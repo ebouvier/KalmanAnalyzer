@@ -5,10 +5,10 @@
 // 
 /**\class KalmanAnalyzer KalmanAnalyzer.cc UserCode/KalmanAnalyzer/src/KalmanAnalyzer.cc
 
- Description: [one line class summary]
+Description: [one line class summary]
 
- Implementation:
-     [Notes on implementation]
+Implementation:
+[Notes on implementation]
 */
 
 
@@ -68,38 +68,38 @@
 //
 
 class KalmanAnalyzer : public edm::EDAnalyzer {
-   public:
-      explicit KalmanAnalyzer(const edm::ParameterSet&);
-      ~KalmanAnalyzer();
+  public:
+    explicit KalmanAnalyzer(const edm::ParameterSet&);
+    ~KalmanAnalyzer();
 
-      static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
+    static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
 
-   private:
-      virtual void beginJob() ;
-      virtual void analyze(const edm::Event&, const edm::EventSetup&);
-      virtual void endJob() ;
+  private:
+    virtual void beginJob() ;
+    virtual void analyze(const edm::Event&, const edm::EventSetup&);
+    virtual void endJob() ;
 
-      virtual void beginRun(edm::Run const&, edm::EventSetup const&);
-      virtual void endRun(edm::Run const&, edm::EventSetup const&);
-      virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
-      virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
+    virtual void beginRun(edm::Run const&, edm::EventSetup const&);
+    virtual void endRun(edm::Run const&, edm::EventSetup const&);
+    virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
+    virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
 
-      // ----------member data ---------------------------
-      
-  //  TFile* tfile_;
+    // ----------member data ---------------------------
 
-  TH1D* HCHI2;
+    //  TFile* tfile_;
 
-  TH1D* HMASS1;
-  TH1D* HMASS2;
-  TH1D* HMASS3;
-  TH1D* HMASS4;
+    TH1D* HCHI2;
 
-  TH1D* CAND_L;
-  TH1D* CAND_L2;
-  TH1D* CAND_SIGMAL;
-  TH1D* CAND_LOVERSIG;
+    TH1D* HMASS1;
+    TH1D* HMASS2;
+    TH1D* HMASS3;
+    TH1D* HMASS4;
+
+    TH1D* CAND_L;
+    TH1D* CAND_L2;
+    TH1D* CAND_SIGMAL;
+    TH1D* CAND_LOVERSIG;
 
 };
 
@@ -117,17 +117,17 @@ class KalmanAnalyzer : public edm::EDAnalyzer {
 KalmanAnalyzer::KalmanAnalyzer(const edm::ParameterSet& iConfig)
 
 {
-   //now do what ever initialization is needed
-  
+  //now do what ever initialization is needed
+
 }
 
 
 KalmanAnalyzer::~KalmanAnalyzer()
 {
- 
-   // do anything here that needs to be done at desctruction time
-   // (e.g. close files, deallocate resources etc.)
-  
+
+  // do anything here that needs to be done at desctruction time
+  // (e.g. close files, deallocate resources etc.)
+
 }
 
 
@@ -136,7 +136,7 @@ KalmanAnalyzer::~KalmanAnalyzer()
 //
 
 // ------------ method called for each event  ------------
-void
+  void
 KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   using namespace edm;
@@ -161,7 +161,7 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   edm::Handle<reco::PFCandidateCollection>  pfHandle;
   edm::InputTag tagPF("particleFlow","","RECO");
-  event.getByLabel(tagPF, pfHandle);
+  iEvent.getByLabel(tagPF, pfHandle);
   reco::PFCandidateCollection pfs = *pfHandle;
   if ( !pfHandle.isValid() ) {
     std::cout << "=> pfHandle is not valid..." << std::endl;
@@ -169,7 +169,7 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   }
 
   // Select good PF muons :
-  
+
   std::vector<const reco::PFCandidate*> myPFparts;
   for ( unsigned int i = 0; i < pfs.size(); ++i ) {
 
@@ -178,13 +178,13 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
     myPFparts.push_back(&pfs[i]);
   }
-  
+
   std::cout << " Number of PF muons = " << myPFparts.size() << std::endl;
 
   //-------------------------------------------
   // Access the jets 
   //-------------------------------------------
-  
+
   //  double d0mass = 1.86484;
 
   ParticleMass kaon_mass  = 0.493677;
@@ -203,9 +203,9 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   edm::Handle<pat::JetCollection> jetHandle;
   iEvent.getByLabel(jetTag, jetHandle);
   pat::JetCollection jets = *jetHandle;
-  
+
   //  std::cout << "Number of jets = " << jets.size() << std::endl;
-  
+
   for (pat::JetCollection::iterator it = jets.begin(); it != jets.end(); ++it)  {
     reco::TrackRefVector jetTracks = (*it).associatedTracks();
     //    std::cout << " ->Number of Tracks = " << jetTracks.size() << std::endl;
@@ -220,7 +220,7 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     int ngood2 = 0;
 
     for (reco::track_iterator iter1 = jetTracks.begin(); iter1 != jetTracks.end(); ++iter1) {
-      
+
       const reco::Track& Track1 = **iter1;
 
       if ( (**iter1).pt() < 4.                 ) continue;
@@ -229,130 +229,130 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       reco::TransientTrack tr1 = (*theB).build((**iter1));
 
       for (reco::track_iterator iter2 = jetTracks.begin(); iter2 != jetTracks.end(); ++iter2) {
-	const reco::Track& Track2 = **iter2;
+        const reco::Track& Track2 = **iter2;
 
-	if ( iter2 == iter1      ) continue;
-	if ( (**iter2).pt() < 4. ) continue;
-	if ( !Track2.quality(reco::Track::highPurity)) continue;
-      
-	reco::TransientTrack tr2 = (*theB).build((**iter2));
-	
-	// Select OS tracks
-	if ( (**iter1).charge()*(**iter2).charge() > 0 ) continue;
+        if ( iter2 == iter1      ) continue;
+        if ( (**iter2).pt() < 4. ) continue;
+        if ( !Track2.quality(reco::Track::highPurity)) continue;
 
-	// Compute the mass
-	double px = (**iter1).px() + (**iter2).px();
-	double py = (**iter1).py() + (**iter2).py();
-	double pz = (**iter1).pz() + (**iter2).pz();
-	double p  = sqrt(pow(px,2)+pow(py,2)+pow(pz,2));
-	double e1 = sqrt(pow((**iter1).p(),2) + pow(kaon_mass,2));
-	double e2 = sqrt(pow((**iter2).p(),2) + pow(pion_mass,2));
-	double e  = e1 + e2;
-	double m  = pow(e,2)-pow(p,2);
-	if ( m>0 ) m = sqrt(m);
-	else       m = 0.;
+        reco::TransientTrack tr2 = (*theB).build((**iter2));
 
-	// To select Jpsi
-	//	if ( m < 3. || m > 3.4 ) continue;
+        // Select OS tracks
+        if ( (**iter1).charge()*(**iter2).charge() > 0 ) continue;
 
-	//Creating a KinematicParticleFactory
-	KinematicParticleFactoryFromTransientTrack pFactory;
-	
-	//initial chi2 and ndf before kinematic fits. The chi2 of the reconstruction is not considered
-	float chi = 0.;
-	float ndf = 0.;
-	
-	//making particles
-	std::vector<RefCountedKinematicParticle> d0Particles;
-	d0Particles.push_back(pFactory.particle (tr1,kaon_mass,chi,ndf,kaon_sigma));
-	d0Particles.push_back(pFactory.particle (tr2,pion_mass,chi,ndf,pion_sigma));
-	
-	/* Example of a simple vertex fit, without other constraints
-	 * The reconstructed decay tree is a result of the kinematic fit
-	 * The KinematicParticleVertexFitter fits the final state particles to their vertex and
-	 * reconstructs the decayed state
-	 */
-	
-	// creating the vertex fitter
-	KinematicParticleVertexFitter fitter;
-	// reconstructing a J/Psi decay
-	RefCountedKinematicTree vertexFitTree = fitter.fit(d0Particles);
-	
-	if (!vertexFitTree->isValid()) continue;
-	//	std::cout << "Fit is valid !!" << std::endl;
+        // Compute the mass
+        double px = (**iter1).px() + (**iter2).px();
+        double py = (**iter1).py() + (**iter2).py();
+        double pz = (**iter1).pz() + (**iter2).pz();
+        double p  = sqrt(pow(px,2)+pow(py,2)+pow(pz,2));
+        double e1 = sqrt(pow((**iter1).p(),2) + pow(kaon_mass,2));
+        double e2 = sqrt(pow((**iter2).p(),2) + pow(pion_mass,2));
+        double e  = e1 + e2;
+        double m  = pow(e,2)-pow(p,2);
+        if ( m>0 ) m = sqrt(m);
+        else       m = 0.;
 
-	//accessing the tree components, move pointer to top
-	vertexFitTree->movePointerToTheTop();
-	
-	//We are now at the top of the decay tree getting the d0 reconstructed KinematicPartlcle
-	RefCountedKinematicParticle d0 = vertexFitTree->currentParticle();
-	//	  AlgebraicVector7 par0 = d0->currentState().kinematicParameters().vector();
-	
-	RefCountedKinematicVertex d0_vertex = vertexFitTree->currentDecayVertex();
+        // To select Jpsi
+        //	if ( m < 3. || m > 3.4 ) continue;
 
-	if ( !d0_vertex->vertexIsValid()) continue;
-	//	std::cout << "Vertex fit is valid: " 
-	//		  << d0_vertex->chiSquared() << " / " 
-	//		  << d0_vertex->degreesOfFreedom() << std::endl;
+        //Creating a KinematicParticleFactory
+        KinematicParticleFactoryFromTransientTrack pFactory;
 
-	++ngood;
-	if (d0_vertex->chiSquared()/(double)d0_vertex->degreesOfFreedom() < 1. ) ++ngood2;
+        //initial chi2 and ndf before kinematic fits. The chi2 of the reconstruction is not considered
+        float chi = 0.;
+        float ndf = 0.;
 
-	HCHI2->Fill(d0_vertex->chiSquared()/(double)d0_vertex->degreesOfFreedom());
-	HMASS1->Fill(m);
-	
-	if (d0_vertex->chiSquared()/(double)d0_vertex->degreesOfFreedom() < 4. )
-	  HMASS2->Fill(m);
-	if (d0_vertex->chiSquared()/(double)d0_vertex->degreesOfFreedom() < 2. )
-	  HMASS3->Fill(m);
-	
-	if ( d0_vertex->chiSquared()/(double)d0_vertex->degreesOfFreedom() > 2. ) continue;
+        //making particles
+        std::vector<RefCountedKinematicParticle> d0Particles;
+        d0Particles.push_back(pFactory.particle (tr1,kaon_mass,chi,ndf,kaon_sigma));
+        d0Particles.push_back(pFactory.particle (tr2,pion_mass,chi,ndf,pion_sigma));
 
-	// Distance to PV :
-	
-	GlobalPoint svPos    = d0_vertex->position();
+        /* Example of a simple vertex fit, without other constraints
+         * The reconstructed decay tree is a result of the kinematic fit
+         * The KinematicParticleVertexFitter fits the final state particles to their vertex and
+         * reconstructs the decayed state
+         */
+
+        // creating the vertex fitter
+        KinematicParticleVertexFitter fitter;
+        // reconstructing a J/Psi decay
+        RefCountedKinematicTree vertexFitTree = fitter.fit(d0Particles);
+
+        if (!vertexFitTree->isValid()) continue;
+        //	std::cout << "Fit is valid !!" << std::endl;
+
+        //accessing the tree components, move pointer to top
+        vertexFitTree->movePointerToTheTop();
+
+        //We are now at the top of the decay tree getting the d0 reconstructed KinematicPartlcle
+        RefCountedKinematicParticle d0 = vertexFitTree->currentParticle();
+        //	  AlgebraicVector7 par0 = d0->currentState().kinematicParameters().vector();
+
+        RefCountedKinematicVertex d0_vertex = vertexFitTree->currentDecayVertex();
+
+        if ( !d0_vertex->vertexIsValid()) continue;
+        //	std::cout << "Vertex fit is valid: " 
+        //		  << d0_vertex->chiSquared() << " / " 
+        //		  << d0_vertex->degreesOfFreedom() << std::endl;
+
+        ++ngood;
+        if (d0_vertex->chiSquared()/(double)d0_vertex->degreesOfFreedom() < 1. ) ++ngood2;
+
+        HCHI2->Fill(d0_vertex->chiSquared()/(double)d0_vertex->degreesOfFreedom());
+        HMASS1->Fill(m);
+
+        if (d0_vertex->chiSquared()/(double)d0_vertex->degreesOfFreedom() < 4. )
+          HMASS2->Fill(m);
+        if (d0_vertex->chiSquared()/(double)d0_vertex->degreesOfFreedom() < 2. )
+          HMASS3->Fill(m);
+
+        if ( d0_vertex->chiSquared()/(double)d0_vertex->degreesOfFreedom() > 2. ) continue;
+
+        // Distance to PV :
+
+        GlobalPoint svPos    = d0_vertex->position();
         GlobalError svPosErr = d0_vertex->error();
 
-	double sigmax = sqrt( vtx[0].xError()*vtx[0].xError() + svPosErr.cxx()*svPosErr.cxx() );
+        double sigmax = sqrt( vtx[0].xError()*vtx[0].xError() + svPosErr.cxx()*svPosErr.cxx() );
         double sigmay = sqrt( vtx[0].yError()*vtx[0].yError() + svPosErr.cyy()*svPosErr.cyy() );
         double sigmaz = sqrt( vtx[0].zError()*vtx[0].zError() + svPosErr.czz()*svPosErr.czz() );
 
-	double interx = pow( (px/m)/sigmax, 2.);
+        double interx = pow( (px/m)/sigmax, 2.);
         double intery = pow( (py/m)/sigmay, 2.);
         double interz = pow( (pz/m)/sigmaz, 2.);
-	
-	double sigmaL3D = pow( interx + intery + interz , -0.5);
 
-	double part1 = (px/m)*pow(sigmaL3D/sigmax,2.)*( svPos.x() - vtx[0].x());
+        double sigmaL3D = pow( interx + intery + interz , -0.5);
+
+        double part1 = (px/m)*pow(sigmaL3D/sigmax,2.)*( svPos.x() - vtx[0].x());
         double part2 = (py/m)*pow(sigmaL3D/sigmay,2.)*( svPos.y() - vtx[0].y());
         double part3 = (pz/m)*pow(sigmaL3D/sigmaz,2.)*( svPos.z() - vtx[0].z());
 
-	double L3D = fabs(part1 + part2 + part3);
+        double L3D = fabs(part1 + part2 + part3);
 
-	double L3DoverSigmaL3D = L3D/sigmaL3D;
+        double L3DoverSigmaL3D = L3D/sigmaL3D;
 
-	if ( L3DoverSigmaL3D < 50. ) continue;
-	
-	CAND_L->Fill(L3D);
-	CAND_L2->Fill(L3D);
-	CAND_SIGMAL->Fill(sigmaL3D);
-	CAND_LOVERSIG->Fill(L3DoverSigmaL3D);
-	
-	HMASS4->Fill(m);
+        if ( L3DoverSigmaL3D < 50. ) continue;
 
-	
-	//        std::cout << "L3D         = " << L3D      << std::endl;
-	//        std::cout << "sigmaL3D    = " << sigmaL3D << std::endl;
-	//        std::cout << "(L/sigma)3D = " << L3DoverSigmaL3D << std::endl;    
+        CAND_L->Fill(L3D);
+        CAND_L2->Fill(L3D);
+        CAND_SIGMAL->Fill(sigmaL3D);
+        CAND_LOVERSIG->Fill(L3DoverSigmaL3D);
+
+        HMASS4->Fill(m);
+
+
+        //        std::cout << "L3D         = " << L3D      << std::endl;
+        //        std::cout << "sigmaL3D    = " << sigmaL3D << std::endl;
+        //        std::cout << "(L/sigma)3D = " << L3DoverSigmaL3D << std::endl;    
 
 
       } // 2nd jet's track loop
 
       //      std::cout << (**iter).pt() << " , " << (**iter).charge() << std::endl;
-      
-      
+
+
     } // 1st jet's track loop
-    
+
     //    std::cout << "Number of good fits = " << ngood << std::endl;
     //    std::cout << "Number of good fits with chi2 cut = " << ngood2 << std::endl;
 
@@ -362,7 +362,7 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 
 // ------------ method called once each job just before starting event loop  ------------
-void 
+  void 
 KalmanAnalyzer::beginJob()
 {
 
@@ -374,7 +374,7 @@ KalmanAnalyzer::beginJob()
   HMASS2 = fs->make<TH1D>("HMASS2","HMASS2",1000,0.,10.);
   HMASS3 = fs->make<TH1D>("HMASS3","HMASS3",1000,0.,10.);
   HMASS4 = fs->make<TH1D>("HMASS4","HMASS4",1000,0.,10.);
-  
+
   CAND_L        = fs->make<TH1D>("CAND_L","CAND_L",1000,0.,1.);
   CAND_L2       = fs->make<TH1D>("CAND_L2","CAND_L2",1000,0.,10.);
   CAND_SIGMAL   = fs->make<TH1D>("CAND_SIGMAL","CAND_SIGMAL",5000,0.,0.005);
@@ -383,7 +383,7 @@ KalmanAnalyzer::beginJob()
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
-void 
+  void 
 KalmanAnalyzer::endJob() 
 {
 
@@ -392,25 +392,25 @@ KalmanAnalyzer::endJob()
 }
 
 // ------------ method called when starting to processes a run  ------------
-void 
+  void 
 KalmanAnalyzer::beginRun(edm::Run const&, edm::EventSetup const&)
 {
 }
 
 // ------------ method called when ending the processing of a run  ------------
-void 
+  void 
 KalmanAnalyzer::endRun(edm::Run const&, edm::EventSetup const&)
 {
 }
 
 // ------------ method called when starting to processes a luminosity block  ------------
-void 
+  void 
 KalmanAnalyzer::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
 {
 }
 
 // ------------ method called when ending the processing of a luminosity block  ------------
-void 
+  void 
 KalmanAnalyzer::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
 {
 }
