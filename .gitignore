@@ -26,3 +26,9 @@
 *.exe
 *.out
 *.app
+
+# Compiled python
+*.pyc
+
+# Root files
+*.root
