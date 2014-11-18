@@ -62,6 +62,7 @@ Implementation:
 
 #include "TFile.h"
 #include "TH1D.h"
+#include "TLorentzVector.h"
 
 //
 // class declaration
@@ -89,17 +90,19 @@ class KalmanAnalyzer : public edm::EDAnalyzer {
 
     //  TFile* tfile_;
 
-    TH1D* HCHI2;
+    TH1D* h_D0Cand_Chi2NDOF;
 
-    TH1D* HMASS1;
-    TH1D* HMASS2;
-    TH1D* HMASS3;
-    TH1D* HMASS4;
+    TH1D* h_D0Cand_MassChi2Sup1;
+    TH1D* h_D0Cand_MassChi2Sup2;
+    TH1D* h_D0Cand_MassChi2Sup4;
 
-    TH1D* CAND_L;
-    TH1D* CAND_L2;
-    TH1D* CAND_SIGMAL;
-    TH1D* CAND_LOVERSIG;
+    TH1D* h_D0Cand_L;
+    TH1D* h_D0Cand_SigmaL;
+    TH1D* h_D0Cand_LOverSigma;
+
+    TH1D* h_D0_L;
+    TH1D* h_D0_SigmaL;
+    TH1D* h_D0_Mass;
 
 };
 
@@ -187,11 +190,11 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   //  double d0mass = 1.86484;
 
-  ParticleMass kaon_mass  = 0.493677;
-  float        kaon_sigma = 0.000001;
+  ParticleMass gMassK  = 0.493677;
+  float        gSigmaK = 0.000001;
 
-  ParticleMass pion_mass  = 0.13957018;
-  float        pion_sigma = 0.00000001;
+  ParticleMass gMassPi   = 0.13957018;
+  float        gSigmaPi = 0.00000001;
 
   // Track setup
 
@@ -204,158 +207,156 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   iEvent.getByLabel(jetTag, jetHandle);
   pat::JetCollection jets = *jetHandle;
 
-  //  std::cout << "Number of jets = " << jets.size() << std::endl;
+  float maxcsv = -1.;
+  unsigned int maxind = -1;
+  float second_max = -1.0;
+  unsigned int maxind2 = -1;
+  unsigned int iSelJet = 0;
 
   for (pat::JetCollection::iterator it = jets.begin(); it != jets.end(); ++it)  {
-    reco::TrackRefVector jetTracks = (*it).associatedTracks();
-    //    std::cout << " ->Number of Tracks = " << jetTracks.size() << std::endl;
-
     double btag = (*it).bDiscriminator("combinedSecondaryVertexBJetTags");
+    if ( (*it).pt() >= 30. ) {
+      if(btag >= maxcsv) {
+        second_max = maxcsv;
+        maxcsv = btag;
+        maxind = iSelJet;
+        maxind2 = maxind;
+      }
+      else if(btag > second_max) {
+        second_max = btag;
+        maxind2 = iSelJet;
+      }
+    }
+    iSelJet++;
+  }
 
-    // Btag medium requirement (medium = 0.679, tight = 0.898
-    if ( (*it).pt() < 40.   ) continue;
-    if ( btag       < 0.679 ) continue;
+  iSelJet = 0;
 
-    int ngood  = 0;
-    int ngood2 = 0;
+  for (pat::JetCollection::iterator it = jets.begin(); it != jets.end(); ++it)  {
 
-    for (reco::track_iterator iter1 = jetTracks.begin(); iter1 != jetTracks.end(); ++iter1) {
+    if (iSelJet == maxind || iSelJet == maxind2){
 
-      const reco::Track& Track1 = **iter1;
+      reco::TrackRefVector jetTracks = (*it).associatedTracks();
 
-      if ( (**iter1).pt() < 4.                 ) continue;
-      if ( !Track1.quality(reco::Track::highPurity)) continue;
+      for (reco::track_iterator iter1 = jetTracks.begin(); iter1 != jetTracks.end(); ++iter1) {
 
-      reco::TransientTrack tr1 = (*theB).build((**iter1));
+        const reco::Track& Track1 = **iter1;
 
-      for (reco::track_iterator iter2 = jetTracks.begin(); iter2 != jetTracks.end(); ++iter2) {
-        const reco::Track& Track2 = **iter2;
+        if ( (**iter1).pt() < 4.                 ) continue;
+        if ( !Track1.quality(reco::Track::highPurity)) continue;
 
-        if ( iter2 == iter1      ) continue;
-        if ( (**iter2).pt() < 4. ) continue;
-        if ( !Track2.quality(reco::Track::highPurity)) continue;
+        reco::TransientTrack tr1 = (*theB).build((**iter1));
 
-        reco::TransientTrack tr2 = (*theB).build((**iter2));
+        for (reco::track_iterator iter2 = jetTracks.begin(); iter2 != jetTracks.end(); ++iter2) {
+          const reco::Track& Track2 = **iter2;
 
-        // Select OS tracks
-        if ( (**iter1).charge()*(**iter2).charge() > 0 ) continue;
+          if ( iter2 == iter1      ) continue;
+          if ( (**iter2).pt() < 4. ) continue;
+          if ( !Track2.quality(reco::Track::highPurity)) continue;
 
-        // Compute the mass
-        double px = (**iter1).px() + (**iter2).px();
-        double py = (**iter1).py() + (**iter2).py();
-        double pz = (**iter1).pz() + (**iter2).pz();
-        double p  = sqrt(pow(px,2)+pow(py,2)+pow(pz,2));
-        double e1 = sqrt(pow((**iter1).p(),2) + pow(kaon_mass,2));
-        double e2 = sqrt(pow((**iter2).p(),2) + pow(pion_mass,2));
-        double e  = e1 + e2;
-        double m  = pow(e,2)-pow(p,2);
-        if ( m>0 ) m = sqrt(m);
-        else       m = 0.;
+          reco::TransientTrack tr2 = (*theB).build((**iter2));
 
-        // To select Jpsi
-        //	if ( m < 3. || m > 3.4 ) continue;
+          //~~~~~~~~~~~~~~~~~~~~~~~~~~
+          // reconstruct D^0 -> K Pi
+          //~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        //Creating a KinematicParticleFactory
-        KinematicParticleFactoryFromTransientTrack pFactory;
+          // Select OS tracks
+          if ( (**iter1).charge()*(**iter2).charge() > 0 ) continue;
 
-        //initial chi2 and ndf before kinematic fits. The chi2 of the reconstruction is not considered
-        float chi = 0.;
-        float ndf = 0.;
+          // Compute the mass
+          TLorentzVector p_tr1, p_tr2;
+          p_tr1.SetPtEtaPhiM((**iter1).pt(), (**iter1).eta(), (**iter1).phi(), gMassK);
+          p_tr2.SetPtEtaPhiM((**iter2).pt(), (**iter2).eta(), (**iter2).phi(), gMassPi);
 
-        //making particles
-        std::vector<RefCountedKinematicParticle> d0Particles;
-        d0Particles.push_back(pFactory.particle (tr1,kaon_mass,chi,ndf,kaon_sigma));
-        d0Particles.push_back(pFactory.particle (tr2,pion_mass,chi,ndf,pion_sigma));
+          if (p_tr1.DeltaR(p_tr2) > 0.2) continue;
 
-        /* Example of a simple vertex fit, without other constraints
-         * The reconstructed decay tree is a result of the kinematic fit
-         * The KinematicParticleVertexFitter fits the final state particles to their vertex and
-         * reconstructs the decayed state
-         */
+          double m  = (p_tr1+p_tr2).M();
+          double px = (p_tr1+p_tr2).Px();
+          double py = (p_tr1+p_tr2).Py();
+          double pz = (p_tr1+p_tr2).Pz();
 
-        // creating the vertex fitter
-        KinematicParticleVertexFitter fitter;
-        // reconstructing a J/Psi decay
-        RefCountedKinematicTree vertexFitTree = fitter.fit(d0Particles);
+          //Creating a KinematicParticleFactory
+          KinematicParticleFactoryFromTransientTrack pFactory;
 
-        if (!vertexFitTree->isValid()) continue;
-        //	std::cout << "Fit is valid !!" << std::endl;
+          //initial chi2 and ndf before kinematic fits. The chi2 of the reconstruction is not considered
+          float chi = 0.;
+          float ndf = 0.;
 
-        //accessing the tree components, move pointer to top
-        vertexFitTree->movePointerToTheTop();
+          //making particles
+          std::vector<RefCountedKinematicParticle> d0Particles;
+          d0Particles.push_back(pFactory.particle (tr1,gMassK,chi,ndf,gSigmaK));
+          d0Particles.push_back(pFactory.particle (tr2,gMassPi,chi,ndf,gSigmaPi));
 
-        //We are now at the top of the decay tree getting the d0 reconstructed KinematicPartlcle
-        RefCountedKinematicParticle d0 = vertexFitTree->currentParticle();
-        //	  AlgebraicVector7 par0 = d0->currentState().kinematicParameters().vector();
+          /* Example of a simple vertex fit, without other constraints
+           * The reconstructed decay tree is a result of the kinematic fit
+           * The KinematicParticleVertexFitter fits the final state particles to their vertex and
+           * reconstructs the decayed state
+           */
 
-        RefCountedKinematicVertex d0_vertex = vertexFitTree->currentDecayVertex();
+          // creating the vertex fitter
+          KinematicParticleVertexFitter fitter;
+          RefCountedKinematicTree vertexFitTree = fitter.fit(d0Particles);
 
-        if ( !d0_vertex->vertexIsValid()) continue;
-        //	std::cout << "Vertex fit is valid: " 
-        //		  << d0_vertex->chiSquared() << " / " 
-        //		  << d0_vertex->degreesOfFreedom() << std::endl;
+          if (!vertexFitTree->isValid()) continue;
 
-        ++ngood;
-        if (d0_vertex->chiSquared()/(double)d0_vertex->degreesOfFreedom() < 1. ) ++ngood2;
+          //accessing the tree components, move pointer to top
+          vertexFitTree->movePointerToTheTop();
 
-        HCHI2->Fill(d0_vertex->chiSquared()/(double)d0_vertex->degreesOfFreedom());
-        HMASS1->Fill(m);
+          //We are now at the top of the decay tree getting the d0 reconstructed KinematicPartlcle
+          RefCountedKinematicParticle d0 = vertexFitTree->currentParticle();
+          RefCountedKinematicVertex d0_vertex = vertexFitTree->currentDecayVertex();
 
-        if (d0_vertex->chiSquared()/(double)d0_vertex->degreesOfFreedom() < 4. )
-          HMASS2->Fill(m);
-        if (d0_vertex->chiSquared()/(double)d0_vertex->degreesOfFreedom() < 2. )
-          HMASS3->Fill(m);
+          if ( !d0_vertex->vertexIsValid()) continue;
 
-        if ( d0_vertex->chiSquared()/(double)d0_vertex->degreesOfFreedom() > 2. ) continue;
+          h_D0Cand_Chi2NDOF->Fill(d0_vertex->chiSquared()/(double)d0_vertex->degreesOfFreedom());
 
-        // Distance to PV :
+          if (d0_vertex->chiSquared()/(double)d0_vertex->degreesOfFreedom() < 1. ) 
+            h_D0Cand_MassChi2Sup1->Fill(m);
+          if (d0_vertex->chiSquared()/(double)d0_vertex->degreesOfFreedom() < 2. )
+            h_D0Cand_MassChi2Sup2->Fill(m);
+          if (d0_vertex->chiSquared()/(double)d0_vertex->degreesOfFreedom() < 4. )
+            h_D0Cand_MassChi2Sup4->Fill(m);
 
-        GlobalPoint svPos    = d0_vertex->position();
-        GlobalError svPosErr = d0_vertex->error();
+          // cut on chi2/NDOF
+          if ( d0_vertex->chiSquared()/(double)d0_vertex->degreesOfFreedom() > 4. ) continue;
 
-        double sigmax = sqrt( vtx[0].xError()*vtx[0].xError() + svPosErr.cxx()*svPosErr.cxx() );
-        double sigmay = sqrt( vtx[0].yError()*vtx[0].yError() + svPosErr.cyy()*svPosErr.cyy() );
-        double sigmaz = sqrt( vtx[0].zError()*vtx[0].zError() + svPosErr.czz()*svPosErr.czz() );
+          // Distance to PV :
+          GlobalPoint svPos    = d0_vertex->position();
+          GlobalError svPosErr = d0_vertex->error();
 
-        double interx = pow( (px/m)/sigmax, 2.);
-        double intery = pow( (py/m)/sigmay, 2.);
-        double interz = pow( (pz/m)/sigmaz, 2.);
+          double sigmax = sqrt( vtx[0].xError()*vtx[0].xError() + svPosErr.cxx()*svPosErr.cxx() );
+          double sigmay = sqrt( vtx[0].yError()*vtx[0].yError() + svPosErr.cyy()*svPosErr.cyy() );
+          double sigmaz = sqrt( vtx[0].zError()*vtx[0].zError() + svPosErr.czz()*svPosErr.czz() );
 
-        double sigmaL3D = pow( interx + intery + interz , -0.5);
+          double interx = pow( (px/m)/sigmax, 2.);
+          double intery = pow( (py/m)/sigmay, 2.);
+          double interz = pow( (pz/m)/sigmaz, 2.);
 
-        double part1 = (px/m)*pow(sigmaL3D/sigmax,2.)*( svPos.x() - vtx[0].x());
-        double part2 = (py/m)*pow(sigmaL3D/sigmay,2.)*( svPos.y() - vtx[0].y());
-        double part3 = (pz/m)*pow(sigmaL3D/sigmaz,2.)*( svPos.z() - vtx[0].z());
+          double sigmaL3D = pow( interx + intery + interz , -0.5);
 
-        double L3D = fabs(part1 + part2 + part3);
+          double part1 = (px/m)*pow(sigmaL3D/sigmax,2.)*( svPos.x() - vtx[0].x());
+          double part2 = (py/m)*pow(sigmaL3D/sigmay,2.)*( svPos.y() - vtx[0].y());
+          double part3 = (pz/m)*pow(sigmaL3D/sigmaz,2.)*( svPos.z() - vtx[0].z());
 
-        double L3DoverSigmaL3D = L3D/sigmaL3D;
+          double L3D = fabs(part1 + part2 + part3);
 
-        if ( L3DoverSigmaL3D < 50. ) continue;
+          double L3DoverSigmaL3D = L3D/sigmaL3D;
 
-        CAND_L->Fill(L3D);
-        CAND_L2->Fill(L3D);
-        CAND_SIGMAL->Fill(sigmaL3D);
-        CAND_LOVERSIG->Fill(L3DoverSigmaL3D);
+          h_D0Cand_L->Fill(L3D);
+          h_D0Cand_SigmaL->Fill(sigmaL3D);
+          h_D0Cand_LOverSigma->Fill(L3DoverSigmaL3D);
 
-        HMASS4->Fill(m);
+          // cut on L/SigmaL
+          if ( L3DoverSigmaL3D < 50. ) continue;
 
+          h_D0_L->Fill(L3D);
+          h_D0_SigmaL->Fill(sigmaL3D);
+          h_D0_Mass->Fill(m);
 
-        //        std::cout << "L3D         = " << L3D      << std::endl;
-        //        std::cout << "sigmaL3D    = " << sigmaL3D << std::endl;
-        //        std::cout << "(L/sigma)3D = " << L3DoverSigmaL3D << std::endl;    
-
-
-      } // 2nd jet's track loop
-
-      //      std::cout << (**iter).pt() << " , " << (**iter).charge() << std::endl;
-
-
-    } // 1st jet's track loop
-
-    //    std::cout << "Number of good fits = " << ngood << std::endl;
-    //    std::cout << "Number of good fits with chi2 cut = " << ngood2 << std::endl;
-
+        } // 2nd jet's track loop
+      } // 1st jet's track loop
+    }
+    iSelJet++;
   } // jet loop
 
 }
@@ -369,17 +370,18 @@ KalmanAnalyzer::beginJob()
   //  std::cout << "Creating histos..." << std::endl;
 
   edm::Service<TFileService> fs;
-  HCHI2  = fs->make<TH1D>("HCHI2","HCHI2",110,0.,11.);
-  HMASS1 = fs->make<TH1D>("HMASS1","HMASS1",1000,0.,10.);
-  HMASS2 = fs->make<TH1D>("HMASS2","HMASS2",1000,0.,10.);
-  HMASS3 = fs->make<TH1D>("HMASS3","HMASS3",1000,0.,10.);
-  HMASS4 = fs->make<TH1D>("HMASS4","HMASS4",1000,0.,10.);
+  h_D0Cand_Chi2NDOF     = fs->make<TH1D>("h_D0Cand_Chi2NDOF","h_D0Cand_Chi2NDOF",110,0.,11.);
+  h_D0Cand_MassChi2Sup1 = fs->make<TH1D>("h_D0Cand_MassChi2Sup1","h_D0Cand_MassChi2Sup1",1000,0.,10.);
+  h_D0Cand_MassChi2Sup2 = fs->make<TH1D>("h_D0Cand_MassChi2Sup2","h_D0Cand_MassChi2Sup2",1000,0.,10.);
+  h_D0Cand_MassChi2Sup4 = fs->make<TH1D>("h_D0Cand_MassChi2Sup4","h_D0Cand_MassChi2Sup4",1000,0.,10.);
 
-  CAND_L        = fs->make<TH1D>("CAND_L","CAND_L",1000,0.,1.);
-  CAND_L2       = fs->make<TH1D>("CAND_L2","CAND_L2",1000,0.,10.);
-  CAND_SIGMAL   = fs->make<TH1D>("CAND_SIGMAL","CAND_SIGMAL",5000,0.,0.005);
-  CAND_LOVERSIG = fs->make<TH1D>("CAND_LOVERSIG","CAND_LOVERSIG",21000,0.,7000.);
+  h_D0Cand_L          = fs->make<TH1D>("h_D0Cand_L","h_D0Cand_L",1000,0.,1.);
+  h_D0Cand_SigmaL     = fs->make<TH1D>("h_D0Cand_SigmaL","h_D0Cand_SigmaL",5000,0.,0.005);
+  h_D0Cand_LOverSigma = fs->make<TH1D>("h_D0Cand_LOverSigma","h_D0Cand_LOverSigma",21000,0.,7000.);
 
+  h_D0_Mass    = fs->make<TH1D>("h_D0_Mass","h_D0_Mass",1000,0.,10.);
+  h_D0_L       = fs->make<TH1D>("h_D0_L","h_D0_L",1000,0.,10.);
+  h_D0_SigmaL  = fs->make<TH1D>("h_D0_SigmaL","h_D0_SigmaL",5000,0.,0.005);
 }
 
 // ------------ method called once each job just after ending the event loop  ------------

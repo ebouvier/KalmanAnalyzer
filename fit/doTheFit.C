@@ -222,7 +222,7 @@ int doTheFit(bool inBatch = true)
   if (inBatch) gROOT->SetBatch(true);
 
   TFile *fi = TFile::Open("../test/kalmanAnalyzed.root");
-  TH1D* histo = (TH1D*)fi->Get("ana/HMASS4");
+  TH1D* histo = (TH1D*)fi->Get("ana/h_D0_Mass");
 
   RooRealVar x("mass","D^{0} mass",1.7,2.,"GeV/c^{2}");
   RooDataHist dh("datahist","datahist",RooArgList(x),histo,1.);
@@ -263,9 +263,9 @@ int doTheFit(bool inBatch = true)
   frame->Draw();
   fit_tex->Draw("same");
   cms_style(); 
-  cn->SaveAs("DOmass.png");
-  cn->SaveAs("DOmass.pdf");
-  cn->SaveAs("DOmass.eps");
+  cn->SaveAs("D0_Mass.png");
+  cn->SaveAs("D0_Mass.pdf");
+  cn->SaveAs("D0_Mass.eps");
   if (!inBatch) getchar();
 
   fi->Close();
