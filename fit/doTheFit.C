@@ -8,6 +8,7 @@
 #include "TPaveText.h"
 #include "TFile.h"
 #include "TH1D.h"
+#include "TGraphErrors.h"
 #include "RooRealVar.h"
 #include "RooDataHist.h"
 #include "RooArgList.h"
@@ -16,7 +17,6 @@
 #include "RooAddPdf.h"
 #include "RooPlot.h"
 #include "TCanvas.h"
-
 
 #pragma once
 
@@ -185,6 +185,44 @@ void h1_style(TH1 *h,
   h->GetYaxis()->SetTitle(ss.str().c_str());
 }
 
+void grapherrors_style(TGraphErrors *gr,
+    const char* name="",
+    int line_width=2,
+    int line_color=1,
+    int line_style=1,
+    int fill_color=50,
+    int fill_style=1001,
+    float y_min=-1111.,
+    float y_max=-1111.,
+    int ndivx=510,
+    int ndivy=510,
+    int marker_style=20,
+    int marker_color=1,
+    float marker_size=1.2,
+    const char* title="",
+    const char* xtitle="",
+    const char* ytitle="") {
+
+  gr->SetLineWidth(line_width);
+  gr->SetLineColor(line_color);
+  gr->SetLineStyle(line_style);
+  gr->SetFillColor(fill_color);
+  gr->SetFillStyle(fill_style);
+  gr->SetMaximum(y_max);
+  gr->SetMinimum(y_min);
+  gr->GetXaxis()->SetNdivisions(ndivx);
+  gr->GetYaxis()->SetNdivisions(ndivy);
+
+  gr->SetMarkerStyle(marker_style);
+  gr->SetMarkerColor(marker_color);
+  gr->SetMarkerSize(marker_size);
+
+  gr->GetXaxis()->SetTitle(xtitle);
+  gr->GetYaxis()->SetTitle(ytitle);
+  gr->SetTitle(title);
+  gr->SetName(name);
+}
+
 void cms_style(bool isData = false){
   std::string status = "Simulation preliminary";
   if (isData) status = "Preliminary";
@@ -213,28 +251,25 @@ void cms_style(bool isData = false){
 }
 
 //---------------------------------------------------------------
-int doTheFit(bool inBatch = true)
+double *step(bool inBatch, TFile* fi, TString name, TString date)
 //---------------------------------------------------------------
 {
-  TStyle* m_style = createStyle();
-  m_style->cd();
   using namespace RooFit;
-  if (inBatch) gROOT->SetBatch(true);
 
-  TFile *fi = TFile::Open("../test/kalmanAnalyzed.root");
-  TH1D* histo = (TH1D*)fi->Get("ana/h_D0_Mass");
+  TH1D* histo = (TH1D*)fi->Get("ana/h_"+name);
 
   RooRealVar x("mass","D^{0} mass",1.7,2.,"GeV/c^{2}");
   RooDataHist dh("datahist","datahist",RooArgList(x),histo,1.);
   
   // Signal+Background pdf
-  RooRealVar mean("mean","mean",1.86,1.8,2.0);
-  RooRealVar sigma("sigma","sigma",0.005,0.001,0.200);
+  RooRealVar mean("mean","mean",1.86484,1.84554,1.88414);
+  RooRealVar sigma("sigma","sigma",0.0193,0.,0.05);
   RooRealVar lambda("lambda", "slope", -0.1, -5., 0.);
   RooGaussian sig("sig","gaussian signal",x,mean,sigma);
   RooExponential bck("bck", "exponential background", x, lambda);
-  RooRealVar fsig("fsig","signal fraction 1",0.10,0.,1.);
-  RooAddPdf model("model","model",RooArgList(sig,bck),RooArgList(fsig)) ;
+  RooRealVar nsig("nsig","number of signal events",0.1*histo->Integral(),0.,histo->Integral());
+  RooRealVar nbck("nbck","number of background events",0.9*histo->Integral(),0.,histo->Integral());
+  RooAddPdf model("model","model",RooArgList(sig,bck),RooArgList(nsig,nbck)) ;
 
   // Fit
   model.fitTo(dh);
@@ -242,12 +277,27 @@ int doTheFit(bool inBatch = true)
   double masserr  = mean.getError();
   double width    = sigma.getVal();
   double widtherr = sigma.getError();
+  double Nsig  = nsig.getVal();
+  double dNsig = nsig.getError();
+  double Nbck  = nbck.getVal();
+  double dNbck = nbck.getError();
+  double *SNR = new double[2];
+  SNR[0] = Nsig*pow(Nbck,-0.5);
+  SNR[1]  = dNsig*pow(Nbck,-0.5) + 0.5*SNR[0]*dNbck/Nbck;
   std::cout << "\nSignal mean = " << mass << " +/- " << masserr << std::endl;
   std::cout << "Signal width = " << width << " +/- " << widtherr << "\n" << std::endl;
-  TPaveText* fit_tex = new TPaveText(0.22,0.47,0.52,0.6,"BRNDC");
+  std::cout << "Nsig = " << Nsig << " +/- " << dNsig << std::endl;
+  std::cout << "Nbck = " << Nbck << " +/- " << dNbck << std::endl;
+  std::cout << "SNR  = " << SNR[0] << " +/- " << SNR[1] << "\n" << std::endl;
+
+  TPaveText* fit_tex = new TPaveText(0.22,0.36,0.52,0.61,"BRNDC");
   fit_tex->AddText("Gaussian parameters :");
   fit_tex->AddText(TString::Format("#mu = (%2.4f #pm %2.4f) GeV/c^{2}",mass,masserr));
   fit_tex->AddText(TString::Format("#sigma = (%2.4f #pm %2.4f) GeV/c^{2}",width,widtherr));
+  fit_tex->AddText("");
+  fit_tex->AddText(TString::Format("N_{sig} = %5.0f #pm %3.0f", Nsig, dNsig));
+  fit_tex->AddText(TString::Format("N_{bck} = %5.0f #pm %3.0f", Nbck, dNbck));
+  fit_tex->AddText(TString::Format("N_{sig}/#sqrt{N_{bck}} = %2.1f #pm %2.1f", SNR[0], SNR[1]));
   fit_tex->SetTextFont(43);
   fit_tex->SetFillColor(0);
   fit_tex->SetTextSize(TITLE_FONTSIZE - 6);
@@ -259,16 +309,65 @@ int doTheFit(bool inBatch = true)
   model.plotOn(frame,Components(bck),LineColor(kBlue));
   model.plotOn(frame,Components(RooArgSet(sig)),LineColor(kRed));
 
-  TCanvas* cn = new TCanvas("cn","D0 meson candidate",800,800);
+  TCanvas* cn = new TCanvas("cn_"+name,"cn_"+name,800,800);
   frame->Draw();
   fit_tex->Draw("same");
   cms_style(); 
-  cn->SaveAs("D0_Mass.png");
-  cn->SaveAs("D0_Mass.pdf");
-  cn->SaveAs("D0_Mass.eps");
+  cn->SaveAs("Plots"+date+"/"+name+".png");
+  cn->SaveAs("Plots"+date+"/"+name+".pdf");
+  cn->SaveAs("Plots"+date+"/"+name+".eps");
   if (!inBatch) getchar();
+
+  delete cn; delete frame; delete fit_tex; delete histo;
+  return SNR;
+}
+
+//---------------------------------------------------------------
+int doTheFit(bool inBatch = true, TString date = "")
+//---------------------------------------------------------------
+{
+  TStyle* m_style = createStyle();
+  m_style->cd();
+  if (inBatch) gROOT->SetBatch(true);
+  gROOT->ProcessLine(".! mkdir Plots"+date);
+
+  TFile *fi = TFile::Open("../test/kalmanAnalyzed.root"); 
+  const unsigned int numberOfPoints = 7;
+  double *SNR_D0Cand_MassChi2Inf1 = step(inBatch, fi, "D0Cand_MassChi2Inf1", date); 
+  double *SNR_D0Cand_MassChi2Inf1p5 = step(inBatch, fi, "D0Cand_MassChi2Inf1p5", date); 
+  double *SNR_D0Cand_MassChi2Inf2 = step(inBatch, fi, "D0Cand_MassChi2Inf2", date);
+  double *SNR_D0Cand_MassChi2Inf2p5 = step(inBatch, fi, "D0Cand_MassChi2Inf2p5", date); 
+  double *SNR_D0Cand_MassChi2Inf3 = step(inBatch, fi, "D0Cand_MassChi2Inf3", date); 
+  double *SNR_D0Cand_MassChi2Inf3p5 = step(inBatch, fi, "D0Cand_MassChi2Inf3p5", date); 
+  double *SNR_D0Cand_MassChi2Inf4 = step(inBatch, fi, "D0Cand_MassChi2Inf4", date); 
+
+  double x[numberOfPoints] = {1., 1.5, 2., 2.5, 3., 3.5, 4.};
+  double ex[numberOfPoints] = {0., 0., 0., 0., 0., 0., 0.};
+  double y[numberOfPoints] = {SNR_D0Cand_MassChi2Inf1[0], SNR_D0Cand_MassChi2Inf1p5[0], SNR_D0Cand_MassChi2Inf2[0], SNR_D0Cand_MassChi2Inf2p5[0], SNR_D0Cand_MassChi2Inf3[0], SNR_D0Cand_MassChi2Inf3p5[0], SNR_D0Cand_MassChi2Inf4[0]};
+  double ey[numberOfPoints] = {SNR_D0Cand_MassChi2Inf1[1], SNR_D0Cand_MassChi2Inf1p5[1], SNR_D0Cand_MassChi2Inf2[1], SNR_D0Cand_MassChi2Inf2p5[1], SNR_D0Cand_MassChi2Inf3[1], SNR_D0Cand_MassChi2Inf3p5[1], SNR_D0Cand_MassChi2Inf4[1]};
+
+  TGraphErrors *gr_SNR_D0Cand = new TGraphErrors(numberOfPoints,x,y,ex,ey);
+  grapherrors_style(gr_SNR_D0Cand, "SNR_D0Cand", 2, 30, 1, 30, 1001, -1111., -1111., 510, 510, 21, 36, 1., "D^{0} candidates", "#chi^{2}/NDOF (D^{0}#rightarrow#kappa#pi)", "N_{sig}/#sqrt{N_{bck}} (D^{0}#rightarrow#kappa#pi)");
+  TCanvas *cn_SNR_D0Cand = new TCanvas("cn_SNR_D0Cand", "cn_SNR_D0Cand", 800, 800);
+  cn_SNR_D0Cand->cd();
+  gr_SNR_D0Cand->Draw("AP");
+  cms_style();
+  cn_SNR_D0Cand->SaveAs("Plots"+date+"/SNR_D0Cand.C");
+  cn_SNR_D0Cand->SaveAs("Plots"+date+"/SNR_D0Cand.eps");
+  cn_SNR_D0Cand->SaveAs("Plots"+date+"/SNR_D0Cand.pdf");
+
+  double *SNR_D0_Mass = step(inBatch, fi, "D0_Mass", date);
+
+  std::cout << "\n\nD0 candidate mass SNR for \n" << std::endl;
+  std::cout << "Chi2 < 1   : " <<  SNR_D0Cand_MassChi2Inf1[0] << " +/- " << SNR_D0Cand_MassChi2Inf1[1] << std::endl;
+  std::cout << "Chi2 < 1.5 : " <<  SNR_D0Cand_MassChi2Inf1p5[0] << " +/- " << SNR_D0Cand_MassChi2Inf1p5[1] << std::endl;
+  std::cout << "Chi2 < 2   : " <<  SNR_D0Cand_MassChi2Inf2[0] << " +/- " << SNR_D0Cand_MassChi2Inf2[1] << std::endl;
+  std::cout << "Chi2 < 2.5 : " <<  SNR_D0Cand_MassChi2Inf2p5[0] << " +/- " << SNR_D0Cand_MassChi2Inf2p5[1] << std::endl;
+  std::cout << "Chi2 < 3   : " <<  SNR_D0Cand_MassChi2Inf3[0] << " +/- " << SNR_D0Cand_MassChi2Inf3[1] << std::endl;
+  std::cout << "Chi2 < 3.5 : " <<  SNR_D0Cand_MassChi2Inf3p5[0] << " +/- " << SNR_D0Cand_MassChi2Inf3p5[1] << std::endl;
+  std::cout << "Chi2 < 4   : " <<  SNR_D0Cand_MassChi2Inf4[0] << " +/- " << SNR_D0Cand_MassChi2Inf4[1] << "\n" << std::endl;
+  std::cout << "... and ctau/sigma(ctau) > 50 : " << SNR_D0_Mass[0] << " +/- " << SNR_D0_Mass[1] << std::endl;
 
   fi->Close();
   return 0;
 }
-

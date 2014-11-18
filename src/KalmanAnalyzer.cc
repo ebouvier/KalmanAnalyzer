@@ -5,10 +5,9 @@
 // 
 /**\class KalmanAnalyzer KalmanAnalyzer.cc UserCode/KalmanAnalyzer/src/KalmanAnalyzer.cc
 
-Description: [one line class summary]
+Description: Reconstruct Bpm -> D0 + mupm (+ nu) -> K Pi + mu (+ nu)
 
-Implementation:
-[Notes on implementation]
+Implementation: Using a simple Kalman vertex fitter for the D0
 */
 
 
@@ -89,23 +88,32 @@ class KalmanAnalyzer : public edm::EDAnalyzer {
     // ----------member data ---------------------------
 
     //  TFile* tfile_;
+    TH1D* h_nJets;
+    TH1D* h_CSV;
+
+    TH1D* h_B0_cuts;
 
     TH1D* h_D0Cand_Chi2NDOF;
 
-    TH1D* h_D0Cand_MassChi2Sup1;
-    TH1D* h_D0Cand_MassChi2Sup2;
-    TH1D* h_D0Cand_MassChi2Sup4;
+    TH1D* h_D0Cand_MassChi2Inf1;
+    TH1D* h_D0Cand_MassChi2Inf1p5;
+    TH1D* h_D0Cand_MassChi2Inf2;
+    TH1D* h_D0Cand_MassChi2Inf2p5;
+    TH1D* h_D0Cand_MassChi2Inf3;
+    TH1D* h_D0Cand_MassChi2Inf3p5;
+    TH1D* h_D0Cand_MassChi2Inf4;
 
     TH1D* h_D0Cand_L;
     TH1D* h_D0Cand_SigmaL;
-    TH1D* h_D0Cand_LOverSigma;
+    TH1D* h_D0Cand_LOverSigmaL;
 
     TH1D* h_D0_L;
     TH1D* h_D0_SigmaL;
     TH1D* h_D0_Mass;
 
     TH1D* h_BCand_DeltaRD0Mu;
-    TH1D* h_BCand_Mass;
+    TH1D* h_B_D0Mass;
+    TH1D* h_B_Mass;
 
 };
 
@@ -233,12 +241,14 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     }
     iSelJet++;
   }
+  h_nJets->Fill(iSelJet);
 
   iSelJet = 0;
 
   for (pat::JetCollection::iterator it = jets.begin(); it != jets.end(); ++it)  {
 
     if (iSelJet == maxind || iSelJet == maxind2){
+      h_CSV->Fill((*it).bDiscriminator("combinedSecondaryVertexBJetTags"));
 
       reco::TrackRefVector jetTracks = (*it).associatedTracks();
 
@@ -258,6 +268,10 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           if ( (**iter2).pt() < 4. ) continue;
           if ( !Track2.quality(reco::Track::highPurity)) continue;
 
+          int iB0Cut = 0;
+          h_B0_cuts->Fill((double)iB0Cut); ++iB0Cut;
+          h_B0_cuts->GetXaxis()->SetBinLabel(iB0Cut,"2 tracks with p_{T} > 4 GeV/c");
+
           reco::TransientTrack tr2 = (*theB).build((**iter2));
 
           //~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -266,6 +280,8 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
           // Select OS tracks
           if ( (**iter1).charge()*(**iter2).charge() > 0 ) continue;
+          h_B0_cuts->Fill((double)iB0Cut); ++iB0Cut;
+          h_B0_cuts->GetXaxis()->SetBinLabel(iB0Cut,"... of opposite signs");
 
           // Compute the mass
           TLorentzVector p_tr1_D0, p_tr2_D0, p_D0;
@@ -273,6 +289,8 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           p_tr2_D0.SetPtEtaPhiM((**iter2).pt(), (**iter2).eta(), (**iter2).phi(), gMassPi);
 
           if (p_tr1_D0.DeltaR(p_tr2_D0) > 0.2) continue;
+          h_B0_cuts->Fill((double)iB0Cut); ++iB0Cut;
+          h_B0_cuts->GetXaxis()->SetBinLabel(iB0Cut,"... within #DeltaR < 0.2");
 
           p_D0 = p_tr1_D0 + p_tr2_D0;
 
@@ -309,17 +327,30 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
           if ( !D0_vertex->vertexIsValid()) continue;
 
+          h_B0_cuts->Fill((double)iB0Cut); ++iB0Cut;
+          h_B0_cuts->GetXaxis()->SetBinLabel(iB0Cut,"... with a valid D^{0} vertex");
+
           h_D0Cand_Chi2NDOF->Fill(D0_vertex->chiSquared()/(double)D0_vertex->degreesOfFreedom());
 
-          if (D0_vertex->chiSquared()/(double)D0_vertex->degreesOfFreedom() < 1. ) 
-            h_D0Cand_MassChi2Sup1->Fill(p_D0.M());
-          if (D0_vertex->chiSquared()/(double)D0_vertex->degreesOfFreedom() < 2. )
-            h_D0Cand_MassChi2Sup2->Fill(p_D0.M());
-          if (D0_vertex->chiSquared()/(double)D0_vertex->degreesOfFreedom() < 4. )
-            h_D0Cand_MassChi2Sup4->Fill(p_D0.M());
+          if (D0_vertex->chiSquared()/(double)D0_vertex->degreesOfFreedom() < 1.) 
+            h_D0Cand_MassChi2Inf1->Fill(p_D0.M());
+          if (D0_vertex->chiSquared()/(double)D0_vertex->degreesOfFreedom() < 1.5) 
+            h_D0Cand_MassChi2Inf1p5->Fill(p_D0.M());
+          if (D0_vertex->chiSquared()/(double)D0_vertex->degreesOfFreedom() < 2.)
+            h_D0Cand_MassChi2Inf2->Fill(p_D0.M());
+          if (D0_vertex->chiSquared()/(double)D0_vertex->degreesOfFreedom() < 2.5)
+            h_D0Cand_MassChi2Inf2p5->Fill(p_D0.M());
+          if (D0_vertex->chiSquared()/(double)D0_vertex->degreesOfFreedom() < 3.)
+            h_D0Cand_MassChi2Inf3->Fill(p_D0.M());
+          if (D0_vertex->chiSquared()/(double)D0_vertex->degreesOfFreedom() < 3.5)
+            h_D0Cand_MassChi2Inf3p5->Fill(p_D0.M());
+          if (D0_vertex->chiSquared()/(double)D0_vertex->degreesOfFreedom() < 4.)
+            h_D0Cand_MassChi2Inf4->Fill(p_D0.M());
 
           // cut on chi2/NDOF
-          if ( D0_vertex->chiSquared()/(double)D0_vertex->degreesOfFreedom() > 4. ) continue;
+          if ( D0_vertex->chiSquared()/(double)D0_vertex->degreesOfFreedom() > 3.5) continue;
+          h_B0_cuts->Fill((double)iB0Cut); ++iB0Cut;
+          h_B0_cuts->GetXaxis()->SetBinLabel(iB0Cut,"... with #chi^{2}/NDOF < 3.5");
 
           // Distance to PV :
           GlobalPoint D0_svPos    = D0_vertex->position();
@@ -345,17 +376,21 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
           h_D0Cand_L->Fill(D0_L3D);
           h_D0Cand_SigmaL->Fill(D0_sigmaL3D);
-          h_D0Cand_LOverSigma->Fill(D0_L3DoverSigmaL3D);
+          h_D0Cand_LOverSigmaL->Fill(D0_L3DoverSigmaL3D);
 
           // cut on L/SigmaL
           if ( D0_L3DoverSigmaL3D < 50. ) continue;
+          h_B0_cuts->Fill((double)iB0Cut); ++iB0Cut;
+          h_B0_cuts->GetXaxis()->SetBinLabel(iB0Cut,"... with c#tau/#sigma(c#tau) > 50");
 
           h_D0_L->Fill(D0_L3D);
           h_D0_SigmaL->Fill(D0_sigmaL3D);
           h_D0_Mass->Fill(p_D0.M());
 
           // 3 sigma window around the peak signal
-          if (p_D0.M() < 1.8089 && p_D0.M() > 1.9229) continue;
+          if (p_D0.M() < 1.8089 || p_D0.M() > 1.9229) continue;
+          h_B0_cuts->Fill((double)iB0Cut); ++iB0Cut;
+          h_B0_cuts->GetXaxis()->SetBinLabel(iB0Cut,"... 1.8089 < M(D^{0}) < 1.9229 GeV/c^{2}");
 
           //~~~~~~~~~~~~~~~~~~~~~~~~~~~
           // associate D^0 to a PF muon
@@ -376,14 +411,23 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           }
 
           if (iMu < 0) continue;
+          h_B0_cuts->Fill((double)iB0Cut); ++iB0Cut;
+          h_B0_cuts->GetXaxis()->SetBinLabel(iB0Cut,"... at least a non isolated #mu");
           h_BCand_DeltaRD0Mu->Fill(deltaRD0Mu);
 
           // keep going if closest muon is close enough
           if (deltaRD0Mu > 0.4) continue;
+          h_B0_cuts->Fill((double)iB0Cut); ++iB0Cut;
+          h_B0_cuts->GetXaxis()->SetBinLabel(iB0Cut,"... within #DeltaR < 0.4");
+
+          h_B_D0Mass->Fill(p_D0.M());
           
           p_Mu.SetPtEtaPhiM(myPFparts[iMu]->pt(), myPFparts[iMu]->eta(), myPFparts[iMu]->phi(), gMassMu);
-          TLorentzVector p_BCand = p_Mu + p_D0;
-          h_BCand_Mass->Fill(p_BCand.M());
+          TLorentzVector p_B = p_Mu + p_D0;
+          h_B_Mass->Fill(p_B.M());
+
+          //reco::GsfTrackRef tr_Mu = myPFparts[iMu]->gsfTrackRef();
+          //*tr_Mu is a "const reco::GsfTrack" 
 
         } // 2nd jet's track loop
       } // 1st jet's track loop
@@ -402,21 +446,35 @@ KalmanAnalyzer::beginJob()
   //  std::cout << "Creating histos..." << std::endl;
 
   edm::Service<TFileService> fs;
-  h_D0Cand_Chi2NDOF     = fs->make<TH1D>("h_D0Cand_Chi2NDOF","h_D0Cand_Chi2NDOF",110,0.,11.);
-  h_D0Cand_MassChi2Sup1 = fs->make<TH1D>("h_D0Cand_MassChi2Sup1","h_D0Cand_MassChi2Sup1",1000,0.,10.);
-  h_D0Cand_MassChi2Sup2 = fs->make<TH1D>("h_D0Cand_MassChi2Sup2","h_D0Cand_MassChi2Sup2",1000,0.,10.);
-  h_D0Cand_MassChi2Sup4 = fs->make<TH1D>("h_D0Cand_MassChi2Sup4","h_D0Cand_MassChi2Sup4",1000,0.,10.);
 
-  h_D0Cand_L          = fs->make<TH1D>("h_D0Cand_L","h_D0Cand_L",1000,0.,1.);
-  h_D0Cand_SigmaL     = fs->make<TH1D>("h_D0Cand_SigmaL","h_D0Cand_SigmaL",5000,0.,0.005);
-  h_D0Cand_LOverSigma = fs->make<TH1D>("h_D0Cand_LOverSigma","h_D0Cand_LOverSigma",21000,0.,7000.);
+  h_nJets = fs->make<TH1D>("h_nJets","h_nJets", 20, 0., 20.);
+  h_CSV = fs->make<TH1D>("h_CSV","h_CSV", 100, 0., 1.);
+
+  h_B0_cuts = fs->make<TH1D>("h_B0_cuts","h_B0_cuts",30,0.,30.);
+  h_B0_cuts->SetOption("bar");
+  h_B0_cuts->SetBarWidth(0.75);
+  h_B0_cuts->SetBarOffset(0.125);
+
+  h_D0Cand_Chi2NDOF       = fs->make<TH1D>("h_D0Cand_Chi2NDOF","h_D0Cand_Chi2NDOF",110,0.,11.);
+  h_D0Cand_MassChi2Inf1   = fs->make<TH1D>("h_D0Cand_MassChi2Inf1","h_D0Cand_MassChi2Inf1",1000,0.,10.);
+  h_D0Cand_MassChi2Inf1p5 = fs->make<TH1D>("h_D0Cand_MassChi2Inf1p5","h_D0Cand_MassChi2Inf1p5",1000,0.,10.);
+  h_D0Cand_MassChi2Inf2   = fs->make<TH1D>("h_D0Cand_MassChi2Inf2","h_D0Cand_MassChi2Inf2",1000,0.,10.);
+  h_D0Cand_MassChi2Inf2p5 = fs->make<TH1D>("h_D0Cand_MassChi2Inf2p5","h_D0Cand_MassChi2Inf2p5",1000,0.,10.);
+  h_D0Cand_MassChi2Inf3   = fs->make<TH1D>("h_D0Cand_MassChi2Inf3","h_D0Cand_MassChi2Inf3",1000,0.,10.);
+  h_D0Cand_MassChi2Inf3p5 = fs->make<TH1D>("h_D0Cand_MassChi2Inf3p5","h_D0Cand_MassChi2Inf3p5",1000,0.,10.);
+  h_D0Cand_MassChi2Inf4   = fs->make<TH1D>("h_D0Cand_MassChi2Inf4","h_D0Cand_MassChi2Inf4",1000,0.,10.);
+
+  h_D0Cand_L           = fs->make<TH1D>("h_D0Cand_L","h_D0Cand_L",1000,0.,1.);
+  h_D0Cand_SigmaL      = fs->make<TH1D>("h_D0Cand_SigmaL","h_D0Cand_SigmaL",5000,0.,0.005);
+  h_D0Cand_LOverSigmaL = fs->make<TH1D>("h_D0Cand_LOverSigmaL","h_D0Cand_LOverSigmaL",21000,0.,7000.);
 
   h_D0_Mass    = fs->make<TH1D>("h_D0_Mass","h_D0_Mass",1000,0.,10.);
-  h_D0_L       = fs->make<TH1D>("h_D0_L","h_D0_L",1000,0.,10.);
+  h_D0_L       = fs->make<TH1D>("h_D0_L","h_D0_L",1000,0.,1.);
   h_D0_SigmaL  = fs->make<TH1D>("h_D0_SigmaL","h_D0_SigmaL",5000,0.,0.005);
 
   h_BCand_DeltaRD0Mu = fs->make<TH1D>("h_BCand_DeltaRD0Mu","h_BCand_DeltaRD0Mu",100,0.,5.);
-  h_BCand_Mass    = fs->make<TH1D>("h_BCand_Mass","h_BCand_Mass",1000,0.,10.);
+  h_B_D0Mass    = fs->make<TH1D>("h_B_D0Mass","h_B_D0Mass",114,1.8089,1.9229);
+  h_B_Mass    = fs->make<TH1D>("h_B_Mass","h_B_Mass",1000,0.,10.);
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
