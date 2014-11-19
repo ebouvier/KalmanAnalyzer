@@ -62,6 +62,7 @@ Implementation: Using a simple Kalman vertex fitter for the D0
 #include "TFile.h"
 #include "TH1D.h"
 #include "TLorentzVector.h"
+#include "TRandom3.h"
 
 //
 // class declaration
@@ -91,7 +92,7 @@ class KalmanAnalyzer : public edm::EDAnalyzer {
     TH1D* h_nJets;
     TH1D* h_CSV;
 
-    TH1D* h_B0_cuts;
+    TH1D* h_B_cuts;
 
     TH1D* h_D0Cand_Chi2NDOF;
 
@@ -114,6 +115,8 @@ class KalmanAnalyzer : public edm::EDAnalyzer {
     TH1D* h_BCand_DeltaRD0Mu;
     TH1D* h_B_D0Mass;
     TH1D* h_B_Mass;
+    TH1D* h_B_DiracMass;
+    TH1D* h_B_GausMass;
 
 };
 
@@ -199,8 +202,13 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   //  double d0mass = 1.86484;
   //  double bmass = 5.2796;
+  
+  ParticleMass gMassW = 80.399;
+  //float      gSigmaW = 0.023;
+  float        gResoW = 10.;
+
   ParticleMass gMassMu  = 0.105658367;
-  //float        gSigmaMu = 0.000000004; 
+  //float      gSigmaMu = 0.000000004; 
 
   ParticleMass gMassK  = 0.493677;
   float        gSigmaK = 0.000001;
@@ -268,9 +276,9 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           if ( (**iter2).pt() < 4. ) continue;
           if ( !Track2.quality(reco::Track::highPurity)) continue;
 
-          int iB0Cut = 0;
-          h_B0_cuts->Fill((double)iB0Cut); ++iB0Cut;
-          h_B0_cuts->GetXaxis()->SetBinLabel(iB0Cut,"2 tracks with p_{T} > 4 GeV/c");
+          int iBCut = 0;
+          h_B_cuts->Fill((double)iBCut); ++iBCut;
+          h_B_cuts->GetXaxis()->SetBinLabel(iBCut,"2 tracks with p_{T} > 4 GeV/c");
 
           reco::TransientTrack tr2 = (*theB).build((**iter2));
 
@@ -280,8 +288,8 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
           // Select OS tracks
           if ( (**iter1).charge()*(**iter2).charge() > 0 ) continue;
-          h_B0_cuts->Fill((double)iB0Cut); ++iB0Cut;
-          h_B0_cuts->GetXaxis()->SetBinLabel(iB0Cut,"... of opposite signs");
+          h_B_cuts->Fill((double)iBCut); ++iBCut;
+          h_B_cuts->GetXaxis()->SetBinLabel(iBCut,"... of opposite signs");
 
           // Compute the mass
           TLorentzVector p_tr1_D0, p_tr2_D0, p_D0;
@@ -289,8 +297,8 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           p_tr2_D0.SetPtEtaPhiM((**iter2).pt(), (**iter2).eta(), (**iter2).phi(), gMassPi);
 
           if (p_tr1_D0.DeltaR(p_tr2_D0) > 0.2) continue;
-          h_B0_cuts->Fill((double)iB0Cut); ++iB0Cut;
-          h_B0_cuts->GetXaxis()->SetBinLabel(iB0Cut,"... within #DeltaR < 0.2");
+          h_B_cuts->Fill((double)iBCut); ++iBCut;
+          h_B_cuts->GetXaxis()->SetBinLabel(iBCut,"... within #DeltaR < 0.2");
 
           p_D0 = p_tr1_D0 + p_tr2_D0;
 
@@ -327,8 +335,8 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
           if ( !D0_vertex->vertexIsValid()) continue;
 
-          h_B0_cuts->Fill((double)iB0Cut); ++iB0Cut;
-          h_B0_cuts->GetXaxis()->SetBinLabel(iB0Cut,"... with a valid D^{0} vertex");
+          h_B_cuts->Fill((double)iBCut); ++iBCut;
+          h_B_cuts->GetXaxis()->SetBinLabel(iBCut,"... with a valid D^{0} vertex");
 
           h_D0Cand_Chi2NDOF->Fill(D0_vertex->chiSquared()/(double)D0_vertex->degreesOfFreedom());
 
@@ -349,8 +357,8 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
           // cut on chi2/NDOF
           if ( D0_vertex->chiSquared()/(double)D0_vertex->degreesOfFreedom() > 3.5) continue;
-          h_B0_cuts->Fill((double)iB0Cut); ++iB0Cut;
-          h_B0_cuts->GetXaxis()->SetBinLabel(iB0Cut,"... with #chi^{2}/NDOF < 3.5");
+          h_B_cuts->Fill((double)iBCut); ++iBCut;
+          h_B_cuts->GetXaxis()->SetBinLabel(iBCut,"... with #chi^{2}/NDOF < 3.5");
 
           // Distance to PV :
           GlobalPoint D0_svPos    = D0_vertex->position();
@@ -380,8 +388,8 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
           // cut on L/SigmaL
           if ( D0_L3DoverSigmaL3D < 50. ) continue;
-          h_B0_cuts->Fill((double)iB0Cut); ++iB0Cut;
-          h_B0_cuts->GetXaxis()->SetBinLabel(iB0Cut,"... with c#tau/#sigma(c#tau) > 50");
+          h_B_cuts->Fill((double)iBCut); ++iBCut;
+          h_B_cuts->GetXaxis()->SetBinLabel(iBCut,"... with c#tau/#sigma(c#tau) > 50");
 
           h_D0_L->Fill(D0_L3D);
           h_D0_SigmaL->Fill(D0_sigmaL3D);
@@ -389,13 +397,13 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
           // 3 sigma window around the peak signal
           if (p_D0.M() < 1.8089 || p_D0.M() > 1.9229) continue;
-          h_B0_cuts->Fill((double)iB0Cut); ++iB0Cut;
-          h_B0_cuts->GetXaxis()->SetBinLabel(iB0Cut,"... 1.8089 < M(D^{0}) < 1.9229 GeV/c^{2}");
+          h_B_cuts->Fill((double)iBCut); ++iBCut;
+          h_B_cuts->GetXaxis()->SetBinLabel(iBCut,"... 1.8089 < M(D^{0}) < 1.9229 GeV/c^{2}");
 
           //~~~~~~~~~~~~~~~~~~~~~~~~~~~
           // associate D^0 to a PF muon
           //~~~~~~~~~~~~~~~~~~~~~~~~~~
-          TLorentzVector p_Mu;
+          TLorentzVector p_Mu, p_WGaus, p_WDirac;
           int iMu = -1;
           double deltaRD0Mu = 2000.;
 
@@ -411,20 +419,33 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           }
 
           if (iMu < 0) continue;
-          h_B0_cuts->Fill((double)iB0Cut); ++iB0Cut;
-          h_B0_cuts->GetXaxis()->SetBinLabel(iB0Cut,"... at least a non isolated #mu");
+          h_B_cuts->Fill((double)iBCut); ++iBCut;
+          h_B_cuts->GetXaxis()->SetBinLabel(iBCut,"... at least a non isolated #mu");
           h_BCand_DeltaRD0Mu->Fill(deltaRD0Mu);
 
           // keep going if closest muon is close enough
           if (deltaRD0Mu > 0.4) continue;
-          h_B0_cuts->Fill((double)iB0Cut); ++iB0Cut;
-          h_B0_cuts->GetXaxis()->SetBinLabel(iB0Cut,"... within #DeltaR < 0.4");
+          h_B_cuts->Fill((double)iBCut); ++iBCut;
+          h_B_cuts->GetXaxis()->SetBinLabel(iBCut,"... within #DeltaR < 0.4");
 
           h_B_D0Mass->Fill(p_D0.M());
           
           p_Mu.SetPtEtaPhiM(myPFparts[iMu]->pt(), myPFparts[iMu]->eta(), myPFparts[iMu]->phi(), gMassMu);
           TLorentzVector p_B = p_Mu + p_D0;
           h_B_Mass->Fill(p_B.M());
+
+          double alpha = pow(gMassW,2.) - pow(gMassMu,2.);
+          alpha = alpha / (2.*p_Mu.P()*(p_Mu.P()-p_Mu.E()));
+
+          p_WDirac.SetPtEtaPhiM(p_Mu.Pt()*(1.+alpha), p_Mu.Eta(), p_Mu.Phi(), gMassW);
+          TLorentzVector p_BDirac = p_WDirac + p_D0;
+          h_B_DiracMass->Fill(p_BDirac.M());
+
+          TRandom3 *myRand = new TRandom3(0);
+          ParticleMass gMassWGaus = myRand->Gaus(gMassW,gResoW);
+          p_WGaus.SetPtEtaPhiM(p_Mu.Pt()*(1.+alpha), p_Mu.Eta(), p_Mu.Phi(), gMassWGaus);
+          TLorentzVector p_BGaus = p_WGaus + p_D0;
+          h_B_GausMass->Fill(p_BGaus.M());
 
           //reco::GsfTrackRef tr_Mu = myPFparts[iMu]->gsfTrackRef();
           //*tr_Mu is a "const reco::GsfTrack" 
@@ -450,10 +471,10 @@ KalmanAnalyzer::beginJob()
   h_nJets = fs->make<TH1D>("h_nJets","h_nJets", 20, 0., 20.);
   h_CSV = fs->make<TH1D>("h_CSV","h_CSV", 100, 0., 1.);
 
-  h_B0_cuts = fs->make<TH1D>("h_B0_cuts","h_B0_cuts",30,0.,30.);
-  h_B0_cuts->SetOption("bar");
-  h_B0_cuts->SetBarWidth(0.75);
-  h_B0_cuts->SetBarOffset(0.125);
+  h_B_cuts = fs->make<TH1D>("h_B_cuts","h_B_cuts",30,0.,30.);
+  h_B_cuts->SetOption("bar");
+  h_B_cuts->SetBarWidth(0.75);
+  h_B_cuts->SetBarOffset(0.125);
 
   h_D0Cand_Chi2NDOF       = fs->make<TH1D>("h_D0Cand_Chi2NDOF","h_D0Cand_Chi2NDOF",110,0.,11.);
   h_D0Cand_MassChi2Inf1   = fs->make<TH1D>("h_D0Cand_MassChi2Inf1","h_D0Cand_MassChi2Inf1",1000,0.,10.);
@@ -474,7 +495,9 @@ KalmanAnalyzer::beginJob()
 
   h_BCand_DeltaRD0Mu = fs->make<TH1D>("h_BCand_DeltaRD0Mu","h_BCand_DeltaRD0Mu",100,0.,5.);
   h_B_D0Mass    = fs->make<TH1D>("h_B_D0Mass","h_B_D0Mass",114,1.8089,1.9229);
-  h_B_Mass    = fs->make<TH1D>("h_B_Mass","h_B_Mass",1000,0.,10.);
+  h_B_Mass      = fs->make<TH1D>("h_B_Mass","h_B_Mass",1000,0.,10.);
+  h_B_DiracMass = fs->make<TH1D>("h_B_DiracMass","h_B_DiracMass",1000,0.,10.);
+  h_B_GausMass  = fs->make<TH1D>("h_B_GausMass","h_B_GausMass",1000,0.,10.);
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
