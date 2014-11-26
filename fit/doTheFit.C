@@ -416,6 +416,7 @@ int doTheFit(bool inBatch = true, TString date = "")
   //TFile *fi = TFile::Open("../test/test/kalmanAnalyzed_noskim.root"); //For tests
   //TFile *fi = TFile::Open("../test/test/kalmanAnalyzed_141124.root"); //For tests
   //TFile *fi = TFile::Open("../test/test/kalmanAnalyzed_141125_pTcut.root"); //For tests
+  //TFile *fi = TFile::Open("../test/test/kalmanAnalyzed_141126.root"); //For tests
   TFile *fi = TFile::Open("../test/kalmanAnalyzed.root"); 
 
   //=============================================================================================
@@ -1001,7 +1002,6 @@ int doTheFit(bool inBatch = true, TString date = "")
   cn_D0cons_dRJet->SaveAs("Plots"+date+"/D0cons_dRJet.pdf");
 
   TH1D* h_D0cons_Chi2NDOF = (TH1D*)fi->Get("ana/h_D0cons_Chi2NDOF");
-  h_D0cons_Chi2NDOF->GetXaxis()->SetRangeUser(0,0.25);
   h1_style(h_D0cons_Chi2NDOF, 38, 38, 3003, -1111., -1111., 510, 510, 38, 1.2, 0, "#chi^{2}/NDOF");
   TCanvas* cn_D0cons_Chi2NDOF = new TCanvas("cn_D0cons_Chi2NDOF","cn_D0cons_Chi2NDOF",800,800);
   cn_D0cons_Chi2NDOF->cd();

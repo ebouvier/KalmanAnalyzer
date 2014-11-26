@@ -342,6 +342,7 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       p_Jet.SetPtEtaPhiM((*it).pt(), (*it).eta(), (*it).phi(), (*it).mass());
       p_D0cons.SetPtEtaPhiM(0., 0., 0., 0.);
       double D0cons_chi2NDOF = 200.;
+      double chargeK = 0;
       double D0cons_ctau[2] = {0., 0.};
 
       double pt_trCand_D0combi[3]  = {0., 0., 0.};
@@ -735,6 +736,7 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                     p_D0cons.SetPtEtaPhiM(p_D0.Pt(), p_D0.Eta(), p_D0.Phi(), p_D0.M());
                     D0cons_ctau[0] = D0cons_L3D;
                     D0cons_ctau[1] = D0cons_sigmaL3D;
+                    chargeK = (**iter1).charge();
                   }
 
                 }  // pT cut
@@ -765,7 +767,7 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
         // find closest muon with opposite charged wrt the kaon
         for (unsigned int iMuConsCand = 0; iMuConsCand < myPFmu.size(); iMuConsCand++) {
-          if (myPFmu[iMuConsCand]->pdgId()*(**iter1).charge() > 0) continue;
+          if (myPFmu[iMuConsCand]->pdgId()*chargeK > 0) continue;
           TLorentzVector p_MuConsCand;
           p_MuConsCand.SetPtEtaPhiM(myPFmu[iMuConsCand]->pt(), myPFmu[iMuConsCand]->eta(), myPFmu[iMuConsCand]->phi(), gMassMu);
           double tmp_deltaRD0consMu = p_D0cons.DeltaR(p_MuConsCand);
@@ -921,7 +923,7 @@ KalmanAnalyzer::beginJob()
   h_D0_Mass    = fs->make<TH1D>("h_D0_Mass","h_D0_Mass",1000,0.,10.);
   h_D0_L       = fs->make<TH1D>("h_D0_L","h_D0_L",1000,0.,1.);
   h_D0_SigmaL  = fs->make<TH1D>("h_D0_SigmaL","h_D0_SigmaL",5000,0.,0.005);
-  h_D0_dRJet   = fs->make<TH1D>("h_D0_dRJet","h_D0_dRJet",100,0.,1.);
+  h_D0_dRJet   = fs->make<TH1D>("h_D0_dRJet","h_D0_dRJet",200,0.,1.);
   h_D0_p       = fs->make<TH1D>("h_D0_p","h_D0_p",1000,0.,500.);
   h_D0_pT      = fs->make<TH1D>("h_D0_pT","h_D0_pT",1000,0.,500.);
   h_D0_eta     = fs->make<TH1D>("h_D0_eta","h_D0_eta",60,-3.,3.);
@@ -949,7 +951,7 @@ KalmanAnalyzer::beginJob()
   h_D0cons_L       = fs->make<TH1D>("h_D0cons_L","h_D0cons_L",1000,0.,1.);
   h_D0cons_SigmaL  = fs->make<TH1D>("h_D0cons_SigmaL","h_D0cons_SigmaL",5000,0.,0.005);
   h_D0cons_Mass    = fs->make<TH1D>("h_D0cons_Mass","h_D0cons_Mass",1000,0.,10.);
-  h_D0cons_dRJet   = fs->make<TH1D>("h_D0cons_dRJet","h_D0cons_dRJet",100,0.,1.);
+  h_D0cons_dRJet   = fs->make<TH1D>("h_D0cons_dRJet","h_D0cons_dRJet",200,0.,1.);
   h_D0cons_p       = fs->make<TH1D>("h_D0cons_p","h_D0cons_p",1000,0.,500.);
   h_D0cons_pT      = fs->make<TH1D>("h_D0cons_pT","h_D0cons_pT",1000,0.,500.);
   h_D0cons_eta     = fs->make<TH1D>("h_D0cons_eta","h_D0cons_eta",60,-3.,3.);
@@ -966,7 +968,7 @@ KalmanAnalyzer::beginJob()
   h_D0combiCand_pT = fs->make<TH1D>("h_D0combiCand_pT","h_D0combiCand_pT",1000,0.,500.);
 
   h_D0combi_Mass  = fs->make<TH1D>("h_D0combi_Mass","h_D0combi_Mass",1000,0.,10.);
-  h_D0combi_dRJet = fs->make<TH1D>("h_D0combi_dRJet","h_D0combi_dRJet",100,0.,1.);
+  h_D0combi_dRJet = fs->make<TH1D>("h_D0combi_dRJet","h_D0combi_dRJet",200,0.,1.);
   h_D0combi_p     = fs->make<TH1D>("h_D0combi_p","h_D0combi_p",1000,0.,500.);
   h_D0combi_pT    = fs->make<TH1D>("h_D0combi_pT","h_D0combi_pT",1000,0.,500.);
   h_D0combi_eta   = fs->make<TH1D>("h_D0combi_eta","h_D0combi_eta",60,-3.,3.);
