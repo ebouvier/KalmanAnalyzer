@@ -13,7 +13,10 @@
 #include "RooDataHist.h"
 #include "RooArgList.h"
 #include "RooGaussian.h"
+#include "RooBreitWigner.h"
+#include "RooVoigtian.h"
 #include "RooExponential.h"
+#include "RooPolynomial.h"
 #include "RooLandau.h"
 #include "RooExponential.h"
 #include "RooAddPdf.h"
@@ -325,6 +328,79 @@ double *step(bool inBatch, TFile* fi, TString name, TString date)
 }
 
 //---------------------------------------------------------------
+double *BRstep(bool inBatch, TFile* fi, TString name, TString date)
+//---------------------------------------------------------------
+{
+  using namespace RooFit;
+
+  TH1D* histo = (TH1D*)fi->Get("ana/h_"+name);
+
+  RooRealVar x("mass","D^{0} mass",0.8,2.5,"GeV/c^{2}");
+  RooDataHist dh("datahist","datahist",RooArgList(x),histo,1.);
+  
+  // Signal+Background pdf
+  RooRealVar mean("mean","mean",1.86484,1.84554,1.88414);
+  RooRealVar widthbr("width","width",0.03,0.,0.1);
+  RooRealVar sigma("sigma","sigma",0.,-0.1,0.1);
+  RooRealVar lambda("lambda", "slope", -1e-10, -10, 0.);
+  RooVoigtian sig("sig","voigtian signal",x,mean,widthbr,sigma);
+  RooPolynomial bck("bck", "linear background", x, RooArgList(lambda), 1);
+  RooRealVar nsig("nsig","number of signal events",0.1*histo->Integral(),0.,histo->Integral());
+  RooRealVar nbck("nbck","number of background events",0.9*histo->Integral(),0.,histo->Integral());
+  RooAddPdf model("model","model",RooArgList(sig,bck),RooArgList(nsig,nbck)) ;
+
+  // Fit
+  model.fitTo(dh);
+  double mass     = mean.getVal();
+  double masserr  = mean.getError();
+  double width    = sigma.getVal();
+  double widtherr = sigma.getError();
+  double Nsig  = nsig.getVal();
+  double dNsig = nsig.getError();
+  double Nbck  = nbck.getVal();
+  double dNbck = nbck.getError();
+  double *SNR = new double[2];
+  SNR[0] = Nsig*pow(Nbck,-0.5);
+  SNR[1]  = dNsig*pow(Nbck,-0.5) + 0.5*SNR[0]*dNbck/Nbck;
+  std::cout << "\nSignal mean = " << mass << " +/- " << masserr << std::endl;
+  std::cout << "Signal width = " << width << " +/- " << widtherr << "\n" << std::endl;
+  std::cout << "Nsig = " << Nsig << " +/- " << dNsig << std::endl;
+  std::cout << "Nbck = " << Nbck << " +/- " << dNbck << std::endl;
+  std::cout << "SNR  = " << SNR[0] << " +/- " << SNR[1] << "\n" << std::endl;
+
+  TPaveText* fit_tex = new TPaveText(0.51,0.61,0.81,0.86,"BRNDC");
+  fit_tex->AddText("Gaussian parameters :");
+  fit_tex->AddText(TString::Format("#mu = (%2.4f #pm %2.4f) GeV/c^{2}",mass,masserr));
+  fit_tex->AddText(TString::Format("#sigma = (%2.4f #pm %2.4f) GeV/c^{2}",width,widtherr));
+  fit_tex->AddText("");
+  fit_tex->AddText(TString::Format("N_{sig} = %5.0f #pm %3.0f", Nsig, dNsig));
+  fit_tex->AddText(TString::Format("N_{bck} = %5.0f #pm %3.0f", Nbck, dNbck));
+  fit_tex->AddText(TString::Format("N_{sig}/#sqrt{N_{bck}} = %2.1f #pm %2.1f", SNR[0], SNR[1]));
+  fit_tex->SetTextFont(43);
+  fit_tex->SetFillColor(0);
+  fit_tex->SetTextSize(TITLE_FONTSIZE - 6);
+
+  // Plot
+  RooPlot* frame = x.frame();
+  dh.plotOn(frame);
+  model.plotOn(frame,LineColor(9));
+  model.plotOn(frame,Components(bck),LineColor(kBlue));
+  model.plotOn(frame,Components(RooArgSet(sig)),LineColor(kRed));
+
+  TCanvas* cn = new TCanvas("cn_"+name,"cn_"+name,800,800);
+  frame->Draw();
+  if (Nsig >= 1) fit_tex->Draw("same");
+  cms_style(); 
+  cn->SaveAs("Plots"+date+"/fit_"+name+".C");
+  cn->SaveAs("Plots"+date+"/fit_"+name+".pdf");
+  cn->SaveAs("Plots"+date+"/fit_"+name+".eps");
+  if (!inBatch) getchar();
+
+  delete cn; delete frame; delete fit_tex; delete histo;
+  return SNR;
+}
+
+//---------------------------------------------------------------
 int doTheFit(bool inBatch = true, TString date = "")
 //---------------------------------------------------------------
 {
@@ -341,7 +417,7 @@ int doTheFit(bool inBatch = true, TString date = "")
   //TFile *fi = TFile::Open("../test/test/kalmanAnalyzed_141124.root"); //For tests
   //TFile *fi = TFile::Open("../test/test/kalmanAnalyzed_141125_pTcut.root"); //For tests
   TFile *fi = TFile::Open("../test/kalmanAnalyzed.root"); 
-  
+
   //=============================================================================================
   //                  Simple Kalman Vertex Fitter for the D0 -> K Pi reconstruction
   //=============================================================================================
@@ -445,6 +521,7 @@ int doTheFit(bool inBatch = true, TString date = "")
   cn_B_cuts->SaveAs("Plots"+date+"/B_cuts.pdf");
 
   TH1D* h_D0_dRJet = (TH1D*)fi->Get("ana/h_D0_dRJet");
+  h_D0_dRJet->GetXaxis()->SetRangeUser(0,0.5);
   h1_style(h_D0_dRJet, 38, 38, 3003, -1111., -1111., 510, 510, 38, 1.2, 0, "#DeltaR(D^{0},jet)");
   TCanvas* cn_D0_dRJet = new TCanvas("cn_D0_dRJet","cn_D0_dRJet",800,800);
   cn_D0_dRJet->cd();
@@ -709,6 +786,7 @@ int doTheFit(bool inBatch = true, TString date = "")
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   TH1D* h_D0combi_dRJet = (TH1D*)fi->Get("ana/h_D0combi_dRJet");
+  h_D0combi_dRJet->GetXaxis()->SetRangeUser(0,0.5);
   h1_style(h_D0combi_dRJet, 38, 38, 3003, -1111., -1111., 510, 510, 38, 1.2, 0, "#DeltaR(D^{0},jet)");
   TCanvas* cn_D0combi_dRJet = new TCanvas("cn_D0combi_dRJet","cn_D0combi_dRJet",800,800);
   cn_D0combi_dRJet->cd();
@@ -794,8 +872,8 @@ int doTheFit(bool inBatch = true, TString date = "")
   cn_B_DeltaRD0combiMu->SaveAs("Plots"+date+"/B_DeltaRD0combiMu.pdf");
 
   TH1D* h_B_pD0combipMu = (TH1D*)fi->Get("ana/h_B_pD0combipMu");
-  h_B_pD0combipMu->GetXaxis()->SetRangeUser(0.1,10.);
   h_B_pD0combipMu->Rebin(2);
+  h_B_pD0combipMu->GetXaxis()->SetRangeUser(0.1,10.);
   h1_style(h_B_pD0combipMu, 38, 38, 3003, -1111., -1111., 510, 510, 38, 1.2, 0, "p(D^{0})/p(#mu^{#pm})");
   TCanvas* cn_B_pD0combipMu = new TCanvas("cn_B_pD0combipMu","cn_B_pD0combipMu",800,800);
   cn_B_pD0combipMu->cd();
@@ -807,8 +885,8 @@ int doTheFit(bool inBatch = true, TString date = "")
   cn_B_pD0combipMu->SaveAs("Plots"+date+"/B_pD0combipMu.pdf");
 
   TH1D* h_B_pTD0combipTMu = (TH1D*)fi->Get("ana/h_B_pTD0combipTMu");
-  h_B_pTD0combipTMu->GetXaxis()->SetRangeUser(0.1,10.);
   h_B_pTD0combipTMu->Rebin(2);
+  h_B_pTD0combipTMu->GetXaxis()->SetRangeUser(0.1,10.);
   h1_style(h_B_pTD0combipTMu, 38, 38, 3003, -1111., -1111., 510, 510, 38, 1.2, 0, "p_{T}(D^{0})/p_{T}(#mu^{#pm})");
   TCanvas* cn_B_pTD0combipTMu = new TCanvas("cn_B_pTD0combipTMu","cn_B_pTD0combipTMu",800,800);
   cn_B_pTD0combipTMu->cd();
@@ -896,81 +974,23 @@ int doTheFit(bool inBatch = true, TString date = "")
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   // optimize chi2 cut on D0 -> K Pi reconstruction
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  
-  const unsigned int numberOfConsPoints = 15;
-  double *SNR_D0consCand_MassChi2Inf1 = step(inBatch, fi, "D0consCand_MassChi2Inf1", date); 
-  double *SNR_D0consCand_MassChi2Inf1p5 = step(inBatch, fi, "D0consCand_MassChi2Inf1p5", date); 
-  double *SNR_D0consCand_MassChi2Inf2 = step(inBatch, fi, "D0consCand_MassChi2Inf2", date);
-  double *SNR_D0consCand_MassChi2Inf2p5 = step(inBatch, fi, "D0consCand_MassChi2Inf2p5", date); 
-  double *SNR_D0consCand_MassChi2Inf3 = step(inBatch, fi, "D0consCand_MassChi2Inf3", date); 
-  double *SNR_D0consCand_MassChi2Inf3p5 = step(inBatch, fi, "D0consCand_MassChi2Inf3p5", date); 
-  double *SNR_D0consCand_MassChi2Inf4 = step(inBatch, fi, "D0consCand_MassChi2Inf4", date); 
-  double *SNR_D0consCand_MassChi2Inf4p5 = step(inBatch, fi, "D0consCand_MassChi2Inf4p5", date); 
-  double *SNR_D0consCand_MassChi2Inf5 = step(inBatch, fi, "D0consCand_MassChi2Inf5", date); 
-  double *SNR_D0consCand_MassChi2Inf5p5 = step(inBatch, fi, "D0consCand_MassChi2Inf5p5", date); 
-  double *SNR_D0consCand_MassChi2Inf6 = step(inBatch, fi, "D0consCand_MassChi2Inf6", date); 
-  double *SNR_D0consCand_MassChi2Inf6p5 = step(inBatch, fi, "D0consCand_MassChi2Inf6p5", date); 
-  double *SNR_D0consCand_MassChi2Inf7 = step(inBatch, fi, "D0consCand_MassChi2Inf7", date); 
-  double *SNR_D0consCand_MassChi2Inf7p5 = step(inBatch, fi, "D0consCand_MassChi2Inf7p5", date); 
-  double *SNR_D0consCand_MassChi2Inf8 = step(inBatch, fi, "D0consCand_MassChi2Inf8", date); 
 
-  double xcons[numberOfConsPoints] = {1.,1.5,2.,2.5,3.,3.5,4.,4.5,5.,5.5,6.,6.5,7.,7.5,8.};
-  double excons[numberOfConsPoints] = {0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.};
-  double ycons[numberOfConsPoints] = {SNR_D0consCand_MassChi2Inf1[0], SNR_D0consCand_MassChi2Inf1p5[0], SNR_D0consCand_MassChi2Inf2[0], SNR_D0consCand_MassChi2Inf2p5[0], SNR_D0consCand_MassChi2Inf3[0], SNR_D0consCand_MassChi2Inf3p5[0], SNR_D0consCand_MassChi2Inf4[0], SNR_D0consCand_MassChi2Inf4p5[0], SNR_D0consCand_MassChi2Inf5[0], SNR_D0consCand_MassChi2Inf5p5[0], SNR_D0consCand_MassChi2Inf6[0], SNR_D0consCand_MassChi2Inf6p5[0], SNR_D0consCand_MassChi2Inf7[0], SNR_D0consCand_MassChi2Inf7p5[0], SNR_D0consCand_MassChi2Inf8[0]};
-  double eycons[numberOfConsPoints] = {SNR_D0consCand_MassChi2Inf1[1], SNR_D0consCand_MassChi2Inf1p5[1], SNR_D0consCand_MassChi2Inf2[1], SNR_D0consCand_MassChi2Inf2p5[1], SNR_D0consCand_MassChi2Inf3[1], SNR_D0consCand_MassChi2Inf3p5[1], SNR_D0consCand_MassChi2Inf4[1], SNR_D0consCand_MassChi2Inf4p5[1], SNR_D0consCand_MassChi2Inf5[1], SNR_D0consCand_MassChi2Inf5p5[1], SNR_D0consCand_MassChi2Inf6[1], SNR_D0consCand_MassChi2Inf6p5[1], SNR_D0consCand_MassChi2Inf7[1], SNR_D0consCand_MassChi2Inf7p5[1], SNR_D0consCand_MassChi2Inf8[1]};
-
-  TGraphErrors *gr_SNR_D0consCand = new TGraphErrors(numberOfConsPoints,xcons,ycons,excons,eycons);
-  grapherrors_style(gr_SNR_D0consCand, "SNR_D0consCand", 2, 30, 1, 30, 1001, -1111., -1111., 510, 510, 21, 36, 1., "D^{0} candidates", "#chi^{2}/NDOF (D^{0}#rightarrow#kappa#pi)", "N_{sig}/#sqrt{N_{bck}} (D^{0}#rightarrow#kappa#pi)");
-  TCanvas *cn_SNR_D0consCand = new TCanvas("cn_SNR_D0consCand", "cn_SNR_D0consCand", 800, 800);
-  cn_SNR_D0consCand->cd();
-  gr_SNR_D0consCand->Draw("AP");
-  cms_style();
-  cn_SNR_D0consCand->SaveAs("Plots"+date+"/SNR_D0consCand.C");
-  cn_SNR_D0consCand->SaveAs("Plots"+date+"/SNR_D0consCand.eps");
-  cn_SNR_D0consCand->SaveAs("Plots"+date+"/SNR_D0consCand.pdf");
-
-  double *SNR_D0cons_Mass = step(inBatch, fi, "D0cons_Mass", date);
-  double *SNR_B_D0consMass = step(inBatch, fi, "B_D0consMass", date);
+  double *SNR_D0cons_Mass = BRstep(inBatch, fi, "D0cons_Mass", date);
+  double *SNR_B_D0consMass = BRstep(inBatch, fi, "B_D0consMass", date);
 
   // Print chi2 otpimization results 
   std::cout << "\n\nD0 candidate mass SNR for \n" << std::endl;
-  std::cout << "Chi2 < 1   : " <<  SNR_D0consCand_MassChi2Inf1[0] << " +/- " << SNR_D0consCand_MassChi2Inf1[1] << std::endl;
-  std::cout << "Chi2 < 1.5 : " <<  SNR_D0consCand_MassChi2Inf1p5[0] << " +/- " << SNR_D0consCand_MassChi2Inf1p5[1] << std::endl;
-  std::cout << "Chi2 < 2   : " <<  SNR_D0consCand_MassChi2Inf2[0] << " +/- " << SNR_D0consCand_MassChi2Inf2[1] << std::endl;
-  std::cout << "Chi2 < 2.5 : " <<  SNR_D0consCand_MassChi2Inf2p5[0] << " +/- " << SNR_D0consCand_MassChi2Inf2p5[1] << std::endl;
-  std::cout << "Chi2 < 3   : " <<  SNR_D0consCand_MassChi2Inf3[0] << " +/- " << SNR_D0consCand_MassChi2Inf3[1] << std::endl;
-  std::cout << "Chi2 < 3.5 : " <<  SNR_D0consCand_MassChi2Inf3p5[0] << " +/- " << SNR_D0consCand_MassChi2Inf3p5[1] << std::endl;
-  std::cout << "Chi2 < 4   : " <<  SNR_D0consCand_MassChi2Inf4[0] << " +/- " << SNR_D0consCand_MassChi2Inf4[1] << std::endl;
-  std::cout << "... and ctau/sigma(ctau) > 50 : " << SNR_D0cons_Mass[0] << " +/- " << SNR_D0cons_Mass[1] << std::endl;
+  std::cout << "... ctau/sigma(ctau) > 50 : " << SNR_D0cons_Mass[0] << " +/- " << SNR_D0cons_Mass[1] << std::endl;
   std::cout << "... and non iso mu : " << SNR_B_D0consMass[0] << " +/- " << SNR_B_D0consMass[1] << std::endl;
-  std::cout << "Chi2 < 4.5 : " <<  SNR_D0consCand_MassChi2Inf4p5[0] << " +/- " << SNR_D0consCand_MassChi2Inf4p5[1] << std::endl;
-  std::cout << "Chi2 < 5   : " <<  SNR_D0consCand_MassChi2Inf5[0] << " +/- " << SNR_D0consCand_MassChi2Inf5[1] << std::endl;
-  std::cout << "Chi2 < 5.5 : " <<  SNR_D0consCand_MassChi2Inf5p5[0] << " +/- " << SNR_D0consCand_MassChi2Inf5p5[1] << std::endl;
-  std::cout << "Chi2 < 6   : " <<  SNR_D0consCand_MassChi2Inf6[0] << " +/- " << SNR_D0consCand_MassChi2Inf6[1] << std::endl;
-  std::cout << "Chi2 < 6.5 : " <<  SNR_D0consCand_MassChi2Inf6p5[0] << " +/- " << SNR_D0consCand_MassChi2Inf6p5[1] << std::endl;
-  std::cout << "Chi2 < 7   : " <<  SNR_D0consCand_MassChi2Inf7[0] << " +/- " << SNR_D0consCand_MassChi2Inf7[1] << std::endl;
-  std::cout << "Chi2 < 7.5 : " <<  SNR_D0consCand_MassChi2Inf7p5[0] << " +/- " << SNR_D0consCand_MassChi2Inf7p5[1] << std::endl;
-  std::cout << "Chi2 < 8   : " <<  SNR_D0consCand_MassChi2Inf8[0] << " +/- " << SNR_D0consCand_MassChi2Inf8[1] << std::endl;
 
   if (!inBatch) getchar();
-  delete cn_SNR_D0consCand; delete gr_SNR_D0consCand;
 
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   // have a look at other distributions 
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  TH1D* h_Bcons_cuts = (TH1D*)fi->Get("ana/h_Bcons_cuts");
-  h_Bcons_cuts->GetXaxis()->SetRangeUser(0,11);
-  h1_style(h_Bcons_cuts, 38, 38, 3003, -1111., -1111., 510, 510, 38, 1.2, 0, "");
-  TCanvas* cn_Bcons_cuts = new TCanvas("cn_Bcons_cuts","cn_Bcons_cuts",800,800);
-  cn_Bcons_cuts->cd();
-  cn_Bcons_cuts->SetLogy(1);
-  h_Bcons_cuts->Draw("hist");
-  cms_style();
-  cn_Bcons_cuts->SaveAs("Plots"+date+"/Bcons_cuts.C");
-  cn_Bcons_cuts->SaveAs("Plots"+date+"/Bcons_cuts.eps");
-  cn_Bcons_cuts->SaveAs("Plots"+date+"/Bcons_cuts.pdf");
 
   TH1D* h_D0cons_dRJet = (TH1D*)fi->Get("ana/h_D0cons_dRJet");
+  h_D0cons_dRJet->GetXaxis()->SetRangeUser(0,0.5);
   h1_style(h_D0cons_dRJet, 38, 38, 3003, -1111., -1111., 510, 510, 38, 1.2, 0, "#DeltaR(D^{0},jet)");
   TCanvas* cn_D0cons_dRJet = new TCanvas("cn_D0cons_dRJet","cn_D0cons_dRJet",800,800);
   cn_D0cons_dRJet->cd();
@@ -979,6 +999,17 @@ int doTheFit(bool inBatch = true, TString date = "")
   cn_D0cons_dRJet->SaveAs("Plots"+date+"/D0cons_dRJet.C");
   cn_D0cons_dRJet->SaveAs("Plots"+date+"/D0cons_dRJet.eps");
   cn_D0cons_dRJet->SaveAs("Plots"+date+"/D0cons_dRJet.pdf");
+
+  TH1D* h_D0cons_Chi2NDOF = (TH1D*)fi->Get("ana/h_D0cons_Chi2NDOF");
+  h_D0cons_Chi2NDOF->GetXaxis()->SetRangeUser(0,0.25);
+  h1_style(h_D0cons_Chi2NDOF, 38, 38, 3003, -1111., -1111., 510, 510, 38, 1.2, 0, "#chi^{2}/NDOF");
+  TCanvas* cn_D0cons_Chi2NDOF = new TCanvas("cn_D0cons_Chi2NDOF","cn_D0cons_Chi2NDOF",800,800);
+  cn_D0cons_Chi2NDOF->cd();
+  h_D0cons_Chi2NDOF->Draw("hist");
+  cms_style();
+  cn_D0cons_Chi2NDOF->SaveAs("Plots"+date+"/D0cons_Chi2NDOF.C");
+  cn_D0cons_Chi2NDOF->SaveAs("Plots"+date+"/D0cons_Chi2NDOF.eps");
+  cn_D0cons_Chi2NDOF->SaveAs("Plots"+date+"/D0cons_Chi2NDOF.pdf");
 
   TH1D* h_D0cons_L = (TH1D*)fi->Get("ana/h_D0cons_L");
   h_D0cons_L->GetXaxis()->SetRangeUser(0,0.25);
@@ -1003,6 +1034,7 @@ int doTheFit(bool inBatch = true, TString date = "")
   cn_D0cons_SigmaL->SaveAs("Plots"+date+"/D0cons_SigmaL.pdf");
 
   TH1D* h_D0cons_p = (TH1D*)fi->Get("ana/h_D0cons_p");
+  h_D0cons_p->Rebin(2);
   h_D0cons_p->GetXaxis()->SetRangeUser(12.,250.);
   h1_style(h_D0cons_p, 38, 38, 3003, -1111., -1111., 510, 510, 38, 1.2, 0, "p(D^{0}#rightarrow#kappa#pi) (GeV/c)");
   TCanvas* cn_D0cons_p = new TCanvas("cn_D0cons_p","cn_D0cons_p",800,800);
@@ -1077,6 +1109,7 @@ int doTheFit(bool inBatch = true, TString date = "")
   cn_B_DeltaRD0consMu->SaveAs("Plots"+date+"/B_DeltaRD0consMu.pdf");
 
   TH1D* h_B_pD0conspMu = (TH1D*)fi->Get("ana/h_B_pD0conspMu");
+  h_B_pD0conspMu->Rebin(5);
   h_B_pD0conspMu->GetXaxis()->SetRangeUser(0.1,10.);
   h1_style(h_B_pD0conspMu, 38, 38, 3003, -1111., -1111., 510, 510, 38, 1.2, 0, "p(D^{0})/p(#mu^{#pm})");
   TCanvas* cn_B_pD0conspMu = new TCanvas("cn_B_pD0conspMu","cn_B_pD0conspMu",800,800);
@@ -1089,6 +1122,7 @@ int doTheFit(bool inBatch = true, TString date = "")
   cn_B_pD0conspMu->SaveAs("Plots"+date+"/B_pD0conspMu.pdf");
 
   TH1D* h_B_pTD0conspTMu = (TH1D*)fi->Get("ana/h_B_pTD0conspTMu");
+  h_B_pTD0conspTMu->Rebin(5);
   h_B_pTD0conspTMu->GetXaxis()->SetRangeUser(0.1,10.);
   h1_style(h_B_pTD0conspTMu, 38, 38, 3003, -1111., -1111., 510, 510, 38, 1.2, 0, "p_{T}(D^{0})/p_{T}(#mu^{#pm})");
   TCanvas* cn_B_pTD0conspTMu = new TCanvas("cn_B_pTD0conspTMu","cn_B_pTD0conspTMu",800,800);
@@ -1113,7 +1147,7 @@ int doTheFit(bool inBatch = true, TString date = "")
   cn_B_consMass->SaveAs("Plots"+date+"/B_consMass.pdf");
 
   if (!inBatch) getchar();
-  delete cn_Bcons_cuts; delete cn_D0cons_L; delete cn_D0cons_SigmaL; delete cn_D0cons_Mass; 
+  delete cn_D0cons_Chi2NDOF; delete cn_D0cons_L; delete cn_D0cons_SigmaL; delete cn_D0cons_Mass; 
   delete cn_D0cons_dRJet; delete cn_D0cons_p; delete cn_D0cons_pT; delete cn_D0cons_eta; delete cn_D0cons_phi;  delete h_B_DeltaRD0consMu; delete cn_B_pD0conspMu; delete cn_B_pTD0conspTMu;
   delete cn_B_D0consMass; delete cn_B_consMass; 
     

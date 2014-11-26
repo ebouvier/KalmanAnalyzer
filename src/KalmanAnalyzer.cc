@@ -140,32 +140,13 @@ class KalmanAnalyzer : public edm::EDAnalyzer {
     TH1D* h_B_GausMass;
 
     //constrained Kalman Vertex Fitter
-    TH1D* h_Bcons_cuts;
-
-    TH1D* h_D0consCand_Chi2NDOF;
-
-    TH1D* h_D0consCand_MassChi2Inf1;
-    TH1D* h_D0consCand_MassChi2Inf1p5;
-    TH1D* h_D0consCand_MassChi2Inf2;
-    TH1D* h_D0consCand_MassChi2Inf2p5;
-    TH1D* h_D0consCand_MassChi2Inf3;
-    TH1D* h_D0consCand_MassChi2Inf3p5;
-    TH1D* h_D0consCand_MassChi2Inf4;
-    TH1D* h_D0consCand_MassChi2Inf4p5;
-    TH1D* h_D0consCand_MassChi2Inf5;
-    TH1D* h_D0consCand_MassChi2Inf5p5;
-    TH1D* h_D0consCand_MassChi2Inf6;
-    TH1D* h_D0consCand_MassChi2Inf6p5;
-    TH1D* h_D0consCand_MassChi2Inf7;
-    TH1D* h_D0consCand_MassChi2Inf7p5;
-    TH1D* h_D0consCand_MassChi2Inf8;
-
     TH1D* h_D0consCand_L;
     TH1D* h_D0consCand_SigmaL;
     TH1D* h_D0consCand_LOverSigmaL;
 
     TH1D* h_D0consCand_pT;
 
+    TH1D* h_D0cons_Chi2NDOF;
     TH1D* h_D0cons_L;
     TH1D* h_D0cons_SigmaL;
     TH1D* h_D0cons_p;
@@ -357,8 +338,11 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     if (iSelJet == maxind || iSelJet == maxind2){
       h_CSV->Fill((*it).bDiscriminator("combinedSecondaryVertexBJetTags"));
 
-      TLorentzVector p_Jet;
+      TLorentzVector p_Jet, p_D0cons;
       p_Jet.SetPtEtaPhiM((*it).pt(), (*it).eta(), (*it).phi(), (*it).mass());
+      p_D0cons.SetPtEtaPhiM(0., 0., 0., 0.);
+      double D0cons_chi2NDOF = 200.;
+      double D0cons_ctau[2] = {0., 0.};
 
       double pt_trCand_D0combi[3]  = {0., 0., 0.};
       double eta_trCand_D0combi[3] = {0., 0., 0.};
@@ -445,9 +429,6 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           int iBCut = 0;
           h_B_cuts->Fill((double)iBCut); ++iBCut;
           h_B_cuts->GetXaxis()->SetBinLabel(iBCut,"2 tracks with p_{T} > 4 GeV/c");
-          int iBconsCut = 0;
-          h_Bcons_cuts->Fill((double)iBconsCut); ++iBconsCut;
-          h_Bcons_cuts->GetXaxis()->SetBinLabel(iBconsCut,"2 tracks with p_{T} > 4 GeV/c");
 
           reco::TransientTrack tr2 = (*theB).build((**iter2));
 
@@ -463,8 +444,6 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           if ((**iter1).charge()*(**iter2).charge() > 0) continue;
           h_B_cuts->Fill((double)iBCut); ++iBCut;
           h_B_cuts->GetXaxis()->SetBinLabel(iBCut,"... of opposite signs");
-          h_Bcons_cuts->Fill((double)iBconsCut); ++iBconsCut;
-          h_Bcons_cuts->GetXaxis()->SetBinLabel(iBconsCut,"... of opposite signs");
 
           // Compute the mass
           TLorentzVector p_tr1_D0, p_tr2_D0, p_D0;
@@ -483,8 +462,6 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           if (tr1IsMu || tr2IsMu) continue;
           h_B_cuts->Fill((double)iBCut); ++iBCut;
           h_B_cuts->GetXaxis()->SetBinLabel(iBCut,"... not identified as #mu");
-          h_Bcons_cuts->Fill((double)iBconsCut); ++iBconsCut;
-          h_Bcons_cuts->GetXaxis()->SetBinLabel(iBconsCut,"... not identified as #mu");
           bool tr1IsEl = false;
           bool tr2IsEl = false;
           for (unsigned int iElCand = 0; iElCand < myPFel.size(); iElCand++) {
@@ -497,16 +474,12 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           if (tr1IsEl || tr2IsEl) continue;
           h_B_cuts->Fill((double)iBCut); ++iBCut;
           h_B_cuts->GetXaxis()->SetBinLabel(iBCut,"... not identified as e");
-          h_Bcons_cuts->Fill((double)iBconsCut); ++iBconsCut;
-          h_Bcons_cuts->GetXaxis()->SetBinLabel(iBconsCut,"... not identified as e");
 
           // min DR between the kaon and the muon
           /*
              if (p_tr1_D0.DeltaR(p_tr2_D0) > 0.2) continue;
              h_B_cuts->Fill((double)iBCut); ++iBCut;
              h_B_cuts->GetXaxis()->SetBinLabel(iBCut,"... within #DeltaR < 0.2");
-             h_Bcons_cuts->Fill((double)iBconsCut); ++iBconsCut;
-             h_Bcons_cuts->GetXaxis()->SetBinLabel(iBconsCut,"... within #DeltaR < 0.2");
              */
 
           p_D0 = p_tr1_D0 + p_tr2_D0;
@@ -715,8 +688,6 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           RefCountedKinematicTree D0vertexConsFitTree = D0consFitter.fit(D0Particles, D0cons);
 
           if (D0vertexConsFitTree->isValid()) {
-            h_Bcons_cuts->Fill((double)iBconsCut); ++iBconsCut;
-            h_Bcons_cuts->GetXaxis()->SetBinLabel(iBconsCut,"... with a valid D^{0} vertex");
 
             D0vertexConsFitTree->movePointerToTheTop();
             RefCountedKinematicParticle D0cons = D0vertexConsFitTree->currentParticle();
@@ -724,141 +695,104 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
             if (D0cons_vertex->vertexIsValid()) {
 
-              h_Bcons_cuts->Fill((double)iBconsCut); ++iBconsCut;
-              h_Bcons_cuts->GetXaxis()->SetBinLabel(iBconsCut,"... with a valid D^{0} vertex");
 
-              h_D0consCand_Chi2NDOF->Fill(D0cons_vertex->chiSquared()/(double)D0cons_vertex->degreesOfFreedom());
+              // Distance to PV :
+              GlobalPoint D0cons_svPos    = D0cons_vertex->position();
+              GlobalError D0cons_svPosErr = D0cons_vertex->error();
 
-              if (D0cons_vertex->chiSquared()/(double)D0cons_vertex->degreesOfFreedom() < 1.) 
-                h_D0consCand_MassChi2Inf1->Fill(p_D0.M());
-              if (D0cons_vertex->chiSquared()/(double)D0cons_vertex->degreesOfFreedom() < 1.5) 
-                h_D0consCand_MassChi2Inf1p5->Fill(p_D0.M());
-              if (D0cons_vertex->chiSquared()/(double)D0cons_vertex->degreesOfFreedom() < 2.)
-                h_D0consCand_MassChi2Inf2->Fill(p_D0.M());
-              if (D0cons_vertex->chiSquared()/(double)D0cons_vertex->degreesOfFreedom() < 2.5)
-                h_D0consCand_MassChi2Inf2p5->Fill(p_D0.M());
-              if (D0cons_vertex->chiSquared()/(double)D0cons_vertex->degreesOfFreedom() < 3.)
-                h_D0consCand_MassChi2Inf3->Fill(p_D0.M());
-              if (D0cons_vertex->chiSquared()/(double)D0cons_vertex->degreesOfFreedom() < 3.5)
-                h_D0consCand_MassChi2Inf3p5->Fill(p_D0.M());
-              if (D0cons_vertex->chiSquared()/(double)D0cons_vertex->degreesOfFreedom() < 4.)
-                h_D0consCand_MassChi2Inf4->Fill(p_D0.M());
-              if (D0cons_vertex->chiSquared()/(double)D0cons_vertex->degreesOfFreedom() < 4.5)
-                h_D0consCand_MassChi2Inf4p5->Fill(p_D0.M());
-              if (D0cons_vertex->chiSquared()/(double)D0cons_vertex->degreesOfFreedom() < 5.)
-                h_D0consCand_MassChi2Inf5->Fill(p_D0.M());
-              if (D0cons_vertex->chiSquared()/(double)D0cons_vertex->degreesOfFreedom() < 5.5)
-                h_D0consCand_MassChi2Inf5p5->Fill(p_D0.M());
-              if (D0cons_vertex->chiSquared()/(double)D0cons_vertex->degreesOfFreedom() < 6.)
-                h_D0consCand_MassChi2Inf6->Fill(p_D0.M());
-              if (D0cons_vertex->chiSquared()/(double)D0cons_vertex->degreesOfFreedom() < 6.5)
-                h_D0consCand_MassChi2Inf6p5->Fill(p_D0.M());
-              if (D0cons_vertex->chiSquared()/(double)D0cons_vertex->degreesOfFreedom() < 7.)
-                h_D0consCand_MassChi2Inf7->Fill(p_D0.M());
-              if (D0cons_vertex->chiSquared()/(double)D0cons_vertex->degreesOfFreedom() < 7.5)
-                h_D0consCand_MassChi2Inf7p5->Fill(p_D0.M());
-              if (D0cons_vertex->chiSquared()/(double)D0cons_vertex->degreesOfFreedom() < 8.)
-                h_D0consCand_MassChi2Inf8->Fill(p_D0.M());
+              double sigmax_vtx_D0consvtx = sqrt(pow(vtx[0].xError(), 2.) + pow(D0cons_svPosErr.cxx(), 2.));
+              double sigmay_vtx_D0consvtx = sqrt(pow(vtx[0].yError(), 2.) + pow(D0cons_svPosErr.cyy(), 2.));
+              double sigmaz_vtx_D0consvtx = sqrt(pow(vtx[0].zError(), 2.) + pow(D0cons_svPosErr.czz(), 2.));
 
-              if (D0cons_vertex->chiSquared()/(double)D0cons_vertex->degreesOfFreedom() < 4.) {
-                h_Bcons_cuts->Fill((double)iBconsCut); ++iBconsCut;
-                h_Bcons_cuts->GetXaxis()->SetBinLabel(iBconsCut,"... with #chi^{2}/NDOF < 4");
+              double D0cons_interx = pow((p_D0.Px()/p_D0.M())/sigmax_vtx_D0consvtx, 2.);
+              double D0cons_intery = pow((p_D0.Py()/p_D0.M())/sigmay_vtx_D0consvtx, 2.);
+              double D0cons_interz = pow((p_D0.Pz()/p_D0.M())/sigmaz_vtx_D0consvtx, 2.);
 
-                // Distance to PV :
-                GlobalPoint D0cons_svPos    = D0cons_vertex->position();
-                GlobalError D0cons_svPosErr = D0cons_vertex->error();
+              double D0cons_sigmaL3D = pow(D0cons_interx + D0cons_intery + D0cons_interz, -0.5);
 
-                double sigmax_vtx_D0consvtx = sqrt(pow(vtx[0].xError(), 2.) + pow(D0cons_svPosErr.cxx(), 2.));
-                double sigmay_vtx_D0consvtx = sqrt(pow(vtx[0].yError(), 2.) + pow(D0cons_svPosErr.cyy(), 2.));
-                double sigmaz_vtx_D0consvtx = sqrt(pow(vtx[0].zError(), 2.) + pow(D0cons_svPosErr.czz(), 2.));
+              double D0cons_part1 = (p_D0.Px()/p_D0.M())*pow(D0cons_sigmaL3D/sigmax_vtx_D0consvtx,2.)*( D0cons_svPos.x() - vtx[0].x());
+              double D0cons_part2 = (p_D0.Py()/p_D0.M())*pow(D0cons_sigmaL3D/sigmay_vtx_D0consvtx,2.)*( D0cons_svPos.y() - vtx[0].y());
+              double D0cons_part3 = (p_D0.Pz()/p_D0.M())*pow(D0cons_sigmaL3D/sigmaz_vtx_D0consvtx,2.)*( D0cons_svPos.z() - vtx[0].z());
 
-                double D0cons_interx = pow((p_D0.Px()/p_D0.M())/sigmax_vtx_D0consvtx, 2.);
-                double D0cons_intery = pow((p_D0.Py()/p_D0.M())/sigmay_vtx_D0consvtx, 2.);
-                double D0cons_interz = pow((p_D0.Pz()/p_D0.M())/sigmaz_vtx_D0consvtx, 2.);
+              double D0cons_L3D = fabs(D0cons_part1 + D0cons_part2 + D0cons_part3);
 
-                double D0cons_sigmaL3D = pow(D0cons_interx + D0cons_intery + D0cons_interz, -0.5);
+              double D0cons_L3DoverSigmaL3D = D0cons_L3D/D0cons_sigmaL3D;
 
-                double D0cons_part1 = (p_D0.Px()/p_D0.M())*pow(D0cons_sigmaL3D/sigmax_vtx_D0consvtx,2.)*( D0cons_svPos.x() - vtx[0].x());
-                double D0cons_part2 = (p_D0.Py()/p_D0.M())*pow(D0cons_sigmaL3D/sigmay_vtx_D0consvtx,2.)*( D0cons_svPos.y() - vtx[0].y());
-                double D0cons_part3 = (p_D0.Pz()/p_D0.M())*pow(D0cons_sigmaL3D/sigmaz_vtx_D0consvtx,2.)*( D0cons_svPos.z() - vtx[0].z());
+              h_D0consCand_L->Fill(D0cons_L3D);
+              h_D0consCand_SigmaL->Fill(D0cons_sigmaL3D);
+              h_D0consCand_LOverSigmaL->Fill(D0cons_L3DoverSigmaL3D);
 
-                double D0cons_L3D = fabs(D0cons_part1 + D0cons_part2 + D0cons_part3);
+              // cut on L/SigmaL
+              if (D0cons_L3DoverSigmaL3D > 50.) {
 
-                double D0cons_L3DoverSigmaL3D = D0cons_L3D/D0cons_sigmaL3D;
+                h_D0consCand_pT->Fill(p_D0.Pt());
 
-                h_D0consCand_L->Fill(D0cons_L3D);
-                h_D0consCand_SigmaL->Fill(D0cons_sigmaL3D);
-                h_D0consCand_LOverSigmaL->Fill(D0cons_L3DoverSigmaL3D);
+                // cut on pT
+                if (p_D0.Pt() > 12.) {
 
-                // cut on L/SigmaL
-                if (D0cons_L3DoverSigmaL3D > 50.) {
-                  h_Bcons_cuts->Fill((double)iBconsCut); ++iBconsCut;
-                  h_Bcons_cuts->GetXaxis()->SetBinLabel(iBconsCut,"... with c#tau/#sigma(c#tau) > 50");
+                  if (D0cons_vertex->chiSquared()/(double)D0cons_vertex->degreesOfFreedom() < D0cons_chi2NDOF) {
+                    D0cons_chi2NDOF = D0cons_vertex->chiSquared()/(double)D0cons_vertex->degreesOfFreedom();
+                    p_D0cons.SetPtEtaPhiM(p_D0.Pt(), p_D0.Eta(), p_D0.Phi(), p_D0.M());
+                    D0cons_ctau[0] = D0cons_L3D;
+                    D0cons_ctau[1] = D0cons_sigmaL3D;
+                  }
 
-                  h_D0consCand_pT->Fill(p_D0.Pt());
-
-                  // cut on pT
-                  if (p_D0.Pt() > 12.) {
-                    h_Bcons_cuts->Fill((double)iBconsCut); ++iBconsCut;
-                    h_Bcons_cuts->GetXaxis()->SetBinLabel(iBconsCut,"... with p_{T} > 12 GeV/c");
-
-                    h_D0cons_L->Fill(D0cons_L3D);
-                    h_D0cons_SigmaL->Fill(D0cons_sigmaL3D);
-                    h_D0cons_dRJet->Fill(p_D0.DeltaR(p_Jet));
-                    h_D0cons_Mass->Fill(p_D0.M());
-                    h_D0cons_p->Fill(p_D0.P());
-                    h_D0cons_pT->Fill(p_D0.Pt());
-                    h_D0cons_eta->Fill(p_D0.Eta());
-                    h_D0cons_phi->Fill(p_D0.Phi());
-
-                    //~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                    // associate D^0 to a PF muon
-                    //~~~~~~~~~~~~~~~~~~~~~~~~~~
-                    TLorentzVector p_MuCons;
-                    int iMuCons = -1;
-                    double deltaRD0consMu = 2000.;
-
-                    // find closest muon with opposite charged wrt the kaon
-                    for (unsigned int iMuConsCand = 0; iMuConsCand < myPFmu.size(); iMuConsCand++) {
-                      if (myPFmu[iMuConsCand]->pdgId()*(**iter1).charge() > 0) continue;
-                      TLorentzVector p_MuConsCand;
-                      p_MuConsCand.SetPtEtaPhiM(myPFmu[iMuConsCand]->pt(), myPFmu[iMuConsCand]->eta(), myPFmu[iMuConsCand]->phi(), gMassMu);
-                      double tmp_deltaRD0consMu = p_D0.DeltaR(p_MuConsCand);
-                      if (tmp_deltaRD0consMu < deltaRD0consMu) {
-                        deltaRD0consMu = tmp_deltaRD0consMu;
-                        iMuCons = iMuConsCand;
-                      }
-                    }
-
-                    if (iMuCons >= 0) {
-                      h_Bcons_cuts->Fill((double)iBconsCut); ++iBconsCut;
-                      h_Bcons_cuts->GetXaxis()->SetBinLabel(iBconsCut,"... at least a non isolated #mu");
-                      h_BCand_DeltaRD0consMu->Fill(deltaRD0consMu);
-
-                      // keep going if closest muon is close enough
-                      if (deltaRD0consMu < 0.4) {
-                        h_Bcons_cuts->Fill((double)iBconsCut); ++iBconsCut;
-                        h_Bcons_cuts->GetXaxis()->SetBinLabel(iBconsCut,"... within #DeltaR < 0.4");
-                        h_B_DeltaRD0consMu->Fill(deltaRD0consMu);
-
-                        h_B_D0consMass->Fill(p_D0.M());
-
-                        p_MuCons.SetPtEtaPhiM(myPFmu[iMuCons]->pt(), myPFmu[iMuCons]->eta(), myPFmu[iMuCons]->phi(), gMassMu);
-                        h_B_pD0conspMu->Fill(p_D0.P() / myPFmu[iMuCons]->p());
-                        h_B_pTD0conspTMu->Fill(p_D0.Pt() / myPFmu[iMuCons]->pt());
-
-                        TLorentzVector p_BCons = p_MuCons + p_D0;
-                        h_B_consMass->Fill(p_BCons.M());
-                      } // non iso mu close enough
-                    } // non iso mu
-                  }  // pT cut
-                } // L3D/sigma cut
-              } // chi2/NDOF < 4
+                }  // pT cut
+              } // L3D/sigma cut
             } // vertex is valid
           } // fit is valid
 
         } // 2nd jet's track loop
       } // 1st jet's track loop
+
+      if (fabs(p_D0cons.Pt()) > 0.) {
+        h_D0cons_Chi2NDOF->Fill(D0cons_chi2NDOF);
+        h_D0cons_L->Fill(D0cons_ctau[0]); 
+        h_D0cons_SigmaL->Fill(D0cons_ctau[1]); 
+        h_D0cons_dRJet->Fill(p_D0cons.DeltaR(p_Jet));
+        h_D0cons_Mass->Fill(p_D0cons.M());
+        h_D0cons_p->Fill(p_D0cons.P());
+        h_D0cons_pT->Fill(p_D0cons.Pt());
+        h_D0cons_eta->Fill(p_D0cons.Eta());
+        h_D0cons_phi->Fill(p_D0cons.Phi());
+
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // associate D^0 to a PF muon
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~
+        TLorentzVector p_MuCons;
+        int iMuCons = -1;
+        double deltaRD0consMu = 2000.;
+
+        // find closest muon with opposite charged wrt the kaon
+        for (unsigned int iMuConsCand = 0; iMuConsCand < myPFmu.size(); iMuConsCand++) {
+          if (myPFmu[iMuConsCand]->pdgId()*(**iter1).charge() > 0) continue;
+          TLorentzVector p_MuConsCand;
+          p_MuConsCand.SetPtEtaPhiM(myPFmu[iMuConsCand]->pt(), myPFmu[iMuConsCand]->eta(), myPFmu[iMuConsCand]->phi(), gMassMu);
+          double tmp_deltaRD0consMu = p_D0cons.DeltaR(p_MuConsCand);
+          if (tmp_deltaRD0consMu < deltaRD0consMu) {
+            deltaRD0consMu = tmp_deltaRD0consMu;
+            iMuCons = iMuConsCand;
+          }
+        }
+
+        if (iMuCons >= 0) {
+          h_BCand_DeltaRD0consMu->Fill(deltaRD0consMu);
+
+          // keep going if closest muon is close enough
+          if (deltaRD0consMu < 0.4) {
+            h_B_DeltaRD0consMu->Fill(deltaRD0consMu);
+
+            h_B_D0consMass->Fill(p_D0cons.M());
+
+            p_MuCons.SetPtEtaPhiM(myPFmu[iMuCons]->pt(), myPFmu[iMuCons]->eta(), myPFmu[iMuCons]->phi(), gMassMu);
+            h_B_pD0conspMu->Fill(p_D0cons.P() / myPFmu[iMuCons]->p());
+            h_B_pTD0conspTMu->Fill(p_D0cons.Pt() / myPFmu[iMuCons]->pt());
+
+            TLorentzVector p_BCons = p_MuCons + p_D0cons;
+            h_B_consMass->Fill(p_BCons.M());
+          } // non iso mu close enough
+        } // non iso mu
+      }
 
       //=================================
       // simple invariant combination
@@ -987,7 +921,7 @@ KalmanAnalyzer::beginJob()
   h_D0_Mass    = fs->make<TH1D>("h_D0_Mass","h_D0_Mass",1000,0.,10.);
   h_D0_L       = fs->make<TH1D>("h_D0_L","h_D0_L",1000,0.,1.);
   h_D0_SigmaL  = fs->make<TH1D>("h_D0_SigmaL","h_D0_SigmaL",5000,0.,0.005);
-  h_D0_dRJet   = fs->make<TH1D>("h_D0_dRJet","h_D0_dRJet",200,0.,10.);
+  h_D0_dRJet   = fs->make<TH1D>("h_D0_dRJet","h_D0_dRJet",100,0.,1.);
   h_D0_p       = fs->make<TH1D>("h_D0_p","h_D0_p",1000,0.,500.);
   h_D0_pT      = fs->make<TH1D>("h_D0_pT","h_D0_pT",1000,0.,500.);
   h_D0_eta     = fs->make<TH1D>("h_D0_eta","h_D0_eta",60,-3.,3.);
@@ -1005,38 +939,17 @@ KalmanAnalyzer::beginJob()
   h_B_GausMass   = fs->make<TH1D>("h_B_GausMass","h_B_GausMass",1500,0.,150.);
 
   // constrained Kalman Vertex fitter
-  h_Bcons_cuts = fs->make<TH1D>("h_Bcons_cuts","h_Bcons_cuts",30,0.,30.);
-  h_Bcons_cuts->SetOption("bar");
-  h_Bcons_cuts->SetBarWidth(0.75);
-  h_Bcons_cuts->SetBarOffset(0.125);
-
-  h_D0consCand_Chi2NDOF = fs->make<TH1D>("h_D0consCand_Chi2NDOF","h_D0consCand_Chi2NDOF",110,0.,11.);
-  h_D0consCand_MassChi2Inf1   = fs->make<TH1D>("h_D0consCand_MassChi2Inf1","h_D0consCand_MassChi2Inf1",1000,0.,10.);
-  h_D0consCand_MassChi2Inf1p5 = fs->make<TH1D>("h_D0consCand_MassChi2Inf1p5","h_D0consCand_MassChi2Inf1p5",1000,0.,10.);
-  h_D0consCand_MassChi2Inf2   = fs->make<TH1D>("h_D0consCand_MassChi2Inf2","h_D0consCand_MassChi2Inf2",1000,0.,10.);
-  h_D0consCand_MassChi2Inf2p5 = fs->make<TH1D>("h_D0consCand_MassChi2Inf2p5","h_D0consCand_MassChi2Inf2p5",1000,0.,10.);
-  h_D0consCand_MassChi2Inf3   = fs->make<TH1D>("h_D0consCand_MassChi2Inf3","h_D0consCand_MassChi2Inf3",1000,0.,10.);
-  h_D0consCand_MassChi2Inf3p5 = fs->make<TH1D>("h_D0consCand_MassChi2Inf3p5","h_D0consCand_MassChi2Inf3p5",1000,0.,10.);
-  h_D0consCand_MassChi2Inf4   = fs->make<TH1D>("h_D0consCand_MassChi2Inf4","h_D0consCand_MassChi2Inf4",1000,0.,10.);
-  h_D0consCand_MassChi2Inf4p5 = fs->make<TH1D>("h_D0consCand_MassChi2Inf4p5","h_D0consCand_MassChi2Inf4p5",1000,0.,10.);
-  h_D0consCand_MassChi2Inf5   = fs->make<TH1D>("h_D0consCand_MassChi2Inf5","h_D0consCand_MassChi2Inf5",1000,0.,10.);
-  h_D0consCand_MassChi2Inf5p5 = fs->make<TH1D>("h_D0consCand_MassChi2Inf5p5","h_D0consCand_MassChi2Inf5p5",1000,0.,10.);
-  h_D0consCand_MassChi2Inf6   = fs->make<TH1D>("h_D0consCand_MassChi2Inf6","h_D0consCand_MassChi2Inf6",1000,0.,10.);
-  h_D0consCand_MassChi2Inf6p5 = fs->make<TH1D>("h_D0consCand_MassChi2Inf6p5","h_D0consCand_MassChi2Inf6p5",1000,0.,10.);
-  h_D0consCand_MassChi2Inf7   = fs->make<TH1D>("h_D0consCand_MassChi2Inf7","h_D0consCand_MassChi2Inf7",1000,0.,10.);
-  h_D0consCand_MassChi2Inf7p5 = fs->make<TH1D>("h_D0consCand_MassChi2Inf7p5","h_D0consCand_MassChi2Inf7p5",1000,0.,10.);
-  h_D0consCand_MassChi2Inf8   = fs->make<TH1D>("h_D0consCand_MassChi2Inf8","h_D0consCand_MassChi2Inf8",1000,0.,10.);
-
   h_D0consCand_L           = fs->make<TH1D>("h_D0consCand_L","h_D0consCand_L",1000,0.,1.);
   h_D0consCand_SigmaL      = fs->make<TH1D>("h_D0consCand_SigmaL","h_D0consCand_SigmaL",5000,0.,0.005);
   h_D0consCand_LOverSigmaL = fs->make<TH1D>("h_D0consCand_LOverSigmaL","h_D0consCand_LOverSigmaL",21000,0.,7000.);
 
   h_D0consCand_pT      = fs->make<TH1D>("h_D0consCand_pT","h_D0consCand_pT",1000,0.,500.);
 
+  h_D0cons_Chi2NDOF = fs->make<TH1D>("h_D0cons_Chi2NDOF","h_D0cons_Chi2NDOF",110,0.,11.);
   h_D0cons_L       = fs->make<TH1D>("h_D0cons_L","h_D0cons_L",1000,0.,1.);
   h_D0cons_SigmaL  = fs->make<TH1D>("h_D0cons_SigmaL","h_D0cons_SigmaL",5000,0.,0.005);
   h_D0cons_Mass    = fs->make<TH1D>("h_D0cons_Mass","h_D0cons_Mass",1000,0.,10.);
-  h_D0cons_dRJet   = fs->make<TH1D>("h_D0cons_dRJet","h_D0cons_dRJet",200,0.,10.);
+  h_D0cons_dRJet   = fs->make<TH1D>("h_D0cons_dRJet","h_D0cons_dRJet",100,0.,1.);
   h_D0cons_p       = fs->make<TH1D>("h_D0cons_p","h_D0cons_p",1000,0.,500.);
   h_D0cons_pT      = fs->make<TH1D>("h_D0cons_pT","h_D0cons_pT",1000,0.,500.);
   h_D0cons_eta     = fs->make<TH1D>("h_D0cons_eta","h_D0cons_eta",60,-3.,3.);
@@ -1053,7 +966,7 @@ KalmanAnalyzer::beginJob()
   h_D0combiCand_pT = fs->make<TH1D>("h_D0combiCand_pT","h_D0combiCand_pT",1000,0.,500.);
 
   h_D0combi_Mass  = fs->make<TH1D>("h_D0combi_Mass","h_D0combi_Mass",1000,0.,10.);
-  h_D0combi_dRJet = fs->make<TH1D>("h_D0combi_dRJet","h_D0combi_dRJet",200,0.,10.);
+  h_D0combi_dRJet = fs->make<TH1D>("h_D0combi_dRJet","h_D0combi_dRJet",100,0.,1.);
   h_D0combi_p     = fs->make<TH1D>("h_D0combi_p","h_D0combi_p",1000,0.,500.);
   h_D0combi_pT    = fs->make<TH1D>("h_D0combi_pT","h_D0combi_pT",1000,0.,500.);
   h_D0combi_eta   = fs->make<TH1D>("h_D0combi_eta","h_D0combi_eta",60,-3.,3.);
