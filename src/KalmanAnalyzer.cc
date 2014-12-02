@@ -62,7 +62,6 @@ Implementation: Using a simple Kalman vertex fitter for the D0
 #include "TFile.h"
 #include "TH1D.h"
 #include "TLorentzVector.h"
-#include "TRandom3.h"
 
 //
 // class declaration
@@ -136,8 +135,10 @@ class KalmanAnalyzer : public edm::EDAnalyzer {
     TH1D* h_B_pTD0pTMu;
     TH1D* h_B_D0Mass;
     TH1D* h_B_Mass;
-    TH1D* h_B_DiracMass;
-    TH1D* h_B_GausMass;
+    TH1D* h_B_p;
+    TH1D* h_B_pT;
+    TH1D* h_B_eta;
+    TH1D* h_B_phi;
 
     //constrained Kalman Vertex Fitter
     TH1D* h_D0consCand_L;
@@ -162,6 +163,10 @@ class KalmanAnalyzer : public edm::EDAnalyzer {
     TH1D* h_B_pTD0conspTMu;
     TH1D* h_B_D0consMass;
     TH1D* h_B_consMass;
+    TH1D* h_B_consp;
+    TH1D* h_B_conspT;
+    TH1D* h_B_conseta;
+    TH1D* h_B_consphi;
 
     // simple invariant combination
     TH1D* h_D0combiCand_pT;
@@ -181,6 +186,31 @@ class KalmanAnalyzer : public edm::EDAnalyzer {
     TH1D* h_B_pTD0combipTMu;
     TH1D* h_B_D0combiMass;
     TH1D* h_B_combiMass;
+    TH1D* h_B_combip;
+    TH1D* h_B_combipT;
+    TH1D* h_B_combieta;
+    TH1D* h_B_combiphi;
+
+    // optimized invariant combination
+    TH1D* h_D0optcombiCand_pT;
+
+    TH1D* h_D0optcombi_p;
+    TH1D* h_D0optcombi_pT;
+    TH1D* h_D0optcombi_eta;
+    TH1D* h_D0optcombi_phi;
+    TH1D* h_D0optcombi_dRJet;
+    TH1D* h_D0optcombi_Mass;
+
+    TH1D* h_BCand_DeltaRD0optcombiMu;
+    TH1D* h_B_DeltaRD0optcombiMu;
+    TH1D* h_B_pD0optcombipMu;
+    TH1D* h_B_pTD0optcombipTMu;
+    TH1D* h_B_D0optcombiMass;
+    TH1D* h_B_optcombiMass;
+    TH1D* h_B_optcombip;
+    TH1D* h_B_optcombipT;
+    TH1D* h_B_optcombieta;
+    TH1D* h_B_optcombiphi;
 };
 
 //
@@ -281,11 +311,9 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   
   ParticleMass gMassD0 = 1.86484;
 
-  ParticleMass gMassW = 80.399;
+  //ParticleMass gMassW = 80.399;
   //float      gSigmaW = 0.023;
-  float        gResoW = 10.;
-  //ParticleMass gMassW = 0.4;
-  //float        gResoW = 0.1;
+  //float        gResoW = 10.;
 
   ParticleMass gMassMu  = 0.105658367;
   //float      gSigmaMu = 0.000000004; 
@@ -644,26 +672,11 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
                         TLorentzVector p_B = p_Mu + p_D0;
                         h_B_Mass->Fill(p_B.M());
+                        h_B_p->Fill(p_B.P());
+                        h_B_pT->Fill(p_B.Pt());
+                        h_B_eta->Fill(p_B.Eta());
+                        h_B_phi->Fill(p_B.Phi());
 
-                        // /!\ le W est produit hors couche de masse et peu booste 
-                        // /!\ FIXME FIXME FIXME
-                        //double gamma = 0.002;
-                        double alpha = 0.5 * (pow(gMassW,2.) - pow(gMassMu,2.)) / (pow(p_Mu.P(),2.)-p_Mu.E()*fabs(p_Mu.P()));
-                        //double alpha = 0.5 * (pow(gMassW,2.) - pow(gMassMu,2.)) / (p_Mu.Pt()+gamma*p_Mu.Pz()-p_Mu.E()*sqrt(pow(p_Mu.Pt(),2.)+pow(gamma*p_Mu.Pz(),2.)));
-
-                        p_WDirac.SetPtEtaPhiM(p_Mu.Pt()*(1.+alpha), p_Mu.Eta(), p_Mu.Phi(), gMassW);
-                        //p_WDirac.SetPtEtaPhiM(p_Mu.Pt()*(1.+alpha), 0.5*log((sqrt(pow(p_Mu.Pt(),2.) + pow(gamma*p_Mu.Pz(),2.) + 1e-10) + gamma*p_Mu.Pz()) / (sqrt(pow(p_Mu.Pt(),2.) + pow(gamma*p_Mu.Pz(),2.)) - gamma*p_Mu.Pz() + 1e-10)), p_Mu.Phi(), gMassW);
-                        TLorentzVector p_BDirac = p_WDirac + p_D0;
-                        //std::cout << "BDirac = " << p_BDirac.M() << std::endl;
-                        h_B_DiracMass->Fill(p_BDirac.M());
-
-                        TRandom3 *myRand = new TRandom3(0);
-                        ParticleMass gMassWGaus = myRand->Gaus(gMassW,gResoW);
-                        p_WGaus.SetPtEtaPhiM(p_Mu.Pt()*(1.+alpha), p_Mu.Eta(), p_Mu.Phi(), gMassWGaus);
-                        //p_WGaus.SetPtEtaPhiM(p_Mu.Pt()*(1.+alpha), 0.5*log((sqrt(pow(p_Mu.Pt(),2.) + pow(gamma*p_Mu.Pz(),2.) + 1e-10) + gamma*p_Mu.Pz()) / (sqrt(pow(p_Mu.Pt(),2.) + pow(gamma*p_Mu.Pz(),2.)) - gamma*p_Mu.Pz() + 1e-10)), p_Mu.Phi(), gMassWGaus);
-                        TLorentzVector p_BGaus = p_WGaus + p_D0;
-                        //std::cout << "BGaus = " << p_BGaus.M() << std::endl;
-                        h_B_GausMass->Fill(p_BGaus.M());
                       } // non iso mu close enough
                     } // non iso mu
                   } // pT cut
@@ -792,6 +805,10 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
             TLorentzVector p_BCons = p_MuCons + p_D0cons;
             h_B_consMass->Fill(p_BCons.M());
+            h_B_consp->Fill(p_BCons.P());
+            h_B_conspT->Fill(p_BCons.Pt());
+            h_B_conseta->Fill(p_BCons.Eta());
+            h_B_consphi->Fill(p_BCons.Phi());
           } // non iso mu close enough
         } // non iso mu
       }
@@ -803,7 +820,9 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       int p1[6] = {0, 0, 1, 1, 2, 2};
       int p2[6] = {1, 2, 2, 0, 0, 1};
 
-      TLorentzVector p_track1_D0combi, p_track2_D0combi, p_D0combi;
+      TLorentzVector p_track1_D0combi, p_track2_D0combi, p_D0combi, p_D0optcombi;
+      p_D0optcombi.SetPtEtaPhiM(0., 0., 0., 200.);
+      int tk2charge = 0;
 
       if (fabs(pt_trCand_D0combi[0]) > 1e-10 && fabs(pt_trCand_D0combi[1]) > 1e-10 && fabs(pt_trCand_D0combi[2]) > 1e-10) {
         for (unsigned int iD0combi = 0; iD0combi < 6; iD0combi++) {
@@ -821,10 +840,15 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           p_track2_D0combi.SetPtEtaPhiM(pt_trCand_D0combi[tk2], eta_trCand_D0combi[tk2], phi_trCand_D0combi[tk2], gMassK);
           p_D0combi = p_track1_D0combi + p_track2_D0combi;
 
+          if (fabs(p_D0combi.M() - gMassD0) < fabs(p_D0optcombi.M() - gMassD0)) {
+            p_D0optcombi.SetPtEtaPhiM(p_D0combi.Pt(), p_D0combi.Eta(), p_D0combi.Phi(), p_D0combi.M());
+            tk2charge = id_trCand_D0combi[tk2];
+          }
+
           h_D0combiCand_pT->Fill(p_D0combi.Pt());
 
           // cut on pT
-          if (p_D0combi.Pt() < 12.) continue;
+          if (p_D0combi.Pt() < 15.) continue;
 
           h_D0combi_Mass->Fill(p_D0combi.M());
           h_D0combi_dRJet->Fill(p_D0combi.DeltaR(p_Jet));
@@ -867,7 +891,73 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
           TLorentzVector p_Bcombi = p_Mu + p_D0combi;
           h_B_combiMass->Fill(p_Bcombi.M());
+          h_B_combip->Fill(p_Bcombi.P());
+          h_B_combipT->Fill(p_Bcombi.Pt());
+          h_B_combieta->Fill(p_Bcombi.Eta());
+          h_B_combiphi->Fill(p_Bcombi.Phi());
         }
+      }
+
+      //=================================
+      // optimized invariant combination
+      //=================================
+
+      if (fabs(p_D0optcombi.Pt()) > 1e-10) {
+
+          //~~~~~~~~~~~~~~~~~~~~~~~~~~~
+          // reconstruct D^0 to K Pi
+          //~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+          h_D0optcombiCand_pT->Fill(p_D0optcombi.Pt());
+
+          // cut on pT
+          if (p_D0optcombi.Pt() < 15.) continue;
+
+          h_D0optcombi_Mass->Fill(p_D0optcombi.M());
+          h_D0optcombi_dRJet->Fill(p_D0optcombi.DeltaR(p_Jet));
+          h_D0optcombi_p->Fill(p_D0optcombi.P());
+          h_D0optcombi_pT->Fill(p_D0optcombi.Pt());
+          h_D0optcombi_eta->Fill(p_D0optcombi.Eta());
+          h_D0optcombi_phi->Fill(p_D0optcombi.Phi());
+
+          //~~~~~~~~~~~~~~~~~~~~~~~~~~~
+          // associate D^0 to a PF muon
+          //~~~~~~~~~~~~~~~~~~~~~~~~~~
+          TLorentzVector p_Mu;
+          int iMu = -1;
+          double deltaRD0optcombiMu = 2000.;
+
+          // find closest muon with opposite charged wrt the kaon
+          for (unsigned int iMuCand = 0; iMuCand < myPFmu.size(); iMuCand++) {
+            if (myPFmu[iMuCand]->pdgId()*tk2charge > 0) continue;  
+            TLorentzVector p_MuCand;
+            p_MuCand.SetPtEtaPhiM(myPFmu[iMuCand]->pt(), myPFmu[iMuCand]->eta(), myPFmu[iMuCand]->phi(), gMassMu);
+            double tmp_deltaRD0optcombiMu = p_D0optcombi.DeltaR(p_MuCand);
+            if (tmp_deltaRD0optcombiMu < deltaRD0optcombiMu) {
+              deltaRD0optcombiMu = tmp_deltaRD0optcombiMu;
+              iMu = iMuCand;
+            }
+          }
+
+          if (iMu < 0) continue;
+          h_BCand_DeltaRD0optcombiMu->Fill(deltaRD0optcombiMu);
+
+          // keep going if closest muon is close enough
+          if (deltaRD0optcombiMu > 0.4) continue;
+          h_B_DeltaRD0optcombiMu->Fill(deltaRD0optcombiMu);
+
+          h_B_D0optcombiMass->Fill(p_D0optcombi.M());
+          
+          p_Mu.SetPtEtaPhiM(myPFmu[iMu]->pt(), myPFmu[iMu]->eta(), myPFmu[iMu]->phi(), gMassMu);
+          h_B_pD0optcombipMu->Fill(p_D0optcombi.P() / myPFmu[iMu]->p());
+          h_B_pTD0optcombipTMu->Fill(p_D0optcombi.Pt() / myPFmu[iMu]->pt());
+
+          TLorentzVector p_Boptcombi = p_Mu + p_D0optcombi;
+          h_B_optcombiMass->Fill(p_Boptcombi.M());
+          h_B_optcombip->Fill(p_Boptcombi.P());
+          h_B_optcombipT->Fill(p_Boptcombi.Pt());
+          h_B_optcombieta->Fill(p_Boptcombi.Eta());
+          h_B_optcombiphi->Fill(p_Boptcombi.Phi());
       }
     }
     iSelJet++;
@@ -935,10 +1025,10 @@ KalmanAnalyzer::beginJob()
   h_B_pD0pMu     = fs->make<TH1D>("h_B_pD0pMu","h_B_pD0pMu",500,0.,10.);
   h_B_pTD0pTMu   = fs->make<TH1D>("h_B_pTD0pTMu","h_B_pTD0pTMu",500,0.,10.);
   h_B_Mass       = fs->make<TH1D>("h_B_Mass","h_B_Mass",1000,0.,10.);
-  //h_B_DiracMass = fs->make<TH1D>("h_B_DiracMass","h_B_DiracMass",1000,0.,10.); FIXME
-  //h_B_GausMass  = fs->make<TH1D>("h_B_GausMass","h_B_GausMass",1000,0.,10.); FIXME
-  h_B_DiracMass  = fs->make<TH1D>("h_B_DiracMass","h_B_DiracMass",1500,0.,150.);
-  h_B_GausMass   = fs->make<TH1D>("h_B_GausMass","h_B_GausMass",1500,0.,150.);
+  h_B_p          = fs->make<TH1D>("h_B_p","h_B_p",1000,0.,500.);
+  h_B_pT         = fs->make<TH1D>("h_B_pT","h_B_pT",1000,0.,500.);
+  h_B_eta        = fs->make<TH1D>("h_B_eta","h_B_eta",60,-3.,3.);
+  h_B_phi        = fs->make<TH1D>("h_B_phi","h_B_phi",64,-3.2,3.2);
 
   // constrained Kalman Vertex fitter
   h_D0consCand_L           = fs->make<TH1D>("h_D0consCand_L","h_D0consCand_L",1000,0.,1.);
@@ -963,6 +1053,10 @@ KalmanAnalyzer::beginJob()
   h_B_pD0conspMu     = fs->make<TH1D>("h_B_pD0conspMu","h_B_pD0conspMu",500,0.,10.);
   h_B_pTD0conspTMu   = fs->make<TH1D>("h_B_pTD0conspTMu","h_B_pTD0conspTMu",500,0.,10.);
   h_B_consMass       = fs->make<TH1D>("h_B_consMass","h_B_consMass",1000,0.,10.);
+  h_B_consp          = fs->make<TH1D>("h_B_consp","h_B_consp",1000,0.,500.);
+  h_B_conspT         = fs->make<TH1D>("h_B_conspT","h_B_conspT",1000,0.,500.);
+  h_B_conseta        = fs->make<TH1D>("h_B_conseta","h_B_conseta",60,-3.,3.);
+  h_B_consphi        = fs->make<TH1D>("h_B_consphi","h_B_consphi",64,-3.2,3.2);
 
   // simple invariant combination
   h_D0combiCand_pT = fs->make<TH1D>("h_D0combiCand_pT","h_D0combiCand_pT",1000,0.,500.);
@@ -980,6 +1074,31 @@ KalmanAnalyzer::beginJob()
   h_B_pD0combipMu     = fs->make<TH1D>("h_B_pD0combipMu","h_B_pD0combipMu",500,0.,10.);
   h_B_pTD0combipTMu   = fs->make<TH1D>("h_B_pTD0combipTMu","h_B_pTD0combipTMu",500,0.,10.);
   h_B_combiMass       = fs->make<TH1D>("h_B_combiMass","h_B_combiMass",1000,0.,10.);
+  h_B_combip          = fs->make<TH1D>("h_B_combip","h_B_combip",1000,0.,500.);
+  h_B_combipT         = fs->make<TH1D>("h_B_combipT","h_B_combipT",1000,0.,500.);
+  h_B_combieta        = fs->make<TH1D>("h_B_combieta","h_B_combieta",60,-3.,3.);
+  h_B_combiphi        = fs->make<TH1D>("h_B_combiphi","h_B_combiphi",64,-3.2,3.2);
+
+  // optimized invariant combination
+  h_D0optcombiCand_pT = fs->make<TH1D>("h_D0optcombiCand_pT","h_D0optcombiCand_pT",1000,0.,500.);
+
+  h_D0optcombi_Mass  = fs->make<TH1D>("h_D0optcombi_Mass","h_D0optcombi_Mass",1000,0.,10.);
+  h_D0optcombi_dRJet = fs->make<TH1D>("h_D0optcombi_dRJet","h_D0optcombi_dRJet",200,0.,1.);
+  h_D0optcombi_p     = fs->make<TH1D>("h_D0optcombi_p","h_D0optcombi_p",1000,0.,500.);
+  h_D0optcombi_pT    = fs->make<TH1D>("h_D0optcombi_pT","h_D0optcombi_pT",1000,0.,500.);
+  h_D0optcombi_eta   = fs->make<TH1D>("h_D0optcombi_eta","h_D0optcombi_eta",60,-3.,3.);
+  h_D0optcombi_phi   = fs->make<TH1D>("h_D0optcombi_phi","h_D0optcombi_phi",64,-3.2,3.2);
+
+  h_BCand_DeltaRD0optcombiMu = fs->make<TH1D>("h_BCand_DeltaRD0optcombiMu","h_BCand_DeltaRD0optcombiMu",100,0.,5.);
+  h_B_D0optcombiMass     = fs->make<TH1D>("h_B_D0optcombiMass","h_B_D0optcombiMass",1000,0.,10.);
+  h_B_DeltaRD0optcombiMu = fs->make<TH1D>("h_B_DeltaRD0optcombiMu","h_B_DeltaRD0optcombiMu",80,0.,0.4);
+  h_B_pD0optcombipMu     = fs->make<TH1D>("h_B_pD0optcombipMu","h_B_pD0optcombipMu",500,0.,10.);
+  h_B_pTD0optcombipTMu   = fs->make<TH1D>("h_B_pTD0optcombipTMu","h_B_pTD0optcombipTMu",500,0.,10.);
+  h_B_optcombiMass       = fs->make<TH1D>("h_B_optcombiMass","h_B_optcombiMass",1000,0.,10.);
+  h_B_optcombip          = fs->make<TH1D>("h_B_optcombip","h_B_optcombip",1000,0.,500.);
+  h_B_optcombipT         = fs->make<TH1D>("h_B_optcombipT","h_B_optcombipT",1000,0.,500.);
+  h_B_optcombieta        = fs->make<TH1D>("h_B_optcombieta","h_B_optcombieta",60,-3.,3.);
+  h_B_optcombiphi        = fs->make<TH1D>("h_B_optcombiphi","h_B_optcombiphi",64,-3.2,3.2);
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
