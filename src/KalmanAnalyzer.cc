@@ -93,8 +93,17 @@ class KalmanAnalyzer : public edm::EDAnalyzer {
     TH1D* h_nJets;
     TH1D* h_CSV;
 
+    TH1D* h_genD0_n;
+    TH1D* h_genD0_p;
+    TH1D* h_genD0_pT;
+    TH1D* h_genD0_eta;
+    TH1D* h_genD0_phi;
+
     // simple Kalman Vertex Fitter
     TH1D* h_B_cuts;
+
+    TH1D* h_candGenRecoD0dR;
+    TH1D* h_candGenRecoTrdR;
 
     TH1D* h_D0Cand_Chi2NDOF;
 
@@ -128,6 +137,30 @@ class KalmanAnalyzer : public edm::EDAnalyzer {
     TH1D* h_D0_SigmaL;
     TH1D* h_D0_dRJet;
     TH1D* h_D0_Mass;
+    TH1D* h_D0_paired_p;
+    TH1D* h_D0_paired_pT;
+    TH1D* h_D0_paired_eta;
+    TH1D* h_D0_paired_phi;
+    TH1D* h_D0_paired_L;
+    TH1D* h_D0_paired_SigmaL;
+    TH1D* h_D0_paired_dRJet;
+    TH1D* h_D0_paired_Mass;
+    TH1D* h_D0_switched_p;
+    TH1D* h_D0_switched_pT;
+    TH1D* h_D0_switched_eta;
+    TH1D* h_D0_switched_phi;
+    TH1D* h_D0_switched_L;
+    TH1D* h_D0_switched_SigmaL;
+    TH1D* h_D0_switched_dRJet;
+    TH1D* h_D0_switched_Mass;
+    TH1D* h_D0_unmatched_p;
+    TH1D* h_D0_unmatched_pT;
+    TH1D* h_D0_unmatched_eta;
+    TH1D* h_D0_unmatched_phi;
+    TH1D* h_D0_unmatched_L;
+    TH1D* h_D0_unmatched_SigmaL;
+    TH1D* h_D0_unmatched_dRJet;
+    TH1D* h_D0_unmatched_Mass;
 
     TH1D* h_BCand_DeltaRD0Mu;
     TH1D* h_B_DeltaRD0Mu;
@@ -139,6 +172,33 @@ class KalmanAnalyzer : public edm::EDAnalyzer {
     TH1D* h_B_pT;
     TH1D* h_B_eta;
     TH1D* h_B_phi;
+    TH1D* h_B_paired_DeltaRD0Mu;
+    TH1D* h_B_paired_pD0pMu;
+    TH1D* h_B_paired_pTD0pTMu;
+    TH1D* h_B_paired_D0Mass;
+    TH1D* h_B_paired_Mass;
+    TH1D* h_B_paired_p;
+    TH1D* h_B_paired_pT;
+    TH1D* h_B_paired_eta;
+    TH1D* h_B_paired_phi;
+    TH1D* h_B_switched_DeltaRD0Mu;
+    TH1D* h_B_switched_pD0pMu;
+    TH1D* h_B_switched_pTD0pTMu;
+    TH1D* h_B_switched_D0Mass;
+    TH1D* h_B_switched_Mass;
+    TH1D* h_B_switched_p;
+    TH1D* h_B_switched_pT;
+    TH1D* h_B_switched_eta;
+    TH1D* h_B_switched_phi;
+    TH1D* h_B_unmatched_DeltaRD0Mu;
+    TH1D* h_B_unmatched_pD0pMu;
+    TH1D* h_B_unmatched_pTD0pTMu;
+    TH1D* h_B_unmatched_D0Mass;
+    TH1D* h_B_unmatched_Mass;
+    TH1D* h_B_unmatched_p;
+    TH1D* h_B_unmatched_pT;
+    TH1D* h_B_unmatched_eta;
+    TH1D* h_B_unmatched_phi;
 
     //constrained Kalman Vertex Fitter
     TH1D* h_D0consCand_L;
@@ -156,6 +216,33 @@ class KalmanAnalyzer : public edm::EDAnalyzer {
     TH1D* h_D0cons_phi;
     TH1D* h_D0cons_dRJet;
     TH1D* h_D0cons_Mass;
+    TH1D* h_D0cons_paired_Chi2NDOF;
+    TH1D* h_D0cons_paired_L;
+    TH1D* h_D0cons_paired_SigmaL;
+    TH1D* h_D0cons_paired_p;
+    TH1D* h_D0cons_paired_pT;
+    TH1D* h_D0cons_paired_eta;
+    TH1D* h_D0cons_paired_phi;
+    TH1D* h_D0cons_paired_dRJet;
+    TH1D* h_D0cons_paired_Mass;
+    TH1D* h_D0cons_switched_Chi2NDOF;
+    TH1D* h_D0cons_switched_L;
+    TH1D* h_D0cons_switched_SigmaL;
+    TH1D* h_D0cons_switched_p;
+    TH1D* h_D0cons_switched_pT;
+    TH1D* h_D0cons_switched_eta;
+    TH1D* h_D0cons_switched_phi;
+    TH1D* h_D0cons_switched_dRJet;
+    TH1D* h_D0cons_switched_Mass;
+    TH1D* h_D0cons_unmatched_Chi2NDOF;
+    TH1D* h_D0cons_unmatched_L;
+    TH1D* h_D0cons_unmatched_SigmaL;
+    TH1D* h_D0cons_unmatched_p;
+    TH1D* h_D0cons_unmatched_pT;
+    TH1D* h_D0cons_unmatched_eta;
+    TH1D* h_D0cons_unmatched_phi;
+    TH1D* h_D0cons_unmatched_dRJet;
+    TH1D* h_D0cons_unmatched_Mass;
 
     TH1D* h_BCand_DeltaRD0consMu;
     TH1D* h_B_DeltaRD0consMu;
@@ -167,8 +254,38 @@ class KalmanAnalyzer : public edm::EDAnalyzer {
     TH1D* h_B_conspT;
     TH1D* h_B_conseta;
     TH1D* h_B_consphi;
+    TH1D* h_B_paired_DeltaRD0consMu;
+    TH1D* h_B_paired_pD0conspMu;
+    TH1D* h_B_paired_pTD0conspTMu;
+    TH1D* h_B_paired_D0consMass;
+    TH1D* h_B_paired_consMass;
+    TH1D* h_B_paired_consp;
+    TH1D* h_B_paired_conspT;
+    TH1D* h_B_paired_conseta;
+    TH1D* h_B_paired_consphi;
+    TH1D* h_B_switched_DeltaRD0consMu;
+    TH1D* h_B_switched_pD0conspMu;
+    TH1D* h_B_switched_pTD0conspTMu;
+    TH1D* h_B_switched_D0consMass;
+    TH1D* h_B_switched_consMass;
+    TH1D* h_B_switched_consp;
+    TH1D* h_B_switched_conspT;
+    TH1D* h_B_switched_conseta;
+    TH1D* h_B_switched_consphi;
+    TH1D* h_B_unmatched_DeltaRD0consMu;
+    TH1D* h_B_unmatched_pD0conspMu;
+    TH1D* h_B_unmatched_pTD0conspTMu;
+    TH1D* h_B_unmatched_D0consMass;
+    TH1D* h_B_unmatched_consMass;
+    TH1D* h_B_unmatched_consp;
+    TH1D* h_B_unmatched_conspT;
+    TH1D* h_B_unmatched_conseta;
+    TH1D* h_B_unmatched_consphi;
 
     // simple invariant combination
+    TH1D* h_candGenRecoD0combidR;
+    TH1D* h_candGenRecoTrcombidR;
+    
     TH1D* h_D0combiCand_pT;
 
     TH1D* h_D0combi_p;
@@ -177,6 +294,24 @@ class KalmanAnalyzer : public edm::EDAnalyzer {
     TH1D* h_D0combi_phi;
     TH1D* h_D0combi_dRJet;
     TH1D* h_D0combi_Mass;
+    TH1D* h_D0combi_paired_p;
+    TH1D* h_D0combi_paired_pT;
+    TH1D* h_D0combi_paired_eta;
+    TH1D* h_D0combi_paired_phi;
+    TH1D* h_D0combi_paired_dRJet;
+    TH1D* h_D0combi_paired_Mass;
+    TH1D* h_D0combi_switched_p;
+    TH1D* h_D0combi_switched_pT;
+    TH1D* h_D0combi_switched_eta;
+    TH1D* h_D0combi_switched_phi;
+    TH1D* h_D0combi_switched_dRJet;
+    TH1D* h_D0combi_switched_Mass;
+    TH1D* h_D0combi_unmatched_p;
+    TH1D* h_D0combi_unmatched_pT;
+    TH1D* h_D0combi_unmatched_eta;
+    TH1D* h_D0combi_unmatched_phi;
+    TH1D* h_D0combi_unmatched_dRJet;
+    TH1D* h_D0combi_unmatched_Mass;
 
     TH1D* h_DeltaR_trCand_Mu;
     TH1D* h_DeltaR_trCand_El;
@@ -190,6 +325,33 @@ class KalmanAnalyzer : public edm::EDAnalyzer {
     TH1D* h_B_combipT;
     TH1D* h_B_combieta;
     TH1D* h_B_combiphi;
+    TH1D* h_B_paired_DeltaRD0combiMu;
+    TH1D* h_B_paired_pD0combipMu;
+    TH1D* h_B_paired_pTD0combipTMu;
+    TH1D* h_B_paired_D0combiMass;
+    TH1D* h_B_paired_combiMass;
+    TH1D* h_B_paired_combip;
+    TH1D* h_B_paired_combipT;
+    TH1D* h_B_paired_combieta;
+    TH1D* h_B_paired_combiphi;
+    TH1D* h_B_switched_DeltaRD0combiMu;
+    TH1D* h_B_switched_pD0combipMu;
+    TH1D* h_B_switched_pTD0combipTMu;
+    TH1D* h_B_switched_D0combiMass;
+    TH1D* h_B_switched_combiMass;
+    TH1D* h_B_switched_combip;
+    TH1D* h_B_switched_combipT;
+    TH1D* h_B_switched_combieta;
+    TH1D* h_B_switched_combiphi;
+    TH1D* h_B_unmatched_DeltaRD0combiMu;
+    TH1D* h_B_unmatched_pD0combipMu;
+    TH1D* h_B_unmatched_pTD0combipTMu;
+    TH1D* h_B_unmatched_D0combiMass;
+    TH1D* h_B_unmatched_combiMass;
+    TH1D* h_B_unmatched_combip;
+    TH1D* h_B_unmatched_combipT;
+    TH1D* h_B_unmatched_combieta;
+    TH1D* h_B_unmatched_combiphi;
 
     // optimized invariant combination
     TH1D* h_D0optcombiCand_pT;
@@ -200,6 +362,24 @@ class KalmanAnalyzer : public edm::EDAnalyzer {
     TH1D* h_D0optcombi_phi;
     TH1D* h_D0optcombi_dRJet;
     TH1D* h_D0optcombi_Mass;
+    TH1D* h_D0optcombi_paired_p;
+    TH1D* h_D0optcombi_paired_pT;
+    TH1D* h_D0optcombi_paired_eta;
+    TH1D* h_D0optcombi_paired_phi;
+    TH1D* h_D0optcombi_paired_dRJet;
+    TH1D* h_D0optcombi_paired_Mass;
+    TH1D* h_D0optcombi_switched_p;
+    TH1D* h_D0optcombi_switched_pT;
+    TH1D* h_D0optcombi_switched_eta;
+    TH1D* h_D0optcombi_switched_phi;
+    TH1D* h_D0optcombi_switched_dRJet;
+    TH1D* h_D0optcombi_switched_Mass;
+    TH1D* h_D0optcombi_unmatched_p;
+    TH1D* h_D0optcombi_unmatched_pT;
+    TH1D* h_D0optcombi_unmatched_eta;
+    TH1D* h_D0optcombi_unmatched_phi;
+    TH1D* h_D0optcombi_unmatched_dRJet;
+    TH1D* h_D0optcombi_unmatched_Mass;
 
     TH1D* h_BCand_DeltaRD0optcombiMu;
     TH1D* h_B_DeltaRD0optcombiMu;
@@ -211,6 +391,33 @@ class KalmanAnalyzer : public edm::EDAnalyzer {
     TH1D* h_B_optcombipT;
     TH1D* h_B_optcombieta;
     TH1D* h_B_optcombiphi;
+    TH1D* h_B_paired_DeltaRD0optcombiMu;
+    TH1D* h_B_paired_pD0optcombipMu;
+    TH1D* h_B_paired_pTD0optcombipTMu;
+    TH1D* h_B_paired_D0optcombiMass;
+    TH1D* h_B_paired_optcombiMass;
+    TH1D* h_B_paired_optcombip;
+    TH1D* h_B_paired_optcombipT;
+    TH1D* h_B_paired_optcombieta;
+    TH1D* h_B_paired_optcombiphi;
+    TH1D* h_B_switched_DeltaRD0optcombiMu;
+    TH1D* h_B_switched_pD0optcombipMu;
+    TH1D* h_B_switched_pTD0optcombipTMu;
+    TH1D* h_B_switched_D0optcombiMass;
+    TH1D* h_B_switched_optcombiMass;
+    TH1D* h_B_switched_optcombip;
+    TH1D* h_B_switched_optcombipT;
+    TH1D* h_B_switched_optcombieta;
+    TH1D* h_B_switched_optcombiphi;
+    TH1D* h_B_unmatched_DeltaRD0optcombiMu;
+    TH1D* h_B_unmatched_pD0optcombipMu;
+    TH1D* h_B_unmatched_pTD0optcombipTMu;
+    TH1D* h_B_unmatched_D0optcombiMass;
+    TH1D* h_B_unmatched_optcombiMass;
+    TH1D* h_B_unmatched_optcombip;
+    TH1D* h_B_unmatched_optcombipT;
+    TH1D* h_B_unmatched_optcombieta;
+    TH1D* h_B_unmatched_optcombiphi;
 };
 
 //
@@ -270,6 +477,32 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     return;
   }
 
+  //-------------------------------------------
+  // Access the Gen D0 -> K Pi
+  //-------------------------------------------
+  
+  edm::Handle<std::vector<reco::GenParticle> > mcHandle;
+  edm::InputTag tagGen("genParticles","","SIM");
+  iEvent.getByLabel(tagGen,mcHandle);
+  const reco::GenParticleCollection& mcparts = *(mcHandle.product());
+
+  // create a vector of pointers to D0/JPSI MC particles
+  std::vector<const reco::GenParticle*> genPartD0;
+
+  for (reco::GenParticleCollection::const_iterator it = mcparts.begin(); it != mcparts.end(); ++it)  {
+    if (abs((*it).pdgId()) != 421) continue;
+    if ((*it).numberOfDaughters() != 2) continue;
+    if ((abs((*it).daughter(0)->pdgId()) != 321 || abs((*it).daughter(1)->pdgId()) != 211) 
+     && (abs((*it).daughter(0)->pdgId()) != 211 || abs((*it).daughter(1)->pdgId()) != 321)) 
+      continue;
+    genPartD0.push_back(&(*it));
+    h_genD0_p->Fill((*it).p());
+    h_genD0_pT->Fill((*it).pt());
+    h_genD0_eta->Fill((*it).eta());
+    h_genD0_phi->Fill((*it).phi());
+  }  
+  h_genD0_n->Fill(genPartD0.size());
+
   //--------------------------------------------------
   // Access the PF candidates for non-isolated mu/e
   //--------------------------------------------------
@@ -309,10 +542,11 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   //  double d0mass = 1.86484;
   //  double bmass = 5.2796;
   
-  ParticleMass gMassD0 = 1.86484;
+  ParticleMass gMassD0 = 1.86483;
+  //float      gSigmaD0 = 0.00014;
 
   //ParticleMass gMassW = 80.399;
-  //float      gSigmaW = 0.023;
+  //float        gSigmaW = 0.023;
   //float        gResoW = 10.;
 
   ParticleMass gMassMu  = 0.105658367;
@@ -372,6 +606,9 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       double D0cons_chi2NDOF = 200.;
       double chargeK = 0;
       double D0cons_ctau[2] = {0., 0.};
+      bool isD0consPaired = false;
+      bool isD0consSwitched = false;
+      bool isD0consUnmatched = false;
 
       double pt_trCand_D0combi[3]  = {0., 0., 0.};
       double eta_trCand_D0combi[3] = {0., 0., 0.};
@@ -513,6 +750,55 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
           p_D0 = p_tr1_D0 + p_tr2_D0;
 
+          bool isD0paired = false;
+          bool isD0switched = false;
+          bool isD0unmatched = false;
+          int iGenD0 = -1;
+          double GenRecoD0dR = 200.;
+          double GenRecoTr1dR = 200.;
+          double GenRecoTr2dR = 200.;
+
+          for (unsigned int iGen = 0; iGen < genPartD0.size(); iGen++) {
+           TLorentzVector p_genD0;
+           p_genD0.SetPtEtaPhiM(genPartD0[iGen]->pt(), genPartD0[iGen]->eta(), genPartD0[iGen]->phi(), genPartD0[iGen]->mass());
+           double GenRecoD0dRtmp = p_D0.DeltaR(p_genD0);
+           if (GenRecoD0dRtmp < GenRecoD0dR) {
+             GenRecoD0dR = GenRecoD0dRtmp;
+             iGenD0 = iGen;
+           }
+          }
+
+          if (fabs(GenRecoD0dR - 200.) > 1e-10) h_candGenRecoD0dR->Fill(GenRecoD0dR);
+          if (GenRecoD0dR > 0.5) 
+            isD0unmatched = true;
+          else {
+            TLorentzVector p_genK, p_genPi;
+            if (abs(genPartD0[iGenD0]->daughter(0)->pdgId()) == 321) {
+              p_genK.SetPtEtaPhiM(genPartD0[iGenD0]->daughter(0)->pt(), genPartD0[iGenD0]->daughter(0)->eta(), genPartD0[iGenD0]->daughter(0)->phi(), genPartD0[iGenD0]->daughter(0)->mass());
+              p_genPi.SetPtEtaPhiM(genPartD0[iGenD0]->daughter(1)->pt(), genPartD0[iGenD0]->daughter(1)->eta(), genPartD0[iGenD0]->daughter(1)->phi(), genPartD0[iGenD0]->daughter(1)->mass());
+            }
+            else {
+              p_genK.SetPtEtaPhiM(genPartD0[iGenD0]->daughter(1)->pt(), genPartD0[iGenD0]->daughter(1)->eta(), genPartD0[iGenD0]->daughter(1)->phi(), genPartD0[iGenD0]->daughter(1)->mass());
+              p_genPi.SetPtEtaPhiM(genPartD0[iGenD0]->daughter(0)->pt(), genPartD0[iGenD0]->daughter(0)->eta(), genPartD0[iGenD0]->daughter(0)->phi(), genPartD0[iGenD0]->daughter(0)->mass());
+            }
+            double GenKRecoTr1dR = p_tr1_D0.DeltaR(p_genK);
+            double GenPiRecoTr1dR = p_tr1_D0.DeltaR(p_genPi);
+            double GenKRecoTr2dR = p_tr2_D0.DeltaR(p_genK);
+            double GenPiRecoTr2dR = p_tr2_D0.DeltaR(p_genPi);
+            if (GenKRecoTr1dR < GenPiRecoTr1dR) GenRecoTr1dR = GenKRecoTr1dR;
+            else GenRecoTr1dR = GenPiRecoTr1dR;
+            if (GenPiRecoTr2dR < GenKRecoTr2dR) GenRecoTr2dR = GenPiRecoTr2dR;
+            else GenRecoTr2dR = GenKRecoTr2dR;
+            h_candGenRecoTrdR->Fill(GenRecoTr1dR);
+            h_candGenRecoTrdR->Fill(GenRecoTr2dR);
+            if (GenRecoTr1dR > 0.005 || GenRecoTr2dR > 0.005) 
+              isD0unmatched = true;
+            else {
+              if (GenKRecoTr1dR < GenPiRecoTr1dR && GenPiRecoTr2dR < GenKRecoTr2dR) isD0paired = true;
+              else isD0switched = true;
+            }
+          }
+
           //Creating a KinematicParticleFactory
           KinematicParticleFactoryFromTransientTrack pFactory;
 
@@ -633,6 +919,36 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                     h_D0_pT->Fill(p_D0.Pt());
                     h_D0_eta->Fill(p_D0.Eta());
                     h_D0_phi->Fill(p_D0.Phi());
+                    if (isD0paired) {
+                      h_D0_paired_L->Fill(D0_L3D);
+                      h_D0_paired_SigmaL->Fill(D0_sigmaL3D);
+                      h_D0_paired_dRJet->Fill(p_D0.DeltaR(p_Jet));
+                      h_D0_paired_Mass->Fill(p_D0.M());
+                      h_D0_paired_p->Fill(p_D0.P());
+                      h_D0_paired_pT->Fill(p_D0.Pt());
+                      h_D0_paired_eta->Fill(p_D0.Eta());
+                      h_D0_paired_phi->Fill(p_D0.Phi());
+                    }
+                    if (isD0switched) {
+                      h_D0_switched_L->Fill(D0_L3D);
+                      h_D0_switched_SigmaL->Fill(D0_sigmaL3D);
+                      h_D0_switched_dRJet->Fill(p_D0.DeltaR(p_Jet));
+                      h_D0_switched_Mass->Fill(p_D0.M());
+                      h_D0_switched_p->Fill(p_D0.P());
+                      h_D0_switched_pT->Fill(p_D0.Pt());
+                      h_D0_switched_eta->Fill(p_D0.Eta());
+                      h_D0_switched_phi->Fill(p_D0.Phi());
+                    }
+                    if (isD0unmatched) {
+                      h_D0_unmatched_L->Fill(D0_L3D);
+                      h_D0_unmatched_SigmaL->Fill(D0_sigmaL3D);
+                      h_D0_unmatched_dRJet->Fill(p_D0.DeltaR(p_Jet));
+                      h_D0_unmatched_Mass->Fill(p_D0.M());
+                      h_D0_unmatched_p->Fill(p_D0.P());
+                      h_D0_unmatched_pT->Fill(p_D0.Pt());
+                      h_D0_unmatched_eta->Fill(p_D0.Eta());
+                      h_D0_unmatched_phi->Fill(p_D0.Phi());
+                    }
 
                     //~~~~~~~~~~~~~~~~~~~~~~~~~~~
                     // associate D^0 to a PF muon
@@ -676,6 +992,40 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                         h_B_pT->Fill(p_B.Pt());
                         h_B_eta->Fill(p_B.Eta());
                         h_B_phi->Fill(p_B.Phi());
+                        
+                        if (isD0paired) {
+                          h_B_paired_DeltaRD0Mu->Fill(deltaRD0Mu);
+                          h_B_paired_D0Mass->Fill(p_D0.M());
+                          h_B_paired_pD0pMu->Fill(p_D0.P() / myPFmu[iMu]->p());
+                          h_B_paired_pTD0pTMu->Fill(p_D0.Pt() / myPFmu[iMu]->pt());
+                          h_B_paired_Mass->Fill(p_B.M());
+                          h_B_paired_p->Fill(p_B.P());
+                          h_B_paired_pT->Fill(p_B.Pt());
+                          h_B_paired_eta->Fill(p_B.Eta());
+                          h_B_paired_phi->Fill(p_B.Phi());
+                        }
+                        if (isD0switched) {
+                          h_B_switched_DeltaRD0Mu->Fill(deltaRD0Mu);
+                          h_B_switched_D0Mass->Fill(p_D0.M());
+                          h_B_switched_pD0pMu->Fill(p_D0.P() / myPFmu[iMu]->p());
+                          h_B_switched_pTD0pTMu->Fill(p_D0.Pt() / myPFmu[iMu]->pt());
+                          h_B_switched_Mass->Fill(p_B.M());
+                          h_B_switched_p->Fill(p_B.P());
+                          h_B_switched_pT->Fill(p_B.Pt());
+                          h_B_switched_eta->Fill(p_B.Eta());
+                          h_B_switched_phi->Fill(p_B.Phi());
+                        }
+                        if (isD0unmatched) {
+                          h_B_unmatched_DeltaRD0Mu->Fill(deltaRD0Mu);
+                          h_B_unmatched_D0Mass->Fill(p_D0.M());
+                          h_B_unmatched_pD0pMu->Fill(p_D0.P() / myPFmu[iMu]->p());
+                          h_B_unmatched_pTD0pTMu->Fill(p_D0.Pt() / myPFmu[iMu]->pt());
+                          h_B_unmatched_Mass->Fill(p_B.M());
+                          h_B_unmatched_p->Fill(p_B.P());
+                          h_B_unmatched_pT->Fill(p_B.Pt());
+                          h_B_unmatched_eta->Fill(p_B.Eta());
+                          h_B_unmatched_phi->Fill(p_B.Phi());
+                        }
 
                       } // non iso mu close enough
                     } // non iso mu
@@ -750,6 +1100,9 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                     D0cons_ctau[0] = D0cons_L3D;
                     D0cons_ctau[1] = D0cons_sigmaL3D;
                     chargeK = (**iter1).charge();
+                    isD0consPaired = isD0paired;
+                    isD0consSwitched = isD0switched;
+                    isD0consUnmatched = isD0unmatched;
                   }
 
                 }  // pT cut
@@ -770,6 +1123,39 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         h_D0cons_pT->Fill(p_D0cons.Pt());
         h_D0cons_eta->Fill(p_D0cons.Eta());
         h_D0cons_phi->Fill(p_D0cons.Phi());
+        if (isD0consPaired) {
+          h_D0cons_paired_Chi2NDOF->Fill(D0cons_chi2NDOF);
+          h_D0cons_paired_L->Fill(D0cons_ctau[0]); 
+          h_D0cons_paired_SigmaL->Fill(D0cons_ctau[1]); 
+          h_D0cons_paired_dRJet->Fill(p_D0cons.DeltaR(p_Jet));
+          h_D0cons_paired_Mass->Fill(p_D0cons.M());
+          h_D0cons_paired_p->Fill(p_D0cons.P());
+          h_D0cons_paired_pT->Fill(p_D0cons.Pt());
+          h_D0cons_paired_eta->Fill(p_D0cons.Eta());
+          h_D0cons_paired_phi->Fill(p_D0cons.Phi());
+        }
+        if (isD0consSwitched) {
+          h_D0cons_switched_Chi2NDOF->Fill(D0cons_chi2NDOF);
+          h_D0cons_switched_L->Fill(D0cons_ctau[0]); 
+          h_D0cons_switched_SigmaL->Fill(D0cons_ctau[1]); 
+          h_D0cons_switched_dRJet->Fill(p_D0cons.DeltaR(p_Jet));
+          h_D0cons_switched_Mass->Fill(p_D0cons.M());
+          h_D0cons_switched_p->Fill(p_D0cons.P());
+          h_D0cons_switched_pT->Fill(p_D0cons.Pt());
+          h_D0cons_switched_eta->Fill(p_D0cons.Eta());
+          h_D0cons_switched_phi->Fill(p_D0cons.Phi());
+        }
+        if (isD0consUnmatched) {
+          h_D0cons_unmatched_Chi2NDOF->Fill(D0cons_chi2NDOF);
+          h_D0cons_unmatched_L->Fill(D0cons_ctau[0]); 
+          h_D0cons_unmatched_SigmaL->Fill(D0cons_ctau[1]); 
+          h_D0cons_unmatched_dRJet->Fill(p_D0cons.DeltaR(p_Jet));
+          h_D0cons_unmatched_Mass->Fill(p_D0cons.M());
+          h_D0cons_unmatched_p->Fill(p_D0cons.P());
+          h_D0cons_unmatched_pT->Fill(p_D0cons.Pt());
+          h_D0cons_unmatched_eta->Fill(p_D0cons.Eta());
+          h_D0cons_unmatched_phi->Fill(p_D0cons.Phi());
+        }
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~~
         // associate D^0 to a PF muon
@@ -809,6 +1195,39 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             h_B_conspT->Fill(p_BCons.Pt());
             h_B_conseta->Fill(p_BCons.Eta());
             h_B_consphi->Fill(p_BCons.Phi());
+            if (isD0consPaired) {
+              h_B_paired_DeltaRD0consMu->Fill(deltaRD0consMu);
+              h_B_paired_D0consMass->Fill(p_D0cons.M());
+              h_B_paired_pD0conspMu->Fill(p_D0cons.P() / myPFmu[iMuCons]->p());
+              h_B_paired_pTD0conspTMu->Fill(p_D0cons.Pt() / myPFmu[iMuCons]->pt());
+              h_B_paired_consMass->Fill(p_BCons.M());
+              h_B_paired_consp->Fill(p_BCons.P());
+              h_B_paired_conspT->Fill(p_BCons.Pt());
+              h_B_paired_conseta->Fill(p_BCons.Eta());
+              h_B_paired_consphi->Fill(p_BCons.Phi());
+            }
+            if (isD0consSwitched) {
+              h_B_switched_DeltaRD0consMu->Fill(deltaRD0consMu);
+              h_B_switched_D0consMass->Fill(p_D0cons.M());
+              h_B_switched_pD0conspMu->Fill(p_D0cons.P() / myPFmu[iMuCons]->p());
+              h_B_switched_pTD0conspTMu->Fill(p_D0cons.Pt() / myPFmu[iMuCons]->pt());
+              h_B_switched_consMass->Fill(p_BCons.M());
+              h_B_switched_consp->Fill(p_BCons.P());
+              h_B_switched_conspT->Fill(p_BCons.Pt());
+              h_B_switched_conseta->Fill(p_BCons.Eta());
+              h_B_switched_consphi->Fill(p_BCons.Phi());
+            }
+            if (isD0consUnmatched) {
+              h_B_unmatched_DeltaRD0consMu->Fill(deltaRD0consMu);
+              h_B_unmatched_D0consMass->Fill(p_D0cons.M());
+              h_B_unmatched_pD0conspMu->Fill(p_D0cons.P() / myPFmu[iMuCons]->p());
+              h_B_unmatched_pTD0conspTMu->Fill(p_D0cons.Pt() / myPFmu[iMuCons]->pt());
+              h_B_unmatched_consMass->Fill(p_BCons.M());
+              h_B_unmatched_consp->Fill(p_BCons.P());
+              h_B_unmatched_conspT->Fill(p_BCons.Pt());
+              h_B_unmatched_conseta->Fill(p_BCons.Eta());
+              h_B_unmatched_consphi->Fill(p_BCons.Phi());
+            }
           } // non iso mu close enough
         } // non iso mu
       }
@@ -823,6 +1242,9 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       TLorentzVector p_track1_D0combi, p_track2_D0combi, p_D0combi, p_D0optcombi;
       p_D0optcombi.SetPtEtaPhiM(0., 0., 0., 200.);
       int tk2charge = 0;
+      bool isD0optcombiPaired = false;
+      bool isD0optcombiSwitched = false;
+      bool isD0optcombiUnmatched = false;
 
       if (fabs(pt_trCand_D0combi[0]) > 1e-10 && fabs(pt_trCand_D0combi[1]) > 1e-10 && fabs(pt_trCand_D0combi[2]) > 1e-10) {
         for (unsigned int iD0combi = 0; iD0combi < 6; iD0combi++) {
@@ -840,9 +1262,61 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           p_track2_D0combi.SetPtEtaPhiM(pt_trCand_D0combi[tk2], eta_trCand_D0combi[tk2], phi_trCand_D0combi[tk2], gMassK);
           p_D0combi = p_track1_D0combi + p_track2_D0combi;
 
+          bool isD0combiPaired = false;
+          bool isD0combiSwitched = false;
+          bool isD0combiUnmatched = false;
+          int iGenD0combi = -1;
+          double GenRecoD0combidR = 200.;
+          double GenRecoTr1combidR = 200.;
+          double GenRecoTr2combidR = 200.;
+
+          for (unsigned int iGen = 0; iGen < genPartD0.size(); iGen++) {
+           TLorentzVector p_genD0;
+           p_genD0.SetPtEtaPhiM(genPartD0[iGen]->pt(), genPartD0[iGen]->eta(), genPartD0[iGen]->phi(), genPartD0[iGen]->mass());
+           double GenRecoD0combidRtmp = p_D0combi.DeltaR(p_genD0);
+           if (GenRecoD0combidRtmp < GenRecoD0combidR) {
+             GenRecoD0combidR = GenRecoD0combidRtmp;
+             iGenD0combi = iGen;
+           }
+          }
+
+          if (fabs(GenRecoD0combidR - 200.) > 1e-10) h_candGenRecoD0combidR->Fill(GenRecoD0combidR);
+          if (GenRecoD0combidR > 0.5) 
+            isD0combiUnmatched = true;
+          else {
+            TLorentzVector p_genK, p_genPi;
+            if (abs(genPartD0[iGenD0combi]->daughter(0)->pdgId()) == 321) {
+              p_genK.SetPtEtaPhiM(genPartD0[iGenD0combi]->daughter(0)->pt(), genPartD0[iGenD0combi]->daughter(0)->eta(), genPartD0[iGenD0combi]->daughter(0)->phi(), genPartD0[iGenD0combi]->daughter(0)->mass());
+              p_genPi.SetPtEtaPhiM(genPartD0[iGenD0combi]->daughter(1)->pt(), genPartD0[iGenD0combi]->daughter(1)->eta(), genPartD0[iGenD0combi]->daughter(1)->phi(), genPartD0[iGenD0combi]->daughter(1)->mass());
+            }
+            else {
+              p_genK.SetPtEtaPhiM(genPartD0[iGenD0combi]->daughter(1)->pt(), genPartD0[iGenD0combi]->daughter(1)->eta(), genPartD0[iGenD0combi]->daughter(1)->phi(), genPartD0[iGenD0combi]->daughter(1)->mass());
+              p_genPi.SetPtEtaPhiM(genPartD0[iGenD0combi]->daughter(0)->pt(), genPartD0[iGenD0combi]->daughter(0)->eta(), genPartD0[iGenD0combi]->daughter(0)->phi(), genPartD0[iGenD0combi]->daughter(0)->mass());
+            }
+            double GenKRecoTr1combidR = p_track1_D0combi.DeltaR(p_genK);
+            double GenPiRecoTr1combidR = p_track1_D0combi.DeltaR(p_genPi);
+            double GenKRecoTr2combidR = p_track2_D0combi.DeltaR(p_genK);
+            double GenPiRecoTr2combidR = p_track2_D0combi.DeltaR(p_genPi);
+            if (GenKRecoTr1combidR < GenPiRecoTr1combidR) GenRecoTr1combidR = GenKRecoTr1combidR;
+            else GenRecoTr1combidR = GenPiRecoTr1combidR;
+            if (GenPiRecoTr2combidR < GenKRecoTr2combidR) GenRecoTr2combidR = GenPiRecoTr2combidR;
+            else GenRecoTr2combidR = GenKRecoTr2combidR;
+            h_candGenRecoTrcombidR->Fill(GenRecoTr1combidR);
+            h_candGenRecoTrcombidR->Fill(GenRecoTr2combidR);
+            if (GenRecoTr1combidR > 0.005 || GenRecoTr2combidR > 0.005) 
+              isD0combiUnmatched = true;
+            else {
+              if (GenKRecoTr1combidR < GenPiRecoTr1combidR && GenPiRecoTr2combidR < GenKRecoTr2combidR) isD0combiPaired = true;
+              else isD0combiSwitched = true;
+            }
+          }
+
           if (fabs(p_D0combi.M() - gMassD0) < fabs(p_D0optcombi.M() - gMassD0)) {
             p_D0optcombi.SetPtEtaPhiM(p_D0combi.Pt(), p_D0combi.Eta(), p_D0combi.Phi(), p_D0combi.M());
             tk2charge = id_trCand_D0combi[tk2];
+            isD0optcombiPaired = isD0combiPaired;
+            isD0optcombiSwitched = isD0combiSwitched;
+            isD0optcombiUnmatched = isD0combiUnmatched;
           }
 
           h_D0combiCand_pT->Fill(p_D0combi.Pt());
@@ -856,6 +1330,30 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           h_D0combi_pT->Fill(p_D0combi.Pt());
           h_D0combi_eta->Fill(p_D0combi.Eta());
           h_D0combi_phi->Fill(p_D0combi.Phi());
+          if (isD0combiPaired) {
+            h_D0combi_paired_Mass->Fill(p_D0combi.M());
+            h_D0combi_paired_dRJet->Fill(p_D0combi.DeltaR(p_Jet));
+            h_D0combi_paired_p->Fill(p_D0combi.P());
+            h_D0combi_paired_pT->Fill(p_D0combi.Pt());
+            h_D0combi_paired_eta->Fill(p_D0combi.Eta());
+            h_D0combi_paired_phi->Fill(p_D0combi.Phi());
+          }
+          if (isD0combiSwitched) {
+            h_D0combi_switched_Mass->Fill(p_D0combi.M());
+            h_D0combi_switched_dRJet->Fill(p_D0combi.DeltaR(p_Jet));
+            h_D0combi_switched_p->Fill(p_D0combi.P());
+            h_D0combi_switched_pT->Fill(p_D0combi.Pt());
+            h_D0combi_switched_eta->Fill(p_D0combi.Eta());
+            h_D0combi_switched_phi->Fill(p_D0combi.Phi());
+          }
+          if (isD0combiUnmatched) {
+            h_D0combi_unmatched_Mass->Fill(p_D0combi.M());
+            h_D0combi_unmatched_dRJet->Fill(p_D0combi.DeltaR(p_Jet));
+            h_D0combi_unmatched_p->Fill(p_D0combi.P());
+            h_D0combi_unmatched_pT->Fill(p_D0combi.Pt());
+            h_D0combi_unmatched_eta->Fill(p_D0combi.Eta());
+            h_D0combi_unmatched_phi->Fill(p_D0combi.Phi());
+          }
 
           //~~~~~~~~~~~~~~~~~~~~~~~~~~~
           // associate D^0 to a PF muon
@@ -895,6 +1393,39 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           h_B_combipT->Fill(p_Bcombi.Pt());
           h_B_combieta->Fill(p_Bcombi.Eta());
           h_B_combiphi->Fill(p_Bcombi.Phi());
+          if (isD0combiPaired) {
+            h_B_paired_DeltaRD0combiMu->Fill(deltaRD0combiMu);
+            h_B_paired_D0combiMass->Fill(p_D0combi.M());
+            h_B_paired_pD0combipMu->Fill(p_D0combi.P() / myPFmu[iMu]->p());
+            h_B_paired_pTD0combipTMu->Fill(p_D0combi.Pt() / myPFmu[iMu]->pt());
+            h_B_paired_combiMass->Fill(p_Bcombi.M());
+            h_B_paired_combip->Fill(p_Bcombi.P());
+            h_B_paired_combipT->Fill(p_Bcombi.Pt());
+            h_B_paired_combieta->Fill(p_Bcombi.Eta());
+            h_B_paired_combiphi->Fill(p_Bcombi.Phi());
+          }
+          if (isD0combiSwitched) {
+            h_B_switched_DeltaRD0combiMu->Fill(deltaRD0combiMu);
+            h_B_switched_D0combiMass->Fill(p_D0combi.M());
+            h_B_switched_pD0combipMu->Fill(p_D0combi.P() / myPFmu[iMu]->p());
+            h_B_switched_pTD0combipTMu->Fill(p_D0combi.Pt() / myPFmu[iMu]->pt());
+            h_B_switched_combiMass->Fill(p_Bcombi.M());
+            h_B_switched_combip->Fill(p_Bcombi.P());
+            h_B_switched_combipT->Fill(p_Bcombi.Pt());
+            h_B_switched_combieta->Fill(p_Bcombi.Eta());
+            h_B_switched_combiphi->Fill(p_Bcombi.Phi());
+          }
+          if (isD0combiUnmatched) {
+            h_B_unmatched_DeltaRD0combiMu->Fill(deltaRD0combiMu);
+            h_B_unmatched_D0combiMass->Fill(p_D0combi.M());
+            h_B_unmatched_pD0combipMu->Fill(p_D0combi.P() / myPFmu[iMu]->p());
+            h_B_unmatched_pTD0combipTMu->Fill(p_D0combi.Pt() / myPFmu[iMu]->pt());
+            h_B_unmatched_combiMass->Fill(p_Bcombi.M());
+            h_B_unmatched_combip->Fill(p_Bcombi.P());
+            h_B_unmatched_combipT->Fill(p_Bcombi.Pt());
+            h_B_unmatched_combieta->Fill(p_Bcombi.Eta());
+            h_B_unmatched_combiphi->Fill(p_Bcombi.Phi());
+          }
         }
       }
 
@@ -919,6 +1450,30 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           h_D0optcombi_pT->Fill(p_D0optcombi.Pt());
           h_D0optcombi_eta->Fill(p_D0optcombi.Eta());
           h_D0optcombi_phi->Fill(p_D0optcombi.Phi());
+          if (isD0optcombiPaired) {
+            h_D0optcombi_paired_Mass->Fill(p_D0optcombi.M());
+            h_D0optcombi_paired_dRJet->Fill(p_D0optcombi.DeltaR(p_Jet));
+            h_D0optcombi_paired_p->Fill(p_D0optcombi.P());
+            h_D0optcombi_paired_pT->Fill(p_D0optcombi.Pt());
+            h_D0optcombi_paired_eta->Fill(p_D0optcombi.Eta());
+            h_D0optcombi_paired_phi->Fill(p_D0optcombi.Phi());
+          }
+          if (isD0optcombiSwitched) {
+            h_D0optcombi_switched_Mass->Fill(p_D0optcombi.M());
+            h_D0optcombi_switched_dRJet->Fill(p_D0optcombi.DeltaR(p_Jet));
+            h_D0optcombi_switched_p->Fill(p_D0optcombi.P());
+            h_D0optcombi_switched_pT->Fill(p_D0optcombi.Pt());
+            h_D0optcombi_switched_eta->Fill(p_D0optcombi.Eta());
+            h_D0optcombi_switched_phi->Fill(p_D0optcombi.Phi());
+          }
+          if (isD0optcombiUnmatched) {
+            h_D0optcombi_unmatched_Mass->Fill(p_D0optcombi.M());
+            h_D0optcombi_unmatched_dRJet->Fill(p_D0optcombi.DeltaR(p_Jet));
+            h_D0optcombi_unmatched_p->Fill(p_D0optcombi.P());
+            h_D0optcombi_unmatched_pT->Fill(p_D0optcombi.Pt());
+            h_D0optcombi_unmatched_eta->Fill(p_D0optcombi.Eta());
+            h_D0optcombi_unmatched_phi->Fill(p_D0optcombi.Phi());
+          }
 
           //~~~~~~~~~~~~~~~~~~~~~~~~~~~
           // associate D^0 to a PF muon
@@ -958,6 +1513,39 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           h_B_optcombipT->Fill(p_Boptcombi.Pt());
           h_B_optcombieta->Fill(p_Boptcombi.Eta());
           h_B_optcombiphi->Fill(p_Boptcombi.Phi());
+          if (isD0optcombiPaired) {
+            h_B_paired_DeltaRD0optcombiMu->Fill(deltaRD0optcombiMu);
+            h_B_paired_D0optcombiMass->Fill(p_D0optcombi.M());
+            h_B_paired_pD0optcombipMu->Fill(p_D0optcombi.P() / myPFmu[iMu]->p());
+            h_B_paired_pTD0optcombipTMu->Fill(p_D0optcombi.Pt() / myPFmu[iMu]->pt());
+            h_B_paired_optcombiMass->Fill(p_Boptcombi.M());
+            h_B_paired_optcombip->Fill(p_Boptcombi.P());
+            h_B_paired_optcombipT->Fill(p_Boptcombi.Pt());
+            h_B_paired_optcombieta->Fill(p_Boptcombi.Eta());
+            h_B_paired_optcombiphi->Fill(p_Boptcombi.Phi());
+          }
+          if (isD0optcombiSwitched) {
+            h_B_switched_DeltaRD0optcombiMu->Fill(deltaRD0optcombiMu);
+            h_B_switched_D0optcombiMass->Fill(p_D0optcombi.M());
+            h_B_switched_pD0optcombipMu->Fill(p_D0optcombi.P() / myPFmu[iMu]->p());
+            h_B_switched_pTD0optcombipTMu->Fill(p_D0optcombi.Pt() / myPFmu[iMu]->pt());
+            h_B_switched_optcombiMass->Fill(p_Boptcombi.M());
+            h_B_switched_optcombip->Fill(p_Boptcombi.P());
+            h_B_switched_optcombipT->Fill(p_Boptcombi.Pt());
+            h_B_switched_optcombieta->Fill(p_Boptcombi.Eta());
+            h_B_switched_optcombiphi->Fill(p_Boptcombi.Phi());
+          }
+          if (isD0optcombiUnmatched) {
+            h_B_unmatched_DeltaRD0optcombiMu->Fill(deltaRD0optcombiMu);
+            h_B_unmatched_D0optcombiMass->Fill(p_D0optcombi.M());
+            h_B_unmatched_pD0optcombipMu->Fill(p_D0optcombi.P() / myPFmu[iMu]->p());
+            h_B_unmatched_pTD0optcombipTMu->Fill(p_D0optcombi.Pt() / myPFmu[iMu]->pt());
+            h_B_unmatched_optcombiMass->Fill(p_Boptcombi.M());
+            h_B_unmatched_optcombip->Fill(p_Boptcombi.P());
+            h_B_unmatched_optcombipT->Fill(p_Boptcombi.Pt());
+            h_B_unmatched_optcombieta->Fill(p_Boptcombi.Eta());
+            h_B_unmatched_optcombiphi->Fill(p_Boptcombi.Phi());
+          }
       }
     }
     iSelJet++;
@@ -981,11 +1569,20 @@ KalmanAnalyzer::beginJob()
   h_DeltaR_trCand_Mu = fs->make<TH1D>("h_DeltaR_trCand_Mu","h_DeltaR_trCand_Mu",1000,0.,0.5);
   h_DeltaR_trCand_El = fs->make<TH1D>("h_DeltaR_trCand_El","h_DeltaR_trCand_El",1000,0.,0.5);
 
+  h_genD0_n    = fs->make<TH1D>("h_genD0_n","h_genD0_n",4,0.,4.);
+  h_genD0_p    = fs->make<TH1D>("h_genD0_p","h_genD0_p",1000,0.,500.);
+  h_genD0_pT   = fs->make<TH1D>("h_genD0_pT","h_genD0_pT",1000,0.,500.);
+  h_genD0_eta  = fs->make<TH1D>("h_genD0_eta","h_genD0_eta",60,-3.,3.);
+  h_genD0_phi  = fs->make<TH1D>("h_genD0_phi","h_genD0_phi",64,-3.2,3.2);
+
   // simple Kalman vertex fitter
   h_B_cuts = fs->make<TH1D>("h_B_cuts","h_B_cuts",30,0.,30.);
   h_B_cuts->SetOption("bar");
   h_B_cuts->SetBarWidth(0.75);
   h_B_cuts->SetBarOffset(0.125);
+
+  h_candGenRecoD0dR   = fs->make<TH1D>("h_candGenRecoD0dR","h_candGenRecoD0dR",200,0.,1.);
+  h_candGenRecoTrdR   = fs->make<TH1D>("h_candGenRecoTrdR","h_candGenRecoTrdR",200,0.,1.);
 
   h_D0Cand_Chi2NDOF       = fs->make<TH1D>("h_D0Cand_Chi2NDOF","h_D0Cand_Chi2NDOF",110,0.,11.);
   h_D0Cand_MassChi2Inf1   = fs->make<TH1D>("h_D0Cand_MassChi2Inf1","h_D0Cand_MassChi2Inf1",1000,0.,10.);
@@ -1018,6 +1615,30 @@ KalmanAnalyzer::beginJob()
   h_D0_pT      = fs->make<TH1D>("h_D0_pT","h_D0_pT",1000,0.,500.);
   h_D0_eta     = fs->make<TH1D>("h_D0_eta","h_D0_eta",60,-3.,3.);
   h_D0_phi     = fs->make<TH1D>("h_D0_phi","h_D0_phi",64,-3.2,3.2);
+  h_D0_paired_Mass    = fs->make<TH1D>("h_D0_paired_Mass","h_D0_paired_Mass",1000,0.,10.);
+  h_D0_paired_L       = fs->make<TH1D>("h_D0_paired_L","h_D0_paired_L",1000,0.,1.);
+  h_D0_paired_SigmaL  = fs->make<TH1D>("h_D0_paired_SigmaL","h_D0_paired_SigmaL",5000,0.,0.005);
+  h_D0_paired_dRJet   = fs->make<TH1D>("h_D0_paired_dRJet","h_D0_paired_dRJet",200,0.,1.);
+  h_D0_paired_p       = fs->make<TH1D>("h_D0_paired_p","h_D0_paired_p",1000,0.,500.);
+  h_D0_paired_pT      = fs->make<TH1D>("h_D0_paired_pT","h_D0_paired_pT",1000,0.,500.);
+  h_D0_paired_eta     = fs->make<TH1D>("h_D0_paired_eta","h_D0_paired_eta",60,-3.,3.);
+  h_D0_paired_phi     = fs->make<TH1D>("h_D0_paired_phi","h_D0_paired_phi",64,-3.2,3.2);
+  h_D0_switched_Mass    = fs->make<TH1D>("h_D0_switched_Mass","h_D0_switched_Mass",1000,0.,10.);
+  h_D0_switched_L       = fs->make<TH1D>("h_D0_switched_L","h_D0_switched_L",1000,0.,1.);
+  h_D0_switched_SigmaL  = fs->make<TH1D>("h_D0_switched_SigmaL","h_D0_switched_SigmaL",5000,0.,0.005);
+  h_D0_switched_dRJet   = fs->make<TH1D>("h_D0_switched_dRJet","h_D0_switched_dRJet",200,0.,1.);
+  h_D0_switched_p       = fs->make<TH1D>("h_D0_switched_p","h_D0_switched_p",1000,0.,500.);
+  h_D0_switched_pT      = fs->make<TH1D>("h_D0_switched_pT","h_D0_switched_pT",1000,0.,500.);
+  h_D0_switched_eta     = fs->make<TH1D>("h_D0_switched_eta","h_D0_switched_eta",60,-3.,3.);
+  h_D0_switched_phi     = fs->make<TH1D>("h_D0_switched_phi","h_D0_switched_phi",64,-3.2,3.2);
+  h_D0_unmatched_Mass    = fs->make<TH1D>("h_D0_unmatched_Mass","h_D0_unmatched_Mass",1000,0.,10.);
+  h_D0_unmatched_L       = fs->make<TH1D>("h_D0_unmatched_L","h_D0_unmatched_L",1000,0.,1.);
+  h_D0_unmatched_SigmaL  = fs->make<TH1D>("h_D0_unmatched_SigmaL","h_D0_unmatched_SigmaL",5000,0.,0.005);
+  h_D0_unmatched_dRJet   = fs->make<TH1D>("h_D0_unmatched_dRJet","h_D0_unmatched_dRJet",200,0.,1.);
+  h_D0_unmatched_p       = fs->make<TH1D>("h_D0_unmatched_p","h_D0_unmatched_p",1000,0.,500.);
+  h_D0_unmatched_pT      = fs->make<TH1D>("h_D0_unmatched_pT","h_D0_unmatched_pT",1000,0.,500.);
+  h_D0_unmatched_eta     = fs->make<TH1D>("h_D0_unmatched_eta","h_D0_unmatched_eta",60,-3.,3.);
+  h_D0_unmatched_phi     = fs->make<TH1D>("h_D0_unmatched_phi","h_D0_unmatched_phi",64,-3.2,3.2);
 
   h_BCand_DeltaRD0Mu = fs->make<TH1D>("h_BCand_DeltaRD0Mu","h_BCand_DeltaRD0Mu",100,0.,5.);
   h_B_D0Mass     = fs->make<TH1D>("h_B_D0Mass","h_B_D0Mass",1000,0.,10.);
@@ -1029,6 +1650,33 @@ KalmanAnalyzer::beginJob()
   h_B_pT         = fs->make<TH1D>("h_B_pT","h_B_pT",1000,0.,500.);
   h_B_eta        = fs->make<TH1D>("h_B_eta","h_B_eta",60,-3.,3.);
   h_B_phi        = fs->make<TH1D>("h_B_phi","h_B_phi",64,-3.2,3.2);
+  h_B_paired_D0Mass     = fs->make<TH1D>("h_B_paired_D0Mass","h_B_paired_D0Mass",1000,0.,10.);
+  h_B_paired_DeltaRD0Mu = fs->make<TH1D>("h_B_paired_DeltaRD0Mu","h_B_paired_DeltaRD0Mu",80,0.,0.4);
+  h_B_paired_pD0pMu     = fs->make<TH1D>("h_B_paired_pD0pMu","h_B_paired_pD0pMu",500,0.,10.);
+  h_B_paired_pTD0pTMu   = fs->make<TH1D>("h_B_paired_pTD0pTMu","h_B_paired_pTD0pTMu",500,0.,10.);
+  h_B_paired_Mass       = fs->make<TH1D>("h_B_paired_Mass","h_B_paired_Mass",1000,0.,10.);
+  h_B_paired_p          = fs->make<TH1D>("h_B_paired_p","h_B_paired_p",1000,0.,500.);
+  h_B_paired_pT         = fs->make<TH1D>("h_B_paired_pT","h_B_paired_pT",1000,0.,500.);
+  h_B_paired_eta        = fs->make<TH1D>("h_B_paired_eta","h_B_paired_eta",60,-3.,3.);
+  h_B_paired_phi        = fs->make<TH1D>("h_B_paired_phi","h_B_paired_phi",64,-3.2,3.2);
+  h_B_switched_D0Mass     = fs->make<TH1D>("h_B_switched_D0Mass","h_B_switched_D0Mass",1000,0.,10.);
+  h_B_switched_DeltaRD0Mu = fs->make<TH1D>("h_B_switched_DeltaRD0Mu","h_B_switched_DeltaRD0Mu",80,0.,0.4);
+  h_B_switched_pD0pMu     = fs->make<TH1D>("h_B_switched_pD0pMu","h_B_switched_pD0pMu",500,0.,10.);
+  h_B_switched_pTD0pTMu   = fs->make<TH1D>("h_B_switched_pTD0pTMu","h_B_switched_pTD0pTMu",500,0.,10.);
+  h_B_switched_Mass       = fs->make<TH1D>("h_B_switched_Mass","h_B_switched_Mass",1000,0.,10.);
+  h_B_switched_p          = fs->make<TH1D>("h_B_switched_p","h_B_switched_p",1000,0.,500.);
+  h_B_switched_pT         = fs->make<TH1D>("h_B_switched_pT","h_B_switched_pT",1000,0.,500.);
+  h_B_switched_eta        = fs->make<TH1D>("h_B_switched_eta","h_B_switched_eta",60,-3.,3.);
+  h_B_switched_phi        = fs->make<TH1D>("h_B_switched_phi","h_B_switched_phi",64,-3.2,3.2);
+  h_B_unmatched_D0Mass     = fs->make<TH1D>("h_B_unmatched_D0Mass","h_B_unmatched_D0Mass",1000,0.,10.);
+  h_B_unmatched_DeltaRD0Mu = fs->make<TH1D>("h_B_unmatched_DeltaRD0Mu","h_B_unmatched_DeltaRD0Mu",80,0.,0.4);
+  h_B_unmatched_pD0pMu     = fs->make<TH1D>("h_B_unmatched_pD0pMu","h_B_unmatched_pD0pMu",500,0.,10.);
+  h_B_unmatched_pTD0pTMu   = fs->make<TH1D>("h_B_unmatched_pTD0pTMu","h_B_unmatched_pTD0pTMu",500,0.,10.);
+  h_B_unmatched_Mass       = fs->make<TH1D>("h_B_unmatched_Mass","h_B_unmatched_Mass",1000,0.,10.);
+  h_B_unmatched_p          = fs->make<TH1D>("h_B_unmatched_p","h_B_unmatched_p",1000,0.,500.);
+  h_B_unmatched_pT         = fs->make<TH1D>("h_B_unmatched_pT","h_B_unmatched_pT",1000,0.,500.);
+  h_B_unmatched_eta        = fs->make<TH1D>("h_B_unmatched_eta","h_B_unmatched_eta",60,-3.,3.);
+  h_B_unmatched_phi        = fs->make<TH1D>("h_B_unmatched_phi","h_B_unmatched_phi",64,-3.2,3.2);
 
   // constrained Kalman Vertex fitter
   h_D0consCand_L           = fs->make<TH1D>("h_D0consCand_L","h_D0consCand_L",1000,0.,1.);
@@ -1046,6 +1694,33 @@ KalmanAnalyzer::beginJob()
   h_D0cons_pT      = fs->make<TH1D>("h_D0cons_pT","h_D0cons_pT",1000,0.,500.);
   h_D0cons_eta     = fs->make<TH1D>("h_D0cons_eta","h_D0cons_eta",60,-3.,3.);
   h_D0cons_phi     = fs->make<TH1D>("h_D0cons_phi","h_D0cons_phi",64,-3.2,3.2);
+  h_D0cons_paired_Chi2NDOF = fs->make<TH1D>("h_D0cons_paired_Chi2NDOF","h_D0cons_paired_Chi2NDOF",110,0.,11.);
+  h_D0cons_paired_L       = fs->make<TH1D>("h_D0cons_paired_L","h_D0cons_paired_L",1000,0.,1.);
+  h_D0cons_paired_SigmaL  = fs->make<TH1D>("h_D0cons_paired_SigmaL","h_D0cons_paired_SigmaL",5000,0.,0.005);
+  h_D0cons_paired_Mass    = fs->make<TH1D>("h_D0cons_paired_Mass","h_D0cons_paired_Mass",1000,0.,10.);
+  h_D0cons_paired_dRJet   = fs->make<TH1D>("h_D0cons_paired_dRJet","h_D0cons_paired_dRJet",200,0.,1.);
+  h_D0cons_paired_p       = fs->make<TH1D>("h_D0cons_paired_p","h_D0cons_paired_p",1000,0.,500.);
+  h_D0cons_paired_pT      = fs->make<TH1D>("h_D0cons_paired_pT","h_D0cons_paired_pT",1000,0.,500.);
+  h_D0cons_paired_eta     = fs->make<TH1D>("h_D0cons_paired_eta","h_D0cons_paired_eta",60,-3.,3.);
+  h_D0cons_paired_phi     = fs->make<TH1D>("h_D0cons_paired_phi","h_D0cons_paired_phi",64,-3.2,3.2);
+  h_D0cons_switched_Chi2NDOF = fs->make<TH1D>("h_D0cons_switched_Chi2NDOF","h_D0cons_switched_Chi2NDOF",110,0.,11.);
+  h_D0cons_switched_L       = fs->make<TH1D>("h_D0cons_switched_L","h_D0cons_switched_L",1000,0.,1.);
+  h_D0cons_switched_SigmaL  = fs->make<TH1D>("h_D0cons_switched_SigmaL","h_D0cons_switched_SigmaL",5000,0.,0.005);
+  h_D0cons_switched_Mass    = fs->make<TH1D>("h_D0cons_switched_Mass","h_D0cons_switched_Mass",1000,0.,10.);
+  h_D0cons_switched_dRJet   = fs->make<TH1D>("h_D0cons_switched_dRJet","h_D0cons_switched_dRJet",200,0.,1.);
+  h_D0cons_switched_p       = fs->make<TH1D>("h_D0cons_switched_p","h_D0cons_switched_p",1000,0.,500.);
+  h_D0cons_switched_pT      = fs->make<TH1D>("h_D0cons_switched_pT","h_D0cons_switched_pT",1000,0.,500.);
+  h_D0cons_switched_eta     = fs->make<TH1D>("h_D0cons_switched_eta","h_D0cons_switched_eta",60,-3.,3.);
+  h_D0cons_switched_phi     = fs->make<TH1D>("h_D0cons_switched_phi","h_D0cons_switched_phi",64,-3.2,3.2);
+  h_D0cons_unmatched_Chi2NDOF = fs->make<TH1D>("h_D0cons_unmatched_Chi2NDOF","h_D0cons_unmatched_Chi2NDOF",110,0.,11.);
+  h_D0cons_unmatched_L       = fs->make<TH1D>("h_D0cons_unmatched_L","h_D0cons_unmatched_L",1000,0.,1.);
+  h_D0cons_unmatched_SigmaL  = fs->make<TH1D>("h_D0cons_unmatched_SigmaL","h_D0cons_unmatched_SigmaL",5000,0.,0.005);
+  h_D0cons_unmatched_Mass    = fs->make<TH1D>("h_D0cons_unmatched_Mass","h_D0cons_unmatched_Mass",1000,0.,10.);
+  h_D0cons_unmatched_dRJet   = fs->make<TH1D>("h_D0cons_unmatched_dRJet","h_D0cons_unmatched_dRJet",200,0.,1.);
+  h_D0cons_unmatched_p       = fs->make<TH1D>("h_D0cons_unmatched_p","h_D0cons_unmatched_p",1000,0.,500.);
+  h_D0cons_unmatched_pT      = fs->make<TH1D>("h_D0cons_unmatched_pT","h_D0cons_unmatched_pT",1000,0.,500.);
+  h_D0cons_unmatched_eta     = fs->make<TH1D>("h_D0cons_unmatched_eta","h_D0cons_unmatched_eta",60,-3.,3.);
+  h_D0cons_unmatched_phi     = fs->make<TH1D>("h_D0cons_unmatched_phi","h_D0cons_unmatched_phi",64,-3.2,3.2);
 
   h_BCand_DeltaRD0consMu = fs->make<TH1D>("h_BCand_DeltaRD0consMu","h_BCand_DeltaRD0consMu",100,0.,5.);
   h_B_D0consMass     = fs->make<TH1D>("h_B_D0consMass","h_B_D0consMass",1000,0.,10.);
@@ -1057,8 +1732,38 @@ KalmanAnalyzer::beginJob()
   h_B_conspT         = fs->make<TH1D>("h_B_conspT","h_B_conspT",1000,0.,500.);
   h_B_conseta        = fs->make<TH1D>("h_B_conseta","h_B_conseta",60,-3.,3.);
   h_B_consphi        = fs->make<TH1D>("h_B_consphi","h_B_consphi",64,-3.2,3.2);
+  h_B_paired_D0consMass     = fs->make<TH1D>("h_B_paired_D0consMass","h_B_paired_D0consMass",1000,0.,10.);
+  h_B_paired_DeltaRD0consMu = fs->make<TH1D>("h_B_paired_DeltaRD0consMu","h_B_paired_DeltaRD0consMu",80,0.,0.4);
+  h_B_paired_pD0conspMu     = fs->make<TH1D>("h_B_paired_pD0conspMu","h_B_paired_pD0conspMu",500,0.,10.);
+  h_B_paired_pTD0conspTMu   = fs->make<TH1D>("h_B_paired_pTD0conspTMu","h_B_paired_pTD0conspTMu",500,0.,10.);
+  h_B_paired_consMass       = fs->make<TH1D>("h_B_paired_consMass","h_B_paired_consMass",1000,0.,10.);
+  h_B_paired_consp          = fs->make<TH1D>("h_B_paired_consp","h_B_paired_consp",1000,0.,500.);
+  h_B_paired_conspT         = fs->make<TH1D>("h_B_paired_conspT","h_B_paired_conspT",1000,0.,500.);
+  h_B_paired_conseta        = fs->make<TH1D>("h_B_paired_conseta","h_B_paired_conseta",60,-3.,3.);
+  h_B_paired_consphi        = fs->make<TH1D>("h_B_paired_consphi","h_B_paired_consphi",64,-3.2,3.2);
+  h_B_switched_D0consMass     = fs->make<TH1D>("h_B_switched_D0consMass","h_B_switched_D0consMass",1000,0.,10.);
+  h_B_switched_DeltaRD0consMu = fs->make<TH1D>("h_B_switched_DeltaRD0consMu","h_B_switched_DeltaRD0consMu",80,0.,0.4);
+  h_B_switched_pD0conspMu     = fs->make<TH1D>("h_B_switched_pD0conspMu","h_B_switched_pD0conspMu",500,0.,10.);
+  h_B_switched_pTD0conspTMu   = fs->make<TH1D>("h_B_switched_pTD0conspTMu","h_B_switched_pTD0conspTMu",500,0.,10.);
+  h_B_switched_consMass       = fs->make<TH1D>("h_B_switched_consMass","h_B_switched_consMass",1000,0.,10.);
+  h_B_switched_consp          = fs->make<TH1D>("h_B_switched_consp","h_B_switched_consp",1000,0.,500.);
+  h_B_switched_conspT         = fs->make<TH1D>("h_B_switched_conspT","h_B_switched_conspT",1000,0.,500.);
+  h_B_switched_conseta        = fs->make<TH1D>("h_B_switched_conseta","h_B_switched_conseta",60,-3.,3.);
+  h_B_switched_consphi        = fs->make<TH1D>("h_B_switched_consphi","h_B_switched_consphi",64,-3.2,3.2);
+  h_B_unmatched_D0consMass     = fs->make<TH1D>("h_B_unmatched_D0consMass","h_B_unmatched_D0consMass",1000,0.,10.);
+  h_B_unmatched_DeltaRD0consMu = fs->make<TH1D>("h_B_unmatched_DeltaRD0consMu","h_B_unmatched_DeltaRD0consMu",80,0.,0.4);
+  h_B_unmatched_pD0conspMu     = fs->make<TH1D>("h_B_unmatched_pD0conspMu","h_B_unmatched_pD0conspMu",500,0.,10.);
+  h_B_unmatched_pTD0conspTMu   = fs->make<TH1D>("h_B_unmatched_pTD0conspTMu","h_B_unmatched_pTD0conspTMu",500,0.,10.);
+  h_B_unmatched_consMass       = fs->make<TH1D>("h_B_unmatched_consMass","h_B_unmatched_consMass",1000,0.,10.);
+  h_B_unmatched_consp          = fs->make<TH1D>("h_B_unmatched_consp","h_B_unmatched_consp",1000,0.,500.);
+  h_B_unmatched_conspT         = fs->make<TH1D>("h_B_unmatched_conspT","h_B_unmatched_conspT",1000,0.,500.);
+  h_B_unmatched_conseta        = fs->make<TH1D>("h_B_unmatched_conseta","h_B_unmatched_conseta",60,-3.,3.);
+  h_B_unmatched_consphi        = fs->make<TH1D>("h_B_unmatched_consphi","h_B_unmatched_consphi",64,-3.2,3.2);
 
   // simple invariant combination
+  h_candGenRecoD0combidR   = fs->make<TH1D>("h_candGenRecoD0combidR","h_candGenRecoD0combidR",200,0.,1.);
+  h_candGenRecoTrcombidR   = fs->make<TH1D>("h_candGenRecoTrcombidR","h_candGenRecoTrcombidR",200,0.,1.);
+
   h_D0combiCand_pT = fs->make<TH1D>("h_D0combiCand_pT","h_D0combiCand_pT",1000,0.,500.);
 
   h_D0combi_Mass  = fs->make<TH1D>("h_D0combi_Mass","h_D0combi_Mass",1000,0.,10.);
@@ -1067,6 +1772,24 @@ KalmanAnalyzer::beginJob()
   h_D0combi_pT    = fs->make<TH1D>("h_D0combi_pT","h_D0combi_pT",1000,0.,500.);
   h_D0combi_eta   = fs->make<TH1D>("h_D0combi_eta","h_D0combi_eta",60,-3.,3.);
   h_D0combi_phi   = fs->make<TH1D>("h_D0combi_phi","h_D0combi_phi",64,-3.2,3.2);
+  h_D0combi_paired_Mass  = fs->make<TH1D>("h_D0combi_paired_Mass","h_D0combi_paired_Mass",1000,0.,10.);
+  h_D0combi_paired_dRJet = fs->make<TH1D>("h_D0combi_paired_dRJet","h_D0combi_paired_dRJet",200,0.,1.);
+  h_D0combi_paired_p     = fs->make<TH1D>("h_D0combi_paired_p","h_D0combi_paired_p",1000,0.,500.);
+  h_D0combi_paired_pT    = fs->make<TH1D>("h_D0combi_paired_pT","h_D0combi_paired_pT",1000,0.,500.);
+  h_D0combi_paired_eta   = fs->make<TH1D>("h_D0combi_paired_eta","h_D0combi_paired_eta",60,-3.,3.);
+  h_D0combi_paired_phi   = fs->make<TH1D>("h_D0combi_paired_phi","h_D0combi_paired_phi",64,-3.2,3.2);
+  h_D0combi_switched_Mass  = fs->make<TH1D>("h_D0combi_switched_Mass","h_D0combi_switched_Mass",1000,0.,10.);
+  h_D0combi_switched_dRJet = fs->make<TH1D>("h_D0combi_switched_dRJet","h_D0combi_switched_dRJet",200,0.,1.);
+  h_D0combi_switched_p     = fs->make<TH1D>("h_D0combi_switched_p","h_D0combi_switched_p",1000,0.,500.);
+  h_D0combi_switched_pT    = fs->make<TH1D>("h_D0combi_switched_pT","h_D0combi_switched_pT",1000,0.,500.);
+  h_D0combi_switched_eta   = fs->make<TH1D>("h_D0combi_switched_eta","h_D0combi_switched_eta",60,-3.,3.);
+  h_D0combi_switched_phi   = fs->make<TH1D>("h_D0combi_switched_phi","h_D0combi_switched_phi",64,-3.2,3.2);
+  h_D0combi_unmatched_Mass  = fs->make<TH1D>("h_D0combi_unmatched_Mass","h_D0combi_unmatched_Mass",1000,0.,10.);
+  h_D0combi_unmatched_dRJet = fs->make<TH1D>("h_D0combi_unmatched_dRJet","h_D0combi_unmatched_dRJet",200,0.,1.);
+  h_D0combi_unmatched_p     = fs->make<TH1D>("h_D0combi_unmatched_p","h_D0combi_unmatched_p",1000,0.,500.);
+  h_D0combi_unmatched_pT    = fs->make<TH1D>("h_D0combi_unmatched_pT","h_D0combi_unmatched_pT",1000,0.,500.);
+  h_D0combi_unmatched_eta   = fs->make<TH1D>("h_D0combi_unmatched_eta","h_D0combi_unmatched_eta",60,-3.,3.);
+  h_D0combi_unmatched_phi   = fs->make<TH1D>("h_D0combi_unmatched_phi","h_D0combi_unmatched_phi",64,-3.2,3.2);
 
   h_BCand_DeltaRD0combiMu = fs->make<TH1D>("h_BCand_DeltaRD0combiMu","h_BCand_DeltaRD0combiMu",100,0.,5.);
   h_B_D0combiMass     = fs->make<TH1D>("h_B_D0combiMass","h_B_D0combiMass",1000,0.,10.);
@@ -1078,6 +1801,33 @@ KalmanAnalyzer::beginJob()
   h_B_combipT         = fs->make<TH1D>("h_B_combipT","h_B_combipT",1000,0.,500.);
   h_B_combieta        = fs->make<TH1D>("h_B_combieta","h_B_combieta",60,-3.,3.);
   h_B_combiphi        = fs->make<TH1D>("h_B_combiphi","h_B_combiphi",64,-3.2,3.2);
+  h_B_paired_D0combiMass     = fs->make<TH1D>("h_B_paired_D0combiMass","h_B_paired_D0combiMass",1000,0.,10.);
+  h_B_paired_DeltaRD0combiMu = fs->make<TH1D>("h_B_paired_DeltaRD0combiMu","h_B_paired_DeltaRD0combiMu",80,0.,0.4);
+  h_B_paired_pD0combipMu     = fs->make<TH1D>("h_B_paired_pD0combipMu","h_B_paired_pD0combipMu",500,0.,10.);
+  h_B_paired_pTD0combipTMu   = fs->make<TH1D>("h_B_paired_pTD0combipTMu","h_B_paired_pTD0combipTMu",500,0.,10.);
+  h_B_paired_combiMass       = fs->make<TH1D>("h_B_paired_combiMass","h_B_paired_combiMass",1000,0.,10.);
+  h_B_paired_combip          = fs->make<TH1D>("h_B_paired_combip","h_B_paired_combip",1000,0.,500.);
+  h_B_paired_combipT         = fs->make<TH1D>("h_B_paired_combipT","h_B_paired_combipT",1000,0.,500.);
+  h_B_paired_combieta        = fs->make<TH1D>("h_B_paired_combieta","h_B_paired_combieta",60,-3.,3.);
+  h_B_paired_combiphi        = fs->make<TH1D>("h_B_paired_combiphi","h_B_paired_combiphi",64,-3.2,3.2);
+  h_B_switched_D0combiMass     = fs->make<TH1D>("h_B_switched_D0combiMass","h_B_switched_D0combiMass",1000,0.,10.);
+  h_B_switched_DeltaRD0combiMu = fs->make<TH1D>("h_B_switched_DeltaRD0combiMu","h_B_switched_DeltaRD0combiMu",80,0.,0.4);
+  h_B_switched_pD0combipMu     = fs->make<TH1D>("h_B_switched_pD0combipMu","h_B_switched_pD0combipMu",500,0.,10.);
+  h_B_switched_pTD0combipTMu   = fs->make<TH1D>("h_B_switched_pTD0combipTMu","h_B_switched_pTD0combipTMu",500,0.,10.);
+  h_B_switched_combiMass       = fs->make<TH1D>("h_B_switched_combiMass","h_B_switched_combiMass",1000,0.,10.);
+  h_B_switched_combip          = fs->make<TH1D>("h_B_switched_combip","h_B_switched_combip",1000,0.,500.);
+  h_B_switched_combipT         = fs->make<TH1D>("h_B_switched_combipT","h_B_switched_combipT",1000,0.,500.);
+  h_B_switched_combieta        = fs->make<TH1D>("h_B_switched_combieta","h_B_switched_combieta",60,-3.,3.);
+  h_B_switched_combiphi        = fs->make<TH1D>("h_B_switched_combiphi","h_B_switched_combiphi",64,-3.2,3.2);
+  h_B_unmatched_D0combiMass     = fs->make<TH1D>("h_B_unmatched_D0combiMass","h_B_unmatched_D0combiMass",1000,0.,10.);
+  h_B_unmatched_DeltaRD0combiMu = fs->make<TH1D>("h_B_unmatched_DeltaRD0combiMu","h_B_unmatched_DeltaRD0combiMu",80,0.,0.4);
+  h_B_unmatched_pD0combipMu     = fs->make<TH1D>("h_B_unmatched_pD0combipMu","h_B_unmatched_pD0combipMu",500,0.,10.);
+  h_B_unmatched_pTD0combipTMu   = fs->make<TH1D>("h_B_unmatched_pTD0combipTMu","h_B_unmatched_pTD0combipTMu",500,0.,10.);
+  h_B_unmatched_combiMass       = fs->make<TH1D>("h_B_unmatched_combiMass","h_B_unmatched_combiMass",1000,0.,10.);
+  h_B_unmatched_combip          = fs->make<TH1D>("h_B_unmatched_combip","h_B_unmatched_combip",1000,0.,500.);
+  h_B_unmatched_combipT         = fs->make<TH1D>("h_B_unmatched_combipT","h_B_unmatched_combipT",1000,0.,500.);
+  h_B_unmatched_combieta        = fs->make<TH1D>("h_B_unmatched_combieta","h_B_unmatched_combieta",60,-3.,3.);
+  h_B_unmatched_combiphi        = fs->make<TH1D>("h_B_unmatched_combiphi","h_B_unmatched_combiphi",64,-3.2,3.2);
 
   // optimized invariant combination
   h_D0optcombiCand_pT = fs->make<TH1D>("h_D0optcombiCand_pT","h_D0optcombiCand_pT",1000,0.,500.);
@@ -1088,6 +1838,24 @@ KalmanAnalyzer::beginJob()
   h_D0optcombi_pT    = fs->make<TH1D>("h_D0optcombi_pT","h_D0optcombi_pT",1000,0.,500.);
   h_D0optcombi_eta   = fs->make<TH1D>("h_D0optcombi_eta","h_D0optcombi_eta",60,-3.,3.);
   h_D0optcombi_phi   = fs->make<TH1D>("h_D0optcombi_phi","h_D0optcombi_phi",64,-3.2,3.2);
+  h_D0optcombi_paired_Mass  = fs->make<TH1D>("h_D0optcombi_paired_Mass","h_D0optcombi_paired_Mass",1000,0.,10.);
+  h_D0optcombi_paired_dRJet = fs->make<TH1D>("h_D0optcombi_paired_dRJet","h_D0optcombi_paired_dRJet",200,0.,1.);
+  h_D0optcombi_paired_p     = fs->make<TH1D>("h_D0optcombi_paired_p","h_D0optcombi_paired_paired_p",1000,0.,500.);
+  h_D0optcombi_paired_pT    = fs->make<TH1D>("h_D0optcombi_paired_pT","h_D0optcombi_paired_pT",1000,0.,500.);
+  h_D0optcombi_paired_eta   = fs->make<TH1D>("h_D0optcombi_paired_eta","h_D0optcombi_paired_eta",60,-3.,3.);
+  h_D0optcombi_paired_phi   = fs->make<TH1D>("h_D0optcombi_paired_phi","h_D0optcombi_paired_phi",64,-3.2,3.2);
+  h_D0optcombi_switched_Mass  = fs->make<TH1D>("h_D0optcombi_switched_Mass","h_D0optcombi_switched_Mass",1000,0.,10.);
+  h_D0optcombi_switched_dRJet = fs->make<TH1D>("h_D0optcombi_switched_dRJet","h_D0optcombi_switched_dRJet",200,0.,1.);
+  h_D0optcombi_switched_p     = fs->make<TH1D>("h_D0optcombi_switched_p","h_D0optcombi_switched_switched_p",1000,0.,500.);
+  h_D0optcombi_switched_pT    = fs->make<TH1D>("h_D0optcombi_switched_pT","h_D0optcombi_switched_pT",1000,0.,500.);
+  h_D0optcombi_switched_eta   = fs->make<TH1D>("h_D0optcombi_switched_eta","h_D0optcombi_switched_eta",60,-3.,3.);
+  h_D0optcombi_switched_phi   = fs->make<TH1D>("h_D0optcombi_switched_phi","h_D0optcombi_switched_phi",64,-3.2,3.2);
+  h_D0optcombi_unmatched_Mass  = fs->make<TH1D>("h_D0optcombi_unmatched_Mass","h_D0optcombi_unmatched_Mass",1000,0.,10.);
+  h_D0optcombi_unmatched_dRJet = fs->make<TH1D>("h_D0optcombi_unmatched_dRJet","h_D0optcombi_unmatched_dRJet",200,0.,1.);
+  h_D0optcombi_unmatched_p     = fs->make<TH1D>("h_D0optcombi_unmatched_p","h_D0optcombi_unmatched_unmatched_p",1000,0.,500.);
+  h_D0optcombi_unmatched_pT    = fs->make<TH1D>("h_D0optcombi_unmatched_pT","h_D0optcombi_unmatched_pT",1000,0.,500.);
+  h_D0optcombi_unmatched_eta   = fs->make<TH1D>("h_D0optcombi_unmatched_eta","h_D0optcombi_unmatched_eta",60,-3.,3.);
+  h_D0optcombi_unmatched_phi   = fs->make<TH1D>("h_D0optcombi_unmatched_phi","h_D0optcombi_unmatched_phi",64,-3.2,3.2);
 
   h_BCand_DeltaRD0optcombiMu = fs->make<TH1D>("h_BCand_DeltaRD0optcombiMu","h_BCand_DeltaRD0optcombiMu",100,0.,5.);
   h_B_D0optcombiMass     = fs->make<TH1D>("h_B_D0optcombiMass","h_B_D0optcombiMass",1000,0.,10.);
@@ -1099,6 +1867,33 @@ KalmanAnalyzer::beginJob()
   h_B_optcombipT         = fs->make<TH1D>("h_B_optcombipT","h_B_optcombipT",1000,0.,500.);
   h_B_optcombieta        = fs->make<TH1D>("h_B_optcombieta","h_B_optcombieta",60,-3.,3.);
   h_B_optcombiphi        = fs->make<TH1D>("h_B_optcombiphi","h_B_optcombiphi",64,-3.2,3.2);
+  h_B_paired_D0optcombiMass     = fs->make<TH1D>("h_B_paired_D0optcombiMass","h_B_paired_D0optcombiMass",1000,0.,10.);
+  h_B_paired_DeltaRD0optcombiMu = fs->make<TH1D>("h_B_paired_DeltaRD0optcombiMu","h_B_paired_DeltaRD0optcombiMu",80,0.,0.4);
+  h_B_paired_pD0optcombipMu     = fs->make<TH1D>("h_B_paired_pD0optcombipMu","h_B_paired_pD0optcombipMu",500,0.,10.);
+  h_B_paired_pTD0optcombipTMu   = fs->make<TH1D>("h_B_paired_pTD0optcombipTMu","h_B_paired_pTD0optcombipTMu",500,0.,10.);
+  h_B_paired_optcombiMass       = fs->make<TH1D>("h_B_paired_optcombiMass","h_B_paired_optcombiMass",1000,0.,10.);
+  h_B_paired_optcombip          = fs->make<TH1D>("h_B_paired_optcombip","h_B_paired_optcombip",1000,0.,500.);
+  h_B_paired_optcombipT         = fs->make<TH1D>("h_B_paired_optcombipT","h_B_paired_optcombipT",1000,0.,500.);
+  h_B_paired_optcombieta        = fs->make<TH1D>("h_B_paired_optcombieta","h_B_paired_optcombieta",60,-3.,3.);
+  h_B_paired_optcombiphi        = fs->make<TH1D>("h_B_paired_optcombiphi","h_B_paired_optcombiphi",64,-3.2,3.2);
+  h_B_switched_D0optcombiMass     = fs->make<TH1D>("h_B_switched_D0optcombiMass","h_B_switched_D0optcombiMass",1000,0.,10.);
+  h_B_switched_DeltaRD0optcombiMu = fs->make<TH1D>("h_B_switched_DeltaRD0optcombiMu","h_B_switched_DeltaRD0optcombiMu",80,0.,0.4);
+  h_B_switched_pD0optcombipMu     = fs->make<TH1D>("h_B_switched_pD0optcombipMu","h_B_switched_pD0optcombipMu",500,0.,10.);
+  h_B_switched_pTD0optcombipTMu   = fs->make<TH1D>("h_B_switched_pTD0optcombipTMu","h_B_switched_pTD0optcombipTMu",500,0.,10.);
+  h_B_switched_optcombiMass       = fs->make<TH1D>("h_B_switched_optcombiMass","h_B_switched_optcombiMass",1000,0.,10.);
+  h_B_switched_optcombip          = fs->make<TH1D>("h_B_switched_optcombip","h_B_switched_optcombip",1000,0.,500.);
+  h_B_switched_optcombipT         = fs->make<TH1D>("h_B_switched_optcombipT","h_B_switched_optcombipT",1000,0.,500.);
+  h_B_switched_optcombieta        = fs->make<TH1D>("h_B_switched_optcombieta","h_B_switched_optcombieta",60,-3.,3.);
+  h_B_switched_optcombiphi        = fs->make<TH1D>("h_B_switched_optcombiphi","h_B_switched_optcombiphi",64,-3.2,3.2);
+  h_B_unmatched_D0optcombiMass     = fs->make<TH1D>("h_B_unmatched_D0optcombiMass","h_B_unmatched_D0optcombiMass",1000,0.,10.);
+  h_B_unmatched_DeltaRD0optcombiMu = fs->make<TH1D>("h_B_unmatched_DeltaRD0optcombiMu","h_B_unmatched_DeltaRD0optcombiMu",80,0.,0.4);
+  h_B_unmatched_pD0optcombipMu     = fs->make<TH1D>("h_B_unmatched_pD0optcombipMu","h_B_unmatched_pD0optcombipMu",500,0.,10.);
+  h_B_unmatched_pTD0optcombipTMu   = fs->make<TH1D>("h_B_unmatched_pTD0optcombipTMu","h_B_unmatched_pTD0optcombipTMu",500,0.,10.);
+  h_B_unmatched_optcombiMass       = fs->make<TH1D>("h_B_unmatched_optcombiMass","h_B_unmatched_optcombiMass",1000,0.,10.);
+  h_B_unmatched_optcombip          = fs->make<TH1D>("h_B_unmatched_optcombip","h_B_unmatched_optcombip",1000,0.,500.);
+  h_B_unmatched_optcombipT         = fs->make<TH1D>("h_B_unmatched_optcombipT","h_B_unmatched_optcombipT",1000,0.,500.);
+  h_B_unmatched_optcombieta        = fs->make<TH1D>("h_B_unmatched_optcombieta","h_B_unmatched_optcombieta",60,-3.,3.);
+  h_B_unmatched_optcombiphi        = fs->make<TH1D>("h_B_unmatched_optcombiphi","h_B_unmatched_optcombiphi",64,-3.2,3.2);
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
