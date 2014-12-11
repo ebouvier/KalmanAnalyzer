@@ -288,6 +288,43 @@ class KalmanAnalyzer : public edm::EDAnalyzer {
     
     TH1D* h_D0combiCand_pT;
 
+    TH1D* h_dRTr1Tr2combi;
+    TH1D* h_dEtaTr1Tr2combi;
+    TH1D* h_dPhiTr1Tr2combi;
+    TH1D* h_pTrCombi;
+    TH1D* h_pTTrCombi;
+    TH1D* h_etaTrCombi;
+    TH1D* h_phiTrCombi;
+    TH1D* h_pTr1pTr2combi;
+    TH1D* h_pTTr1pTTr2combi;
+    TH1D* h_dRTr1Tr2combi_paired;
+    TH1D* h_dEtaTr1Tr2combi_paired;
+    TH1D* h_dPhiTr1Tr2combi_paired;
+    TH1D* h_pTrCombi_paired;
+    TH1D* h_pTTrCombi_paired;
+    TH1D* h_etaTrCombi_paired;
+    TH1D* h_phiTrCombi_paired;
+    TH1D* h_pTr1pTr2combi_paired;
+    TH1D* h_pTTr1pTTr2combi_paired;
+    TH1D* h_dRTr1Tr2combi_switched;
+    TH1D* h_dEtaTr1Tr2combi_switched;
+    TH1D* h_dPhiTr1Tr2combi_switched;
+    TH1D* h_pTrCombi_switched;
+    TH1D* h_pTTrCombi_switched;
+    TH1D* h_etaTrCombi_switched;
+    TH1D* h_phiTrCombi_switched;
+    TH1D* h_pTr1pTr2combi_switched;
+    TH1D* h_pTTr1pTTr2combi_switched;
+    TH1D* h_dRTr1Tr2combi_unmatched;
+    TH1D* h_dEtaTr1Tr2combi_unmatched;
+    TH1D* h_dPhiTr1Tr2combi_unmatched;
+    TH1D* h_pTrCombi_unmatched;
+    TH1D* h_pTTrCombi_unmatched;
+    TH1D* h_etaTrCombi_unmatched;
+    TH1D* h_phiTrCombi_unmatched;
+    TH1D* h_pTr1pTr2combi_unmatched;
+    TH1D* h_pTTr1pTTr2combi_unmatched;
+
     TH1D* h_D0combi_p;
     TH1D* h_D0combi_pT;
     TH1D* h_D0combi_eta;
@@ -1324,6 +1361,19 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           // cut on pT
           if (p_D0combi.Pt() < 15.) continue;
 
+          h_dRTr1Tr2combi->Fill(p_track1_D0combi.DeltaR(p_track2_D0combi));
+          h_dEtaTr1Tr2combi->Fill(fabs(p_track1_D0combi.Eta()-p_track2_D0combi.Eta()));
+          h_dPhiTr1Tr2combi->Fill(p_track1_D0combi.DeltaPhi(p_track2_D0combi));
+          h_pTrCombi->Fill(p_track1_D0combi.P());
+          h_pTrCombi->Fill(p_track2_D0combi.P());
+          h_pTTrCombi->Fill(p_track1_D0combi.Pt());
+          h_pTTrCombi->Fill(p_track2_D0combi.Pt());
+          h_etaTrCombi->Fill(p_track1_D0combi.Eta());
+          h_etaTrCombi->Fill(p_track2_D0combi.Eta());
+          h_phiTrCombi->Fill(p_track1_D0combi.Phi());
+          h_phiTrCombi->Fill(p_track2_D0combi.Phi());
+          h_pTr1pTr2combi->Fill(p_track1_D0combi.P()/p_track2_D0combi.P());
+          h_pTTr1pTTr2combi->Fill(p_track1_D0combi.Pt()/p_track2_D0combi.Pt());
           h_D0combi_Mass->Fill(p_D0combi.M());
           h_D0combi_dRJet->Fill(p_D0combi.DeltaR(p_Jet));
           h_D0combi_p->Fill(p_D0combi.P());
@@ -1331,6 +1381,19 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           h_D0combi_eta->Fill(p_D0combi.Eta());
           h_D0combi_phi->Fill(p_D0combi.Phi());
           if (isD0combiPaired) {
+            h_dRTr1Tr2combi_paired->Fill(p_track1_D0combi.DeltaR(p_track2_D0combi));
+            h_dEtaTr1Tr2combi_paired->Fill(fabs(p_track1_D0combi.Eta()-p_track2_D0combi.Eta()));
+            h_dPhiTr1Tr2combi_paired->Fill(p_track1_D0combi.DeltaPhi(p_track2_D0combi));
+            h_pTrCombi_paired->Fill(p_track1_D0combi.P());
+            h_pTrCombi_paired->Fill(p_track2_D0combi.P());
+            h_pTTrCombi_paired->Fill(p_track1_D0combi.Pt());
+            h_pTTrCombi_paired->Fill(p_track2_D0combi.Pt());
+            h_etaTrCombi_paired->Fill(p_track1_D0combi.Eta());
+            h_etaTrCombi_paired->Fill(p_track2_D0combi.Eta());
+            h_phiTrCombi_paired->Fill(p_track1_D0combi.Phi());
+            h_phiTrCombi_paired->Fill(p_track2_D0combi.Phi());
+            h_pTr1pTr2combi_paired->Fill(p_track1_D0combi.P()/p_track2_D0combi.P());
+            h_pTTr1pTTr2combi_paired->Fill(p_track1_D0combi.Pt()/p_track2_D0combi.Pt());
             h_D0combi_paired_Mass->Fill(p_D0combi.M());
             h_D0combi_paired_dRJet->Fill(p_D0combi.DeltaR(p_Jet));
             h_D0combi_paired_p->Fill(p_D0combi.P());
@@ -1339,6 +1402,19 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             h_D0combi_paired_phi->Fill(p_D0combi.Phi());
           }
           if (isD0combiSwitched) {
+            h_dRTr1Tr2combi_switched->Fill(p_track1_D0combi.DeltaR(p_track2_D0combi));
+            h_dEtaTr1Tr2combi_switched->Fill(fabs(p_track1_D0combi.Eta()-p_track2_D0combi.Eta()));
+            h_dPhiTr1Tr2combi_switched->Fill(p_track1_D0combi.DeltaPhi(p_track2_D0combi));
+            h_pTrCombi_switched->Fill(p_track1_D0combi.P());
+            h_pTrCombi_switched->Fill(p_track2_D0combi.P());
+            h_pTTrCombi_switched->Fill(p_track1_D0combi.Pt());
+            h_pTTrCombi_switched->Fill(p_track2_D0combi.Pt());
+            h_etaTrCombi_switched->Fill(p_track1_D0combi.Eta());
+            h_etaTrCombi_switched->Fill(p_track2_D0combi.Eta());
+            h_phiTrCombi_switched->Fill(p_track1_D0combi.Phi());
+            h_phiTrCombi_switched->Fill(p_track2_D0combi.Phi());
+            h_pTr1pTr2combi_switched->Fill(p_track1_D0combi.P()/p_track2_D0combi.P());
+            h_pTTr1pTTr2combi_switched->Fill(p_track1_D0combi.Pt()/p_track2_D0combi.Pt());
             h_D0combi_switched_Mass->Fill(p_D0combi.M());
             h_D0combi_switched_dRJet->Fill(p_D0combi.DeltaR(p_Jet));
             h_D0combi_switched_p->Fill(p_D0combi.P());
@@ -1347,6 +1423,19 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             h_D0combi_switched_phi->Fill(p_D0combi.Phi());
           }
           if (isD0combiUnmatched) {
+            h_dRTr1Tr2combi_unmatched->Fill(p_track1_D0combi.DeltaR(p_track2_D0combi));
+            h_dEtaTr1Tr2combi_unmatched->Fill(fabs(p_track1_D0combi.Eta()-p_track2_D0combi.Eta()));
+            h_dPhiTr1Tr2combi_unmatched->Fill(p_track1_D0combi.DeltaPhi(p_track2_D0combi));
+            h_pTrCombi_unmatched->Fill(p_track1_D0combi.P());
+            h_pTrCombi_unmatched->Fill(p_track2_D0combi.P());
+            h_pTTrCombi_unmatched->Fill(p_track1_D0combi.Pt());
+            h_pTTrCombi_unmatched->Fill(p_track2_D0combi.Pt());
+            h_etaTrCombi_unmatched->Fill(p_track1_D0combi.Eta());
+            h_etaTrCombi_unmatched->Fill(p_track2_D0combi.Eta());
+            h_phiTrCombi_unmatched->Fill(p_track1_D0combi.Phi());
+            h_phiTrCombi_unmatched->Fill(p_track2_D0combi.Phi());
+            h_pTr1pTr2combi_unmatched->Fill(p_track1_D0combi.P()/p_track2_D0combi.P());
+            h_pTTr1pTTr2combi_unmatched->Fill(p_track1_D0combi.Pt()/p_track2_D0combi.Pt());
             h_D0combi_unmatched_Mass->Fill(p_D0combi.M());
             h_D0combi_unmatched_dRJet->Fill(p_D0combi.DeltaR(p_Jet));
             h_D0combi_unmatched_p->Fill(p_D0combi.P());
@@ -1765,6 +1854,43 @@ KalmanAnalyzer::beginJob()
   h_candGenRecoTrcombidR   = fs->make<TH1D>("h_candGenRecoTrcombidR","h_candGenRecoTrcombidR",200,0.,1.);
 
   h_D0combiCand_pT = fs->make<TH1D>("h_D0combiCand_pT","h_D0combiCand_pT",1000,0.,500.);
+
+  h_dRTr1Tr2combi = fs->make<TH1D>("h_dRTr1Tr2combi","h_dRTr1Tr2combi",200,0.,1.);
+  h_dEtaTr1Tr2combi = fs->make<TH1D>("h_dEtaTr1Tr2combi","h_dEtaTr1Tr2combi",200,0.,1.);
+  h_dPhiTr1Tr2combi = fs->make<TH1D>("h_dPhiTr1Tr2combi","h_dPhiTr1Tr2combi",200,0.,1.);
+  h_pTrCombi      = fs->make<TH1D>("h_pTrCombi","h_pTrCombi",1000,0.,500.);
+  h_pTTrCombi     = fs->make<TH1D>("h_pTTrCombi","h_pTTrCombi",1000,0.,500.);
+  h_etaTrCombi    = fs->make<TH1D>("h_etaTrCombi","h_etaTrCombi",60,-3.,3.);
+  h_phiTrCombi    = fs->make<TH1D>("h_phiTrCombi","h_phiTrCombi",64,-3.2,3.2);
+  h_pTr1pTr2combi   = fs->make<TH1D>("h_pTr1pTr2combi","h_pTr1pTr2combi",500,0.,10.);
+  h_pTTr1pTTr2combi = fs->make<TH1D>("h_pTTr1pTTr2combi","h_pTTr1pTTr2combi",500,0.,10.);
+  h_dRTr1Tr2combi_paired = fs->make<TH1D>("h_dRTr1Tr2combi_paired","h_dRTr1Tr2combi_paired",200,0.,1.);
+  h_dEtaTr1Tr2combi_paired = fs->make<TH1D>("h_dEtaTr1Tr2combi_paired","h_dEtaTr1Tr2combi_paired",200,0.,1.);
+  h_dPhiTr1Tr2combi_paired = fs->make<TH1D>("h_dPhiTr1Tr2combi_paired","h_dPhiTr1Tr2combi_paired",200,0.,1.);
+  h_pTrCombi_paired      = fs->make<TH1D>("h_pTrCombi_paired","h_pTrCombi_paired",1000,0.,500.);
+  h_pTTrCombi_paired     = fs->make<TH1D>("h_pTTrCombi_paired","h_pTTrCombi_paired",1000,0.,500.);
+  h_etaTrCombi_paired    = fs->make<TH1D>("h_etaTrCombi_paired","h_etaTrCombi_paired",60,-3.,3.);
+  h_phiTrCombi_paired    = fs->make<TH1D>("h_phiTrCombi_paired","h_phiTrCombi_paired",64,-3.2,3.2);
+  h_pTr1pTr2combi_paired   = fs->make<TH1D>("h_pTr1pTr2combi_paired","h_pTr1pTr2combi_paired",500,0.,10.);
+  h_pTTr1pTTr2combi_paired = fs->make<TH1D>("h_pTTr1pTTr2combi_paired","h_pTTr1pTTr2combi_paired",500,0.,10.);
+  h_dRTr1Tr2combi_switched = fs->make<TH1D>("h_dRTr1Tr2combi_switched","h_dRTr1Tr2combi_switched",200,0.,1.);
+  h_dEtaTr1Tr2combi_switched = fs->make<TH1D>("h_dEtaTr1Tr2combi_switched","h_dEtaTr1Tr2combi_switched",200,0.,1.);
+  h_dPhiTr1Tr2combi_switched = fs->make<TH1D>("h_dPhiTr1Tr2combi_switched","h_dPhiTr1Tr2combi_switched",200,0.,1.);
+  h_pTrCombi_switched      = fs->make<TH1D>("h_pTrCombi_switched","h_pTrCombi_switched",1000,0.,500.);
+  h_pTTrCombi_switched     = fs->make<TH1D>("h_pTTrCombi_switched","h_pTTrCombi_switched",1000,0.,500.);
+  h_etaTrCombi_switched    = fs->make<TH1D>("h_etaTrCombi_switched","h_etaTrCombi_switched",60,-3.,3.);
+  h_phiTrCombi_switched    = fs->make<TH1D>("h_phiTrCombi_switched","h_phiTrCombi_switched",64,-3.2,3.2);
+  h_pTr1pTr2combi_switched   = fs->make<TH1D>("h_pTr1pTr2combi_switched","h_pTr1pTr2combi_switched",500,0.,10.);
+  h_pTTr1pTTr2combi_switched = fs->make<TH1D>("h_pTTr1pTTr2combi_switched","h_pTTr1pTTr2combi_switched",500,0.,10.);
+  h_dRTr1Tr2combi_unmatched = fs->make<TH1D>("h_dRTr1Tr2combi_unmatched","h_dRTr1Tr2combi_unmatched",200,0.,1.);
+  h_dEtaTr1Tr2combi_unmatched = fs->make<TH1D>("h_dEtaTr1Tr2combi_unmatched","h_dEtaTr1Tr2combi_unmatched",200,0.,1.);
+  h_dPhiTr1Tr2combi_unmatched = fs->make<TH1D>("h_dPhiTr1Tr2combi_unmatched","h_dPhiTr1Tr2combi_unmatched",200,0.,1.);
+  h_pTrCombi_unmatched      = fs->make<TH1D>("h_pTrCombi_unmatched","h_pTrCombi_unmatched",1000,0.,500.);
+  h_pTTrCombi_unmatched     = fs->make<TH1D>("h_pTTrCombi_unmatched","h_pTTrCombi_unmatched",1000,0.,500.);
+  h_etaTrCombi_unmatched    = fs->make<TH1D>("h_etaTrCombi_unmatched","h_etaTrCombi_unmatched",60,-3.,3.);
+  h_phiTrCombi_unmatched    = fs->make<TH1D>("h_phiTrCombi_unmatched","h_phiTrCombi_unmatched",64,-3.2,3.2);
+  h_pTr1pTr2combi_unmatched   = fs->make<TH1D>("h_pTr1pTr2combi_unmatched","h_pTr1pTr2combi_unmatched",500,0.,10.);
+  h_pTTr1pTTr2combi_unmatched = fs->make<TH1D>("h_pTTr1pTTr2combi_unmatched","h_pTTr1pTTr2combi_unmatched",500,0.,10.);
 
   h_D0combi_Mass  = fs->make<TH1D>("h_D0combi_Mass","h_D0combi_Mass",1000,0.,10.);
   h_D0combi_dRJet = fs->make<TH1D>("h_D0combi_dRJet","h_D0combi_dRJet",200,0.,1.);
