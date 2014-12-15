@@ -937,9 +937,11 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                 h_D0Cand_LOverSigmaL->Fill(D0_L3DoverSigmaL3D);
 
                 // cut on L/SigmaL
-                if (D0_L3DoverSigmaL3D > 50.) {
+                //if (D0_L3DoverSigmaL3D > 50.) {
+                if (D0_L3DoverSigmaL3D > 100.) {
                   h_B_cuts->Fill((double)iBCut); ++iBCut;
-                  h_B_cuts->GetXaxis()->SetBinLabel(iBCut,"... with c#tau/#sigma(c#tau) > 50");
+                  h_B_cuts->GetXaxis()->SetBinLabel(iBCut,"... with c#tau/#sigma(c#tau) > 100");
+                  //h_B_cuts->GetXaxis()->SetBinLabel(iBCut,"... with c#tau/#sigma(c#tau) > 50");
 
                   h_D0Cand_pT->Fill(p_D0.Pt());
 
@@ -1124,7 +1126,8 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
               h_D0consCand_LOverSigmaL->Fill(D0cons_L3DoverSigmaL3D);
 
               // cut on L/SigmaL
-              if (D0cons_L3DoverSigmaL3D > 50.) {
+              //if (D0cons_L3DoverSigmaL3D > 50.) {
+              if (D0cons_L3DoverSigmaL3D > 100.) {
 
                 h_D0consCand_pT->Fill(p_D0.Pt());
 
