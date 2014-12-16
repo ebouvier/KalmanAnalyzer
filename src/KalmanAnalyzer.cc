@@ -607,10 +607,10 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   pat::JetCollection jets = *jetHandle;
 
   float maxcsv = -1.;
-  unsigned int maxind = -1;
+  int maxind = -1;
   float second_max = -1.0;
-  unsigned int maxind2 = -1;
-  unsigned int iSelJet = 0;
+  int maxind2 = -1;
+  int iSelJet = 0;
 
   for (pat::JetCollection::iterator it = jets.begin(); it != jets.end(); ++it)  {
     double btag = (*it).bDiscriminator("combinedSecondaryVertexBJetTags");
@@ -618,8 +618,8 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       if(btag >= maxcsv) {
         second_max = maxcsv;
         maxcsv = btag;
-        maxind = iSelJet;
         maxind2 = maxind;
+        maxind = iSelJet;
       }
       else if(btag > second_max) {
         second_max = btag;
@@ -630,9 +630,10 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   }
   h_nJets->Fill(iSelJet);
 
-  iSelJet = 0;
+  iSelJet = -1;
 
   for (pat::JetCollection::iterator it = jets.begin(); it != jets.end(); ++it)  {
+    iSelJet++;
 
     if (iSelJet == maxind || iSelJet == maxind2){
       h_CSV->Fill((*it).bDiscriminator("combinedSecondaryVertexBJetTags"));
@@ -1640,7 +1641,7 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           }
       }
     }
-    iSelJet++;
+//    iSelJet++;
   } // jet loop
 
 }
