@@ -7,7 +7,8 @@ parser = OptionParser()
 parser.add_option("", "--run", action="store_true", dest="run", default=False, help="run crab")
 (options, args) = parser.parse_args()
 
-pset_name = "\'kalmananalyzer_cfg.py\'"
+#pset_name = "\'kalmananalyzer_cfg.py\'"
+pset_name = "\'d0forrivet_cfg.py\'"
 
 datasets = [
     ["\'/TTJets_FullLeptMGDecays_8TeV-madgraph/verdier-TTbar-dilept_05Oct13-v3-80a352c723b543c465f0aa98c4bbef52/USER\'", "TTJets_FullLeptMGDecays_05Oct13"],

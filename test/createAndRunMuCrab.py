@@ -7,7 +7,8 @@ parser = OptionParser()
 parser.add_option("", "--run", action="store_true", dest="run", default=False, help="run crab")
 (options, args) = parser.parse_args()
 
-pset_name = "\'kalmananalyzer_mu_cfg.py\'"
+#pset_name = "\'kalmananalyzer_mu_cfg.py\'"
+pset_name = "\'d0forrivet_mu_cfg.py\'"
 
 datasets = [
     ["\'/MuHad/verdier-MuHad_Run2012A-22Jan2013_02Oct13-v3-7ed5d64fb39097b01209acde5484d3b2/USER\'", "MuHad_Run2012A-22Jan2013_02Oct13"],
