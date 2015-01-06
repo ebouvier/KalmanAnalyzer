@@ -6,6 +6,7 @@
 #include "TStyle.h"
 #include "TLegend.h"
 #include "TPaveText.h"
+#include "TLatex.h"
 #include "TFile.h"
 #include "TH1D.h"
 #include "TGraphErrors.h"
@@ -259,12 +260,14 @@ void cms_style(bool isData = false){
 }
 
 //---------------------------------------------------------------
-double *step(bool inBatch, TFile* fi, TString name, TString date)
+double *step(bool inBatch, TFile* fi, TString name, TString date, double factor, TLatex* channel_tex)
 //---------------------------------------------------------------
 {
   using namespace RooFit;
+  TH1::SetDefaultSumw2(true);
 
   TH1D* histo = (TH1D*)fi->Get("ana/h_"+name);
+  histo->Scale(factor);
 
   RooRealVar x("mass","D^{0} mass",1.7,2.,"GeV/c^{2}");
   RooDataHist dh("datahist","datahist",RooArgList(x),histo,1.);
@@ -321,6 +324,7 @@ double *step(bool inBatch, TFile* fi, TString name, TString date)
   TCanvas* cn = new TCanvas("cn_"+name,"cn_"+name,800,800);
   frame->Draw();
   if (Nsig >= 1) fit_tex->Draw("same");
+  channel_tex->Draw("same");  
   cms_style(); 
   cn->SaveAs("Plots"+date+"/fit_"+name+".C");
   cn->SaveAs("Plots"+date+"/fit_"+name+".pdf");
@@ -332,9 +336,11 @@ double *step(bool inBatch, TFile* fi, TString name, TString date)
 }
 
 //---------------------------------------------------------------
-void doTheComparison_step(bool inBatch = true, TString date = "", TString file = "")
+void doTheComparison_step(bool inBatch = true, TString date = "", TString file = "", double factor = 1., TString channel ="") //, double ngen = 1.)
 //---------------------------------------------------------------
 {
+  TH1::SetDefaultSumw2(true);
+
   using namespace RooFit;
   TStyle* m_style = createStyle();
   m_style->cd();
@@ -342,16 +348,21 @@ void doTheComparison_step(bool inBatch = true, TString date = "", TString file =
   if (date.Length() > 0) date = "_" + date;
   gROOT->ProcessLine(".! mkdir Plots"+date);
 
+  TLatex* channel_tex = new TLatex(0.22, 0.9, channel);
+  channel_tex->SetNDC(true);
+  channel_tex->SetTextFont(43);
+  channel_tex->SetTextSize(TITLE_FONTSIZE - 6);  
+
   TFile *fi = TFile::Open(file); 
 
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   // B_D0 mass fit signal+background
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  double *SNR_B_D0Mass = step(inBatch, fi, "B_D0Mass", date); 
-  double *SNR_B_D0consMass = step(inBatch, fi, "B_D0consMass", date); 
-  double *SNR_B_D0combiMass = step(inBatch, fi, "B_D0combiMass", date); 
-  double *SNR_B_D0optcombiMass = step(inBatch, fi, "B_D0optcombiMass", date); 
+  double *SNR_B_D0Mass = step(inBatch, fi, "B_D0Mass", date, factor, channel_tex); 
+  double *SNR_B_D0consMass = step(inBatch, fi, "B_D0consMass", date, factor, channel_tex); 
+  double *SNR_B_D0combiMass = step(inBatch, fi, "B_D0combiMass", date, factor, channel_tex); 
+  double *SNR_B_D0optcombiMass = step(inBatch, fi, "B_D0optcombiMass", date, factor, channel_tex); 
 
   // Print chi2 otpimization results 
   std::cout << "\n\nD0 candidate mass SNR with \n" << std::endl;
@@ -367,6 +378,11 @@ void doTheComparison_step(bool inBatch = true, TString date = "", TString file =
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   TH1D* h_B_D0Mass = (TH1D*)fi->Get("ana/h_B_D0Mass");
+  h_B_D0Mass->Scale(factor);
+  //for (int i = 1; i <= h_B_D0Mass->GetNbinsX(); i++) {
+  //  h_B_D0Mass->SetBinError(i, sqrt(pow(factor,2.)*h_B_D0Mass->GetBinContent(i)*(1.-h_B_D0Mass->GetBinContent(i)/ngen)));
+  //  h_B_D0Mass->SetBinContent(i, h_B_D0Mass->GetBinContent(i)*factor);
+  //}
   h_B_D0Mass->Rebin(2);
 //  h_B_D0Mass->GetXaxis()->SetRangeUser(0,5);
   h_B_D0Mass->SetName("Simple Kalman Vertex Fit");
@@ -374,12 +390,14 @@ void doTheComparison_step(bool inBatch = true, TString date = "", TString file =
   TCanvas* cn_B_D0Mass = new TCanvas("cn_B_D0Mass","cn_B_D0Mass",800,800);
   cn_B_D0Mass->cd();
   h_B_D0Mass->Draw("hist");
+  channel_tex->Draw("same");  
   cms_style();
   cn_B_D0Mass->SaveAs("Plots"+date+"/B_D0Mass.C");
   cn_B_D0Mass->SaveAs("Plots"+date+"/B_D0Mass.eps");
   cn_B_D0Mass->SaveAs("Plots"+date+"/B_D0Mass.pdf");
 
   TH1D* h_B_D0consMass = (TH1D*)fi->Get("ana/h_B_D0consMass");
+  h_B_D0consMass->Scale(factor);
   h_B_D0consMass->Rebin(2);
 //  h_B_D0consMass->GetXaxis()->SetRangeUser(0,5);
   h_B_D0consMass->SetName("Constrained Kalman Vertex Fit");
@@ -387,12 +405,14 @@ void doTheComparison_step(bool inBatch = true, TString date = "", TString file =
   TCanvas* cn_B_D0consMass = new TCanvas("cn_B_D0consMass","cn_B_D0consMass",800,800);
   cn_B_D0consMass->cd();
   h_B_D0consMass->Draw("hist");
+  channel_tex->Draw("same");  
   cms_style();
   cn_B_D0consMass->SaveAs("Plots"+date+"/B_D0consMass.C");
   cn_B_D0consMass->SaveAs("Plots"+date+"/B_D0consMass.eps");
   cn_B_D0consMass->SaveAs("Plots"+date+"/B_D0consMass.pdf");
 
   TH1D* h_B_D0combiMass = (TH1D*)fi->Get("ana/h_B_D0combiMass");
+  h_B_D0combiMass->Scale(factor);
   h_B_D0combiMass->Rebin(2);
 //  h_B_D0combiMass->GetXaxis()->SetRangeUser(0,5);
   h_B_D0combiMass->SetName("Simple PF combination");
@@ -400,12 +420,14 @@ void doTheComparison_step(bool inBatch = true, TString date = "", TString file =
   TCanvas* cn_B_D0combiMass = new TCanvas("cn_B_D0combiMass","cn_B_D0combiMass",800,800);
   cn_B_D0combiMass->cd();
   h_B_D0combiMass->Draw("hist");
+  channel_tex->Draw("same");  
   cms_style();
   cn_B_D0combiMass->SaveAs("Plots"+date+"/B_D0combiMass.C");
   cn_B_D0combiMass->SaveAs("Plots"+date+"/B_D0combiMass.eps");
   cn_B_D0combiMass->SaveAs("Plots"+date+"/B_D0combiMass.pdf");
 
   TH1D* h_B_D0optcombiMass = (TH1D*)fi->Get("ana/h_B_D0optcombiMass");
+  h_B_D0optcombiMass->Scale(factor);
   h_B_D0optcombiMass->Rebin(2);
 //  h_B_D0optcombiMass->GetXaxis()->SetRangeUser(0,5);
   h_B_D0optcombiMass->SetName("Biased PF combination");
@@ -413,6 +435,7 @@ void doTheComparison_step(bool inBatch = true, TString date = "", TString file =
   TCanvas* cn_B_D0optcombiMass = new TCanvas("cn_B_D0optcombiMass","cn_B_D0optcombiMass",800,800);
   cn_B_D0optcombiMass->cd();
   h_B_D0optcombiMass->Draw("hist");
+  channel_tex->Draw("same");  
   cms_style();
   cn_B_D0optcombiMass->SaveAs("Plots"+date+"/B_D0optcombiMass.C");
   cn_B_D0optcombiMass->SaveAs("Plots"+date+"/B_D0optcombiMass.eps");
@@ -424,6 +447,7 @@ void doTheComparison_step(bool inBatch = true, TString date = "", TString file =
   
   // Unmatched
   TH1D* h_B_unmatched_D0consMass = (TH1D*)fi->Get("ana/h_B_unmatched_D0consMass");
+  h_B_unmatched_D0consMass->Scale(factor);
   h_B_unmatched_D0consMass->Rebin(2);
 //  h_B_unmatched_D0consMass->GetXaxis()->SetRangeUser(0,5);
   h_B_unmatched_D0consMass->SetName("Constrained Kalman Vertex Fit");
@@ -431,12 +455,14 @@ void doTheComparison_step(bool inBatch = true, TString date = "", TString file =
   TCanvas* cn_B_unmatched_D0consMass = new TCanvas("cn_B_unmatched_D0consMass","cn_B_unmatched_D0consMass",800,800);
   cn_B_unmatched_D0consMass->cd();
   h_B_unmatched_D0consMass->Draw("hist");
+  channel_tex->Draw("same");  
   cms_style();
   cn_B_unmatched_D0consMass->SaveAs("Plots"+date+"/B_unmatched_D0consMass.C");
   cn_B_unmatched_D0consMass->SaveAs("Plots"+date+"/B_unmatched_D0consMass.eps");
   cn_B_unmatched_D0consMass->SaveAs("Plots"+date+"/B_unmatched_D0consMass.pdf");
 
   TH1D* h_B_unmatched_D0optcombiMass = (TH1D*)fi->Get("ana/h_B_unmatched_D0optcombiMass");
+  h_B_unmatched_D0optcombiMass->Scale(factor);
   h_B_unmatched_D0optcombiMass->Rebin(2);
 //  h_B_unmatched_D0optcombiMass->GetXaxis()->SetRangeUser(0,5);
   h_B_unmatched_D0optcombiMass->SetName("Biased PF combination");
@@ -444,6 +470,7 @@ void doTheComparison_step(bool inBatch = true, TString date = "", TString file =
   TCanvas* cn_B_unmatched_D0optcombiMass = new TCanvas("cn_B_unmatched_D0optcombiMass","cn_B_unmatched_D0optcombiMass",800,800);
   cn_B_unmatched_D0optcombiMass->cd();
   h_B_unmatched_D0optcombiMass->Draw("hist");
+  channel_tex->Draw("same");  
   cms_style();
   cn_B_unmatched_D0optcombiMass->SaveAs("Plots"+date+"/B_unmatched_D0optcombiMass.C");
   cn_B_unmatched_D0optcombiMass->SaveAs("Plots"+date+"/B_unmatched_D0optcombiMass.eps");
@@ -454,6 +481,7 @@ void doTheComparison_step(bool inBatch = true, TString date = "", TString file =
   delete h_B_unmatched_D0consMass; delete h_B_unmatched_D0optcombiMass;
 
   TH1D* h_B_unmatched_D0consMass_zoom = (TH1D*)fi->Get("ana/h_B_unmatched_D0consMass");
+  h_B_unmatched_D0consMass_zoom->Scale(factor);
   h_B_unmatched_D0consMass_zoom->SetName("Constrained Kalman Vertex Fit");
 
   RooRealVar x_B_unmatched_D0consMass_zoom("mass","D^{0} mass",1.7,2.,"GeV/c^{2}");
@@ -505,6 +533,7 @@ void doTheComparison_step(bool inBatch = true, TString date = "", TString file =
   cn_B_unmatched_D0consMass_zoom->cd();
   frame_B_unmatched_D0consMass_zoom->Draw();
   if (Nsig_B_unmatched_D0consMass_zoom >= 1) fit_tex_B_unmatched_D0consMass_zoom->Draw("same");
+  channel_tex->Draw("same");  
   cms_style();
   cn_B_unmatched_D0consMass_zoom->SaveAs("Plots"+date+"/B_unmatched_D0consMass_zoom.C");
   cn_B_unmatched_D0consMass_zoom->SaveAs("Plots"+date+"/B_unmatched_D0consMass_zoom.eps");
@@ -514,6 +543,7 @@ void doTheComparison_step(bool inBatch = true, TString date = "", TString file =
   delete cn_B_unmatched_D0consMass_zoom;
 
   TH1D* h_B_unmatched_D0optcombiMass_zoom = (TH1D*)fi->Get("ana/h_B_unmatched_D0optcombiMass");
+  h_B_unmatched_D0optcombiMass_zoom->Scale(factor);
   h_B_unmatched_D0optcombiMass_zoom->SetName("Biased PF combination");
 
   RooRealVar x_B_unmatched_D0optcombiMass_zoom("mass","D^{0} mass",1.7,2.,"GeV/c^{2}");
@@ -565,6 +595,7 @@ void doTheComparison_step(bool inBatch = true, TString date = "", TString file =
   cn_B_unmatched_D0optcombiMass_zoom->cd();
   frame_B_unmatched_D0optcombiMass_zoom->Draw();
   if (Nsig_B_unmatched_D0optcombiMass_zoom >= 1) fit_tex_B_unmatched_D0optcombiMass_zoom->Draw("same");
+  channel_tex->Draw("same");  
   cms_style();
   cn_B_unmatched_D0optcombiMass_zoom->SaveAs("Plots"+date+"/B_unmatched_D0optcombiMass_zoom.C");
   cn_B_unmatched_D0optcombiMass_zoom->SaveAs("Plots"+date+"/B_unmatched_D0optcombiMass_zoom.eps");
@@ -578,6 +609,7 @@ void doTheComparison_step(bool inBatch = true, TString date = "", TString file =
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   TH1D* h_B_D0Mass_zoom = (TH1D*)fi->Get("ana/h_B_D0Mass");
+  h_B_D0Mass_zoom->Scale(factor);
   h_B_D0Mass_zoom->SetName("Simple Kalman Vertex Fit");
   //h_B_D0Mass_zoom->Scale(1./h_B_D0Mass_zoom->Integral());
 
@@ -614,6 +646,7 @@ void doTheComparison_step(bool inBatch = true, TString date = "", TString file =
   std::cout << "SNR  = " << SNR_B_D0Mass_zoom[0] << " +/- " << SNR_B_D0Mass_zoom[1] << "\n" << std::endl;
 
   TH1D* h_B_D0combiMass_zoom = (TH1D*)fi->Get("ana/h_B_D0combiMass");
+  h_B_D0combiMass_zoom->Scale(factor);
   h_B_D0combiMass_zoom->SetName("Simple PF combination");
   h_B_D0combiMass_zoom->Scale(h_B_D0Mass_zoom->Integral()/h_B_D0combiMass_zoom->Integral());
 
@@ -663,6 +696,7 @@ void doTheComparison_step(bool inBatch = true, TString date = "", TString file =
   leg_B_D0unbias_zoom->AddEntry("model_B_D0combiMass_zoom","#splitline{Simple PF}{combination}","LP");
   leg_B_D0unbias_zoom->AddEntry("model_B_D0Mass_zoom","#splitline{Simple Kalman}{Vertex Fit}","LP");
   leg_B_D0unbias_zoom->Draw();
+  channel_tex->Draw("same");  
   cms_style();
   cn_B_D0unbias_zoom->SaveAs("Plots"+date+"/B_D0unbias_zoom.C");
   cn_B_D0unbias_zoom->SaveAs("Plots"+date+"/B_D0unbias_zoom.eps");
@@ -672,6 +706,7 @@ void doTheComparison_step(bool inBatch = true, TString date = "", TString file =
   delete cn_B_D0unbias_zoom;
 
   TH1D* h_B_D0consMass_zoom = (TH1D*)fi->Get("ana/h_B_D0consMass");
+  h_B_D0consMass_zoom->Scale(factor);
   h_B_D0consMass_zoom->SetName("Constrained Kalman Vertex Fit");
 
   RooRealVar x_B_D0consMass_zoom("mass","D^{0} mass",1.7,2.,"GeV/c^{2}");
@@ -707,6 +742,7 @@ void doTheComparison_step(bool inBatch = true, TString date = "", TString file =
   std::cout << "SNR  = " << SNR_B_D0consMass_zoom[0] << " +/- " << SNR_B_D0consMass_zoom[1] << "\n" << std::endl;
 
   TH1D* h_B_D0optcombiMass_zoom = (TH1D*)fi->Get("ana/h_B_D0optcombiMass");
+  h_B_D0optcombiMass_zoom->Scale(factor);
   h_B_D0optcombiMass_zoom->SetName("Biased PF combination");
 
   RooRealVar x_B_D0optcombiMass_zoom("mass","D^{0} mass",1.7,2.,"GeV/c^{2}");
@@ -755,6 +791,7 @@ void doTheComparison_step(bool inBatch = true, TString date = "", TString file =
   leg_B_D0bias_zoom->AddEntry("model_B_D0optcombiMass_zoom","#splitline{Biased PF}{combination}","LP");
   leg_B_D0bias_zoom->AddEntry("model_B_D0consMass_zoom","#splitline{Constrained Kalman}{Vertex Fit}","LP");
   leg_B_D0bias_zoom->Draw();
+  channel_tex->Draw("same");  
   cms_style();
   cn_B_D0bias_zoom->SaveAs("Plots"+date+"/B_D0bias_zoom.C");
   cn_B_D0bias_zoom->SaveAs("Plots"+date+"/B_D0bias_zoom.eps");
@@ -764,6 +801,7 @@ void doTheComparison_step(bool inBatch = true, TString date = "", TString file =
   delete cn_B_D0bias_zoom;
 
   TH1D* h_B_unmatched_D0Mass_zoom = (TH1D*)fi->Get("ana/h_B_unmatched_D0Mass");
+  h_B_unmatched_D0Mass_zoom->Scale(factor);
   h_B_unmatched_D0Mass_zoom->SetName("Simple Kalman Vertex Fit");
   //h_B_unmatched_D0Mass_zoom->Scale(1./h_B_unmatched_D0Mass_zoom->Integral());
 
@@ -800,6 +838,7 @@ void doTheComparison_step(bool inBatch = true, TString date = "", TString file =
   std::cout << "SNR  = " << SNR_B_unmatched_D0Mass_zoom[0] << " +/- " << SNR_B_unmatched_D0Mass_zoom[1] << "\n" << std::endl;
 
   TH1D* h_B_unmatched_D0combiMass_zoom = (TH1D*)fi->Get("ana/h_B_unmatched_D0combiMass");
+  h_B_unmatched_D0combiMass_zoom->Scale(factor);
   h_B_unmatched_D0combiMass_zoom->SetName("Simple PF combination");
   h_B_unmatched_D0combiMass_zoom->Scale(h_B_unmatched_D0Mass_zoom->Integral()/h_B_unmatched_D0combiMass_zoom->Integral());
 
@@ -849,6 +888,7 @@ void doTheComparison_step(bool inBatch = true, TString date = "", TString file =
   leg_B_unmatched_D0unbias_zoom->AddEntry("model_B_unmatched_D0combiMass_zoom","#splitline{Simple PF}{combination}","LP");
   leg_B_unmatched_D0unbias_zoom->AddEntry("model_B_unmatched_D0Mass_zoom","#splitline{Simple Kalman}{Vertex Fit}","LP");
   leg_B_unmatched_D0unbias_zoom->Draw();
+  channel_tex->Draw("same");  
   cms_style();
   cn_B_unmatched_D0unbias_zoom->SaveAs("Plots"+date+"/B_unmatched_D0unbias_zoom.C");
   cn_B_unmatched_D0unbias_zoom->SaveAs("Plots"+date+"/B_unmatched_D0unbias_zoom.eps");
@@ -871,6 +911,7 @@ void doTheComparison_step(bool inBatch = true, TString date = "", TString file =
   leg_B_unmatched_D0bias_zoom->AddEntry("model_B_unmatched_D0optcombiMass_zoom","#splitline{Biased PF}{combination}","LP");
   leg_B_unmatched_D0bias_zoom->AddEntry("model_B_unmatched_D0consMass_zoom","#splitline{Constrained Kalman}{Vertex Fit}","LP");
   leg_B_unmatched_D0bias_zoom->Draw();
+  channel_tex->Draw("same");  
   cms_style();
   cn_B_unmatched_D0bias_zoom->SaveAs("Plots"+date+"/B_unmatched_D0bias_zoom.C");
   cn_B_unmatched_D0bias_zoom->SaveAs("Plots"+date+"/B_unmatched_D0bias_zoom.eps");
@@ -886,28 +927,33 @@ void doTheComparison_step(bool inBatch = true, TString date = "", TString file =
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   TH1D* h_nJets = (TH1D*)fi->Get("ana/h_nJets");
+  h_nJets->Scale(factor);
   h1_style(h_nJets, 38, 38, 3003, -1111., -1111., 510, 510, 38, 1.2, 0, "Number of jets");
   h_nJets->GetYaxis()->SetNoExponent();
   TCanvas* cn_nJets = new TCanvas("cn_nJets","cn_nJets",800,800);
   cn_nJets->cd();
   h_nJets->Draw("hist");
+  channel_tex->Draw("same");  
   cms_style();
   cn_nJets->SaveAs("Plots"+date+"/nJets.C");
   cn_nJets->SaveAs("Plots"+date+"/nJets.eps");
   cn_nJets->SaveAs("Plots"+date+"/nJets.pdf");
 
   TH1D* h_CSV = (TH1D*)fi->Get("ana/h_CSV");
+  h_CSV->Scale(factor);
   h1_style(h_CSV, 38, 38, 3003, -1111., -1111., 510, 510, 38, 1.2, 0, "CSV discriminant");
   h_CSV->GetYaxis()->SetNoExponent();
   TCanvas* cn_CSV = new TCanvas("cn_CSV","cn_CSV",800,800);
   cn_CSV->cd();
   h_CSV->Draw("hist");
+  channel_tex->Draw("same");  
   cms_style();
   cn_CSV->SaveAs("Plots"+date+"/CSV.C");
   cn_CSV->SaveAs("Plots"+date+"/CSV.eps");
   cn_CSV->SaveAs("Plots"+date+"/CSV.pdf");
 
   TH1D* h_B_cuts = (TH1D*)fi->Get("ana/h_B_cuts");
+  h_B_cuts->Scale(factor);
   h1_style(h_B_cuts, 38, 38, 3003, -1111., -1111., 510, 510, 38, 1.2, 0, "");
   h_B_cuts->GetXaxis()->SetRangeUser(0,11);
   h_B_cuts->GetYaxis()->SetNoExponent();
@@ -916,18 +962,21 @@ void doTheComparison_step(bool inBatch = true, TString date = "", TString file =
   cn_B_cuts->cd();
   cn_B_cuts->SetLogy(1);
   h_B_cuts->Draw("hist");
+  channel_tex->Draw("same");  
   cms_style();
   cn_B_cuts->SaveAs("Plots"+date+"/B_cuts.C");
   cn_B_cuts->SaveAs("Plots"+date+"/B_cuts.eps");
   cn_B_cuts->SaveAs("Plots"+date+"/B_cuts.pdf");
 
   TH1D* h_genD0_n = (TH1D*)fi->Get("ana/h_genD0_n");
+  h_genD0_n->Scale(factor);
   h1_style(h_genD0_n, 38, 38, 3003, -1111., -1111., 510, 510, 38, 1.2, 0, "Number of generated D^{0}");
   h_genD0_n->GetYaxis()->SetNoExponent();
   TCanvas* cn_genD0_n = new TCanvas("cn_genD0_n","cn_genD0_n",800,800);
   cn_genD0_n->cd();
   cn_genD0_n->SetLogy(1);
   h_genD0_n->Draw("hist");
+  channel_tex->Draw("same");  
   cms_style();
   cn_genD0_n->SaveAs("Plots"+date+"/genD0_n.C");
   cn_genD0_n->SaveAs("Plots"+date+"/genD0_n.eps");
@@ -945,8 +994,14 @@ void doTheComparison_step(bool inBatch = true, TString date = "", TString file =
 int doTheComparison_MC(bool inBatch = true, TString date = "")
 //---------------------------------------------------------------
 {
+  const double lumi = 19800.;
+  const double xsection[2] = {107.6722, 25.8031};
+  const double ngen[2] = {25339818, 12031276};
+  double factor[2];
+  for (unsigned int i = 0; i < 2; i++) 
+    factor[i] = lumi * xsection[i] / ngen[i];
 
-  doTheComparison_step(inBatch, "SemiLept_" + date, "../test/crab_results/17Dec14/kalmanAnalyzed_SemiLept_merged.root");
-  doTheComparison_step(inBatch, "FullLept_" + date, "../test/crab_results/17Dec14/kalmanAnalyzed_FullLept_merged.root");
+  doTheComparison_step(inBatch, "SemiLept_" + date, "../test/crab_results/18Dec14/kalmanAnalyzed_SemiLept_merged.root", factor[0], "MG+PY6 Z2* Semilept. t#bar{t}"); //, ngen[0]);
+  doTheComparison_step(inBatch, "FullLept_" + date, "../test/crab_results/18Dec14/kalmanAnalyzed_FullLept_merged.root", factor[1], "MG+PY6 Z2* Dilept. t#bar{t}"); //, ngen[1]);
   return 0;
 }

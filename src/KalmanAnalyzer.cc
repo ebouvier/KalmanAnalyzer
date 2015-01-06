@@ -781,7 +781,8 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     int iSelJet = 0;
 
     for (pat::JetCollection::iterator it = jets.begin(); it != jets.end(); ++it)  {
-      double btag = (*it).bDiscriminator("combinedSecondaryVertexBJetTags");
+      //double btag = (*it).bDiscriminator("combinedSecondaryVertexBJetTags");
+      double btag = (*it).pt();
       if ( (*it).pt() >= 30. ) {
         if(btag >= maxcsv) {
           second_max = maxcsv;
@@ -1115,9 +1116,9 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                     h_D0Cand_pT->Fill(p_D0.Pt(),weight);
 
                     // cut on pT
-                    if (p_D0.Pt() > 12.) {
+                    if (p_D0.Pt() > 15.) {
                       h_B_cuts->Fill((double)iBCut,weight); ++iBCut;
-                      h_B_cuts->GetXaxis()->SetBinLabel(iBCut,"... with p_{T} > 12 GeV/c");
+                      h_B_cuts->GetXaxis()->SetBinLabel(iBCut,"... with p_{T} > 15 GeV/c");
 
                       h_D0_L->Fill(D0_L3D,weight);
                       h_D0_SigmaL->Fill(D0_sigmaL3D,weight);
@@ -1300,7 +1301,7 @@ KalmanAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                   h_D0consCand_pT->Fill(p_D0.Pt(),weight);
 
                   // cut on pT
-                  if (p_D0.Pt() > 12.) {
+                  if (p_D0.Pt() > 15.) {
 
                     if (D0cons_vertex->chiSquared()/(double)D0cons_vertex->degreesOfFreedom() < D0cons_chi2NDOF) {
                       D0cons_chi2NDOF = D0cons_vertex->chiSquared()/(double)D0cons_vertex->degreesOfFreedom();

@@ -5,6 +5,7 @@
 #include "TRint.h"
 #include "TStyle.h"
 #include "TLegend.h"
+#include "TLatex.h"
 #include "TPaveText.h"
 #include "TFile.h"
 #include "TH1D.h"
@@ -259,7 +260,7 @@ void cms_style(bool isData = true){
 }
 
 //---------------------------------------------------------------
-double *step(bool inBatch, TFile* fi, TString name, TString date)
+double *step(bool inBatch, TFile* fi, TString name, TString date, TLatex* channel_tex)
 //---------------------------------------------------------------
 {
   using namespace RooFit;
@@ -321,6 +322,7 @@ double *step(bool inBatch, TFile* fi, TString name, TString date)
   TCanvas* cn = new TCanvas("cn_"+name,"cn_"+name,800,800);
   frame->Draw();
   if (Nsig >= 1) fit_tex->Draw("same");
+  channel_tex->Draw("same");  
   cms_style(); 
   cn->SaveAs("Plots"+date+"/fit_"+name+".C");
   cn->SaveAs("Plots"+date+"/fit_"+name+".pdf");
@@ -332,7 +334,7 @@ double *step(bool inBatch, TFile* fi, TString name, TString date)
 }
 
 //---------------------------------------------------------------
-void doTheComparison_step(bool inBatch = true, TString date = "", TString file = "")
+void doTheComparison_step(bool inBatch = true, TString date = "", TString file = "", TString channel ="")
 //---------------------------------------------------------------
 {
   using namespace RooFit;
@@ -342,16 +344,21 @@ void doTheComparison_step(bool inBatch = true, TString date = "", TString file =
   if (date.Length() > 0) date = "_" + date;
   gROOT->ProcessLine(".! mkdir Plots"+date);
 
+  TLatex* channel_tex = new TLatex(0.22, 0.9, channel);
+  channel_tex->SetNDC(true);
+  channel_tex->SetTextFont(43);
+  channel_tex->SetTextSize(TITLE_FONTSIZE - 6);  
+
   TFile *fi = TFile::Open(file); 
 
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   // B_D0 mass fit signal+background
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  double *SNR_B_D0Mass = step(inBatch, fi, "B_D0Mass", date); 
-  double *SNR_B_D0consMass = step(inBatch, fi, "B_D0consMass", date); 
-  double *SNR_B_D0combiMass = step(inBatch, fi, "B_D0combiMass", date); 
-  double *SNR_B_D0optcombiMass = step(inBatch, fi, "B_D0optcombiMass", date); 
+  double *SNR_B_D0Mass = step(inBatch, fi, "B_D0Mass", date, channel_tex); 
+  double *SNR_B_D0consMass = step(inBatch, fi, "B_D0consMass", date, channel_tex); 
+  double *SNR_B_D0combiMass = step(inBatch, fi, "B_D0combiMass", date, channel_tex); 
+  double *SNR_B_D0optcombiMass = step(inBatch, fi, "B_D0optcombiMass", date, channel_tex); 
 
   // Print chi2 otpimization results 
   std::cout << "\n\nD0 candidate mass SNR with \n" << std::endl;
@@ -374,6 +381,7 @@ void doTheComparison_step(bool inBatch = true, TString date = "", TString file =
   TCanvas* cn_B_D0Mass = new TCanvas("cn_B_D0Mass","cn_B_D0Mass",800,800);
   cn_B_D0Mass->cd();
   h_B_D0Mass->Draw("hist");
+  channel_tex->Draw("same");  
   cms_style();
   cn_B_D0Mass->SaveAs("Plots"+date+"/B_D0Mass.C");
   cn_B_D0Mass->SaveAs("Plots"+date+"/B_D0Mass.eps");
@@ -387,6 +395,7 @@ void doTheComparison_step(bool inBatch = true, TString date = "", TString file =
   TCanvas* cn_B_D0consMass = new TCanvas("cn_B_D0consMass","cn_B_D0consMass",800,800);
   cn_B_D0consMass->cd();
   h_B_D0consMass->Draw("hist");
+  channel_tex->Draw("same");  
   cms_style();
   cn_B_D0consMass->SaveAs("Plots"+date+"/B_D0consMass.C");
   cn_B_D0consMass->SaveAs("Plots"+date+"/B_D0consMass.eps");
@@ -400,6 +409,7 @@ void doTheComparison_step(bool inBatch = true, TString date = "", TString file =
   TCanvas* cn_B_D0combiMass = new TCanvas("cn_B_D0combiMass","cn_B_D0combiMass",800,800);
   cn_B_D0combiMass->cd();
   h_B_D0combiMass->Draw("hist");
+  channel_tex->Draw("same");  
   cms_style();
   cn_B_D0combiMass->SaveAs("Plots"+date+"/B_D0combiMass.C");
   cn_B_D0combiMass->SaveAs("Plots"+date+"/B_D0combiMass.eps");
@@ -413,6 +423,7 @@ void doTheComparison_step(bool inBatch = true, TString date = "", TString file =
   TCanvas* cn_B_D0optcombiMass = new TCanvas("cn_B_D0optcombiMass","cn_B_D0optcombiMass",800,800);
   cn_B_D0optcombiMass->cd();
   h_B_D0optcombiMass->Draw("hist");
+  channel_tex->Draw("same");  
   cms_style();
   cn_B_D0optcombiMass->SaveAs("Plots"+date+"/B_D0optcombiMass.C");
   cn_B_D0optcombiMass->SaveAs("Plots"+date+"/B_D0optcombiMass.eps");
@@ -512,6 +523,7 @@ void doTheComparison_step(bool inBatch = true, TString date = "", TString file =
   leg_B_D0unbias_zoom->AddEntry("model_B_D0combiMass_zoom","#splitline{Simple PF}{combination}","LP");
   leg_B_D0unbias_zoom->AddEntry("model_B_D0Mass_zoom","#splitline{Simple Kalman}{Vertex Fit}","LP");
   leg_B_D0unbias_zoom->Draw();
+  channel_tex->Draw("same");  
   cms_style();
   cn_B_D0unbias_zoom->SaveAs("Plots"+date+"/B_D0unbias_zoom.C");
   cn_B_D0unbias_zoom->SaveAs("Plots"+date+"/B_D0unbias_zoom.eps");
@@ -604,6 +616,7 @@ void doTheComparison_step(bool inBatch = true, TString date = "", TString file =
   leg_B_D0bias_zoom->AddEntry("model_B_D0optcombiMass_zoom","#splitline{Biased PF}{combination}","LP");
   leg_B_D0bias_zoom->AddEntry("model_B_D0consMass_zoom","#splitline{Constrained Kalman}{Vertex Fit}","LP");
   leg_B_D0bias_zoom->Draw();
+  channel_tex->Draw("same");  
   cms_style();
   cn_B_D0bias_zoom->SaveAs("Plots"+date+"/B_D0bias_zoom.C");
   cn_B_D0bias_zoom->SaveAs("Plots"+date+"/B_D0bias_zoom.eps");
@@ -622,6 +635,7 @@ void doTheComparison_step(bool inBatch = true, TString date = "", TString file =
   TCanvas* cn_nJets = new TCanvas("cn_nJets","cn_nJets",800,800);
   cn_nJets->cd();
   h_nJets->Draw("hist");
+  channel_tex->Draw("same");  
   cms_style();
   cn_nJets->SaveAs("Plots"+date+"/nJets.C");
   cn_nJets->SaveAs("Plots"+date+"/nJets.eps");
@@ -633,6 +647,7 @@ void doTheComparison_step(bool inBatch = true, TString date = "", TString file =
   TCanvas* cn_CSV = new TCanvas("cn_CSV","cn_CSV",800,800);
   cn_CSV->cd();
   h_CSV->Draw("hist");
+  channel_tex->Draw("same");  
   cms_style();
   cn_CSV->SaveAs("Plots"+date+"/CSV.C");
   cn_CSV->SaveAs("Plots"+date+"/CSV.eps");
@@ -647,6 +662,7 @@ void doTheComparison_step(bool inBatch = true, TString date = "", TString file =
   cn_B_cuts->cd();
   cn_B_cuts->SetLogy(1);
   h_B_cuts->Draw("hist");
+  channel_tex->Draw("same");  
   cms_style();
   cn_B_cuts->SaveAs("Plots"+date+"/B_cuts.C");
   cn_B_cuts->SaveAs("Plots"+date+"/B_cuts.eps");
@@ -665,7 +681,7 @@ int doTheComparison_Data(bool inBatch = true, TString date = "")
 //---------------------------------------------------------------
 {
 
-  doTheComparison_step(inBatch, "El_" + date, "../test/crab_results/17Dec14/kalmanAnalyzed_El_merged.root");
-  doTheComparison_step(inBatch, "Mu_" + date, "../test/crab_results/17Dec14/kalmanAnalyzed_Mu_merged.root");
+  doTheComparison_step(inBatch, "El_" + date, "../test/crab_results/18Dec14/kalmanAnalyzed_El_merged.root", "e + Jets channel");
+  doTheComparison_step(inBatch, "Mu_" + date, "../test/crab_results/18Dec14/kalmanAnalyzed_Mu_merged.root", "#mu + Jets channel");
   return 0;
 }
