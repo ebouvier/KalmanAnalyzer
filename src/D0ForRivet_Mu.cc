@@ -169,6 +169,9 @@ D0ForRivet_Mu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   using namespace edm;
   nEvts++;
+  _Nch[0] = 0; _Nch[1] = 0;
+  _sump[0] = 0.; _sump[1] = 0.;
+  _sumpvec[0].SetPtEtaPhiM(0.,0.,0.,0.);
   hasGoodMuons = false;
   hasGoodElectrons = false;
   hasGoodLeptons = false;
@@ -655,10 +658,10 @@ D0ForRivet_Mu::beginJob()
 
   edm::Service<TFileService> fs;
 
-  _h_Nch[0] = fs->make<TH1D>("Nch-b-jet1", "Nch-b-jet1", 500, 0, 500);
-  _h_Nch[1] = fs->make<TH1D>("Nch-b-jet2", "Nch-b-jet2", 500, 0, 500);
-  _h_sump[0] = fs->make<TH1D>("Sump-b-jet1", "Sump-b-jet1", 750, 0, 5000);
-  _h_sump[1] = fs->make<TH1D>("Sump-b-jet2", "Sump-b-jet2", 750, 0, 5000);
+  _h_Nch[0] = fs->make<TH1D>("Nch-b-jet1", "Nch-b-jet1", 45, 0, 45);
+  _h_Nch[1] = fs->make<TH1D>("Nch-b-jet2", "Nch-b-jet2", 45, 0, 45);
+  _h_sump[0] = fs->make<TH1D>("Sump-b-jet1", "Sump-b-jet1", 200, 0, 1000);
+  _h_sump[1] = fs->make<TH1D>("Sump-b-jet2", "Sump-b-jet2", 200, 0, 1000);
   _h_sumpvec[0] = fs->make<TH1D>("VectorialSump-b-jet1", "VectorialSump-b-jet1", 300, 0, 1500);
   _h_sumpvec[1] = fs->make<TH1D>("VectorialSump-b-jet2", "VectorialSump-b-jet2", 300, 0, 1500);
   _h_sum1p[0] = fs->make<TH1D>("Highestp-b-jet1", "Highestp-b-jet1", 150, 0, 300);
@@ -667,16 +670,16 @@ D0ForRivet_Mu::beginJob()
   _h_sum3p[1] = fs->make<TH1D>("Sum3p-b-jet2", "Sum3p-b-jet2", 150, 0, 300);
   _h_R3[0] = fs->make<TH1D>("R3-b-jet1", "R3-b-jet1", 50, 0, 1);
   _h_R3[1] = fs->make<TH1D>("R3-b-jet2", "R3-b-jet2", 50, 0, 1);
-  _h_D0Mass[0] = fs->make<TH1D>("D0Mass-b-jet1", "D0Mass-b-jet1", 80, 0, 8);
-  _h_D0Mass[1] = fs->make<TH1D>("D0Mass-b-jet2", "D0Mass-b-jet2", 80, 0, 8);
-  _h_D0MassClean[0] = fs->make<TH1D>("D0MassClean-b-jet1", "D0MassClean-b-jet1", 80, 0, 8);
-  _h_D0MassClean[1] = fs->make<TH1D>("D0MassClean-b-jet2", "D0MassClean-b-jet2", 80, 0, 8);
-  _h_BMomentum[0] = fs->make<TH1D>("BMomentum-b-jet1", "BMomentum-b-jet1", 200, 0, 400);
-  _h_BMomentum[1] = fs->make<TH1D>("BMomentum-b-jet2", "BMomentum-b-jet2", 200, 0, 400);
-  _h_D0MassBlow[0] = fs->make<TH1D>("D0Mass-b-jet1-blow", "D0Mass-b-jet1-blow", 60, 1.7, 2.);
-  _h_D0MassBlow[1] = fs->make<TH1D>("D0Mass-b-jet2-blow", "D0Mass-b-jet2-blow", 60, 1.7, 2.);
-  _h_D0MassCleanBlow[0] = fs->make<TH1D>("D0MassClean-b-jet1-blow", "D0MassClean-b-jet1-blow", 60, 1.7, 2.);
-  _h_D0MassCleanBlow[1] = fs->make<TH1D>("D0MassClean-b-jet2-blow", "D0MassClean-b-jet2-blow", 60, 1.7, 2.);
+  _h_D0Mass[0] = fs->make<TH1D>("D0Mass-b-jet1", "D0Mass-b-jet1", 160, 0, 8);
+  _h_D0Mass[1] = fs->make<TH1D>("D0Mass-b-jet2", "D0Mass-b-jet2", 160, 0, 8);
+  _h_D0MassClean[0] = fs->make<TH1D>("D0MassClean-b-jet1", "D0MassClean-b-jet1", 160, 0, 8);
+  _h_D0MassClean[1] = fs->make<TH1D>("D0MassClean-b-jet2", "D0MassClean-b-jet2", 160, 0, 8);
+  _h_BMomentum[0] = fs->make<TH1D>("BMomentum-b-jet1", "BMomentum-b-jet1", 100, 0, 400);
+  _h_BMomentum[1] = fs->make<TH1D>("BMomentum-b-jet2", "BMomentum-b-jet2", 100, 0, 400);
+  _h_D0MassBlow[0] = fs->make<TH1D>("D0Mass-b-jet1-blow", "D0Mass-b-jet1-blow", 30, 1.7, 2.);
+  _h_D0MassBlow[1] = fs->make<TH1D>("D0Mass-b-jet2-blow", "D0Mass-b-jet2-blow", 30, 1.7, 2.);
+  _h_D0MassCleanBlow[0] = fs->make<TH1D>("D0MassClean-b-jet1-blow", "D0MassClean-b-jet1-blow", 30, 1.7, 2.);
+  _h_D0MassCleanBlow[1] = fs->make<TH1D>("D0MassClean-b-jet2-blow", "D0MassClean-b-jet2-blow", 30, 1.7, 2.);
 
 }
 
