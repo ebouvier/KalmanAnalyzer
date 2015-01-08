@@ -9,6 +9,7 @@
 *.pch
 
 # Compiled Dynamic libraries
+*.d
 *.so
 *.dylib
 *.dll
@@ -32,3 +33,9 @@
 
 # Root files
 *.root
+
+# Plots
+*.eps
+*.pdf
+*.jpg
+*.png
