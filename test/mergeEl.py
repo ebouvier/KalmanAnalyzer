@@ -27,6 +27,6 @@ for crabFolder in crabFolders:
         command = "%s%s%s " % (command, fullPath, name)
 
 if not os.path.exists("crab_results/"+options.date):
-  os.system("mkdir crab_results/%s" % options.date)
+  os.mkdir("crab_results/"+options.date)
 
 os.system(command)
