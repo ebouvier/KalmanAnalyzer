@@ -393,8 +393,8 @@ D0ForRivet_El::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     int iSelJet = 0;
 
     for (pat::JetCollection::iterator it = jets.begin(); it != jets.end(); ++it)  {
-      //double btag = (*it).bDiscriminator("combinedSecondaryVertexBJetTags");
-      double btag = (*it).pt();
+      //double btag = (*it).bDiscriminator("combinedSecondaryVertexBJetTags");  // save 2 jets of highest CSV among those with pT > 30 GeV/c
+      double btag = (*it).pt(); //save 2 jets of highest pT among those with pT > 30 GeV/c
       if ( (*it).pt() >= 30. ) {
         if(btag >= maxcsv) {
           second_max = maxcsv;
@@ -688,7 +688,30 @@ D0ForRivet_El::endJob()
 {
 
   //  std::cout << "Closing histos..." << std::endl;
-
+  /* Uncomment for Integral() = 1.
+  _h_Nch[0]->Scale(1./_h_Nch[0]->Integral());
+  _h_Nch[1]->Scale(1./_h_Nch[1]->Integral());
+  _h_sump[0]->Scale(1./_h_sump[0]->Integral());
+  _h_sump[1]->Scale(1./_h_sump[1]->Integral());
+  _h_sumpvec[0]->Scale(1./_h_sumpvec[0]->Integral());
+  _h_sumpvec[1]->Scale(1./_h_sumpvec[1]->Integral());
+  _h_sum1p[0]->Scale(1./_h_sum1p[0]->Integral());
+  _h_sum1p[1]->Scale(1./_h_sum1p[1]->Integral());
+  _h_sum3p[0]->Scale(1./_h_sum3p[0]->Integral());
+  _h_sum3p[1]->Scale(1./_h_sum3p[1]->Integral());
+  _h_R3[0]->Scale(1./_h_R3[0]->Integral());
+  _h_R3[1]->Scale(1./_h_R3[1]->Integral());
+  _h_D0Mass[0]->Scale(1./_h_D0Mass[0]->Integral());
+  _h_D0Mass[1]->Scale(1./_h_D0Mass[1]->Integral());
+  _h_D0MassClean[0]->Scale(1./_h_D0MassClean[0]->Integral());
+  _h_D0MassClean[1]->Scale(1./_h_D0MassClean[1]->Integral());
+  _h_BMomentum[0]->Scale(1./_h_BMomentum[0]->Integral());
+  _h_BMomentum[1]->Scale(1./_h_BMomentum[1]->Integral());
+  _h_D0MassBlow[0]->Scale(1./_h_D0MassBlow[0]->Integral());
+  _h_D0MassBlow[1]->Scale(1./_h_D0MassBlow[1]->Integral());
+  _h_D0MassCleanBlow[0]->Scale(1./_h_D0MassCleanBlow[0]->Integral());
+  _h_D0MassCleanBlow[1]->Scale(1./_h_D0MassCleanBlow[1]->Integral());
+ */
 }
 
 // ------------ method called when starting to processes a run  ------------
