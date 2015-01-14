@@ -93,6 +93,7 @@ class D0ForRivet : public edm::EDAnalyzer {
     virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
 
     // ----------member data ---------------------------
+    bool _isCSVbased;
     
     // evts properties
     unsigned int nEvts;
@@ -106,6 +107,11 @@ class D0ForRivet : public edm::EDAnalyzer {
 
     double weight;
 
+    TH1D* _h_nJets;
+    TH1D* _h_CSVSelJets;
+    TH1D* _h_pTSelJets;
+    TH1D* _h_etach[2];
+
     int _Nch[2];
     TH1D* _h_Nch[2];
     double _sump[2];
@@ -114,12 +120,13 @@ class D0ForRivet : public edm::EDAnalyzer {
     TH1D* _h_sumpvec[2];
     TH1D* _h_sum1p[2];
     TH1D* _h_sum3p[2];
+    TH1D* _h_R1[2];
     TH1D* _h_R3[2];
     TH1D* _h_D0Mass[2];
     TH1D* _h_D0MassClean[2];
     TH1D* _h_BMomentum[2];
-    TH1D* _h_D0MassBlow[2];
-    TH1D* _h_D0MassCleanBlow[2];
+//    TH1D* _h_D0MassBlow[2];
+//    TH1D* _h_D0MassCleanBlow[2];
 
 };
 
@@ -134,8 +141,8 @@ class D0ForRivet : public edm::EDAnalyzer {
 //
 // constructors and destructor
 //
-D0ForRivet::D0ForRivet(const edm::ParameterSet& iConfig)
-
+D0ForRivet::D0ForRivet(const edm::ParameterSet& iConfig) :
+_isCSVbased(iConfig.getUntrackedParameter<bool>("isCSVbased", false))
 {
   //now do what ever initialization is needed
   nEvts = 0;
@@ -414,22 +421,26 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     int iSelJet = 0;
 
     for (pat::JetCollection::iterator it = jets.begin(); it != jets.end(); ++it)  {
-      //double btag = (*it).bDiscriminator("combinedSecondaryVertexBJetTags");  // save 2 jets of highest CSV among those with pT > 30 GeV/c
-      double btag = (*it).pt(); //save 2 jets of highest pT among those with pT > 30 GeV/c
+      double disc = 0.;
+      if (_isCSVbased) 
+        disc = (*it).bDiscriminator("combinedSecondaryVertexBJetTags");  // save 2 jets of highest CSV among those with pT > 30 GeV/c
+      else 
+        disc = (*it).pt(); //save 2 jets of highest pT among those with pT > 30 GeV/c
       if ( (*it).pt() >= 30. ) {
-        if(btag >= maxcsv) {
+        if(disc >= maxcsv) {
           second_max = maxcsv;
-          maxcsv = btag;
+          maxcsv = disc;
           maxind2 = maxind; 
           maxind = iSelJet;
         }
-        else if(btag > second_max) {
-          second_max = btag;
+        else if(disc > second_max) {
+          second_max = disc;
           maxind2 = iSelJet;
         }
       }
       iSelJet++;
     }
+    _h_nJets->Fill(iSelJet, weight);
 
     iSelJet = -1;
 
@@ -440,6 +451,9 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         int indJet = -1;
         if (iSelJet == maxind) indJet = 0;
         if (iSelJet == maxind2) indJet = 1;
+
+        _h_CSVSelJets->Fill((*it).bDiscriminator("combinedSecondaryVertexBJetTags"), weight);
+        _h_pTSelJets->Fill((*it).pt(), weight);
 
         TLorentzVector p_Jet;
         p_Jet.SetPtEtaPhiM((*it).pt(), (*it).eta(), (*it).phi(), (*it).mass());
@@ -535,6 +549,7 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           _Nch[indJet]++;
           _sump[indJet] = _sump[indJet] + p_tr1.P();
           _sumpvec[indJet] = _sumpvec[indJet] + p_tr1;
+          _h_etach[indJet]->Fill(p_tr1.Eta(), weight);
           
         } // 1st jet's track loop
 
@@ -543,6 +558,7 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         _h_sumpvec[indJet]->Fill(_sumpvec[indJet].P(), weight);
         if (p_trCand[0].M() > 1e-10) {
           _h_sum1p[indJet]->Fill(p_trCand[0].P(), weight);
+          _h_R1[indJet]->Fill(p_trCand[0].P() / _sump[indJet], weight);
           if (p_trCand[1].M() > 1e-10 && p_trCand[2].M() > 1e-10) {
             _h_sum3p[indJet]->Fill(p_trCand[0].P() + p_trCand[1].P() + p_trCand[2].P(), weight);
             _h_R3[indJet]->Fill((p_trCand[0].P() + p_trCand[1].P() + p_trCand[2].P()) / _sump[indJet], weight);
@@ -585,7 +601,7 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             if (p_D0combi.Pt() < 15.) continue;
 
             _h_D0Mass[indJet]->Fill(p_D0combi.M(), weight);
-            _h_D0MassBlow[indJet]->Fill(p_D0combi.M(), weight);
+//            _h_D0MassBlow[indJet]->Fill(p_D0combi.M(), weight);
 
             //~~~~~~~~~~~~~~~~~~~~~~~~~~~
             // associate D^0 to a PF muon
@@ -631,7 +647,7 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           if (p_D0optcombi.Pt() < 15.) continue;
 
           _h_D0MassClean[indJet]->Fill(p_D0optcombi.M(), weight);
-          _h_D0MassCleanBlow[indJet]->Fill(p_D0optcombi.M(), weight);
+//          _h_D0MassCleanBlow[indJet]->Fill(p_D0optcombi.M(), weight);
 
           //~~~~~~~~~~~~~~~~~~~~~~~~~~~
           // associate D^0 to a PF muon
@@ -677,6 +693,11 @@ D0ForRivet::beginJob()
   //  std::cout << "Creating histos..." << std::endl;
 
   edm::Service<TFileService> fs;
+  _h_nJets = fs->make<TH1D>("NJets", "NJets", 20, 0., 20.);
+  _h_CSVSelJets = fs->make<TH1D>("CSV-b-jets", "CSV-b-jets", 100, 0., 1.);
+  _h_pTSelJets = fs->make<TH1D>("TransverseMomentum-b-jets", "TransverseMomentum-b-jets", 100, 0., 500.);
+  _h_etach[0] = fs->make<TH1D>("Etach-b-jet1", "Etach-b-jet1", 60, -3., 3.);
+  _h_etach[1] = fs->make<TH1D>("Etach-b-jet2", "Etach-b-jet2", 60, -3., 3.);
 
   _h_Nch[0] = fs->make<TH1D>("Nch-b-jet1", "Nch-b-jet1", 45, 0, 45);
   _h_Nch[1] = fs->make<TH1D>("Nch-b-jet2", "Nch-b-jet2", 45, 0, 45);
@@ -688,18 +709,20 @@ D0ForRivet::beginJob()
   _h_sum1p[1] = fs->make<TH1D>("Highestp-b-jet2", "Highestp-b-jet2", 150, 0, 300);
   _h_sum3p[0] = fs->make<TH1D>("Sum3p-b-jet1", "Sum3p-b-jet1", 150, 0, 300);
   _h_sum3p[1] = fs->make<TH1D>("Sum3p-b-jet2", "Sum3p-b-jet2", 150, 0, 300);
+  _h_R1[0] = fs->make<TH1D>("R1-b-jet1", "R1-b-jet1", 50, 0, 1);
+  _h_R1[1] = fs->make<TH1D>("R1-b-jet2", "R1-b-jet2", 50, 0, 1);
   _h_R3[0] = fs->make<TH1D>("R3-b-jet1", "R3-b-jet1", 50, 0, 1);
   _h_R3[1] = fs->make<TH1D>("R3-b-jet2", "R3-b-jet2", 50, 0, 1);
-  _h_D0Mass[0] = fs->make<TH1D>("D0Mass-b-jet1", "D0Mass-b-jet1", 160, 0, 8);
-  _h_D0Mass[1] = fs->make<TH1D>("D0Mass-b-jet2", "D0Mass-b-jet2", 160, 0, 8);
-  _h_D0MassClean[0] = fs->make<TH1D>("D0MassClean-b-jet1", "D0MassClean-b-jet1", 160, 0, 8);
-  _h_D0MassClean[1] = fs->make<TH1D>("D0MassClean-b-jet2", "D0MassClean-b-jet2", 160, 0, 8);
+  _h_D0Mass[0] = fs->make<TH1D>("D0Mass-b-jet1", "D0Mass-b-jet1", 400, 0, 8);
+  _h_D0Mass[1] = fs->make<TH1D>("D0Mass-b-jet2", "D0Mass-b-jet2", 400, 0, 8);
+  _h_D0MassClean[0] = fs->make<TH1D>("D0MassClean-b-jet1", "D0MassClean-b-jet1", 400, 0, 8);
+  _h_D0MassClean[1] = fs->make<TH1D>("D0MassClean-b-jet2", "D0MassClean-b-jet2", 4000, 0, 8);
   _h_BMomentum[0] = fs->make<TH1D>("BMomentum-b-jet1", "BMomentum-b-jet1", 100, 0, 400);
   _h_BMomentum[1] = fs->make<TH1D>("BMomentum-b-jet2", "BMomentum-b-jet2", 100, 0, 400);
-  _h_D0MassBlow[0] = fs->make<TH1D>("D0Mass-b-jet1-blow", "D0Mass-b-jet1-blow", 30, 1.7, 2.);
-  _h_D0MassBlow[1] = fs->make<TH1D>("D0Mass-b-jet2-blow", "D0Mass-b-jet2-blow", 30, 1.7, 2.);
-  _h_D0MassCleanBlow[0] = fs->make<TH1D>("D0MassClean-b-jet1-blow", "D0MassClean-b-jet1-blow", 30, 1.7, 2.);
-  _h_D0MassCleanBlow[1] = fs->make<TH1D>("D0MassClean-b-jet2-blow", "D0MassClean-b-jet2-blow", 30, 1.7, 2.);
+//  _h_D0MassBlow[0] = fs->make<TH1D>("D0Mass-b-jet1-blow", "D0Mass-b-jet1-blow", 30, 1.7, 2.);
+//  _h_D0MassBlow[1] = fs->make<TH1D>("D0Mass-b-jet2-blow", "D0Mass-b-jet2-blow", 30, 1.7, 2.);
+//  _h_D0MassCleanBlow[0] = fs->make<TH1D>("D0MassClean-b-jet1-blow", "D0MassClean-b-jet1-blow", 30, 1.7, 2.);
+//  _h_D0MassCleanBlow[1] = fs->make<TH1D>("D0MassClean-b-jet2-blow", "D0MassClean-b-jet2-blow", 30, 1.7, 2.);
 
 }
 
@@ -720,6 +743,8 @@ D0ForRivet::endJob()
   _h_sum1p[1]->Scale(1./_h_sum1p[1]->Integral());
   _h_sum3p[0]->Scale(1./_h_sum3p[0]->Integral());
   _h_sum3p[1]->Scale(1./_h_sum3p[1]->Integral());
+  _h_R1[0]->Scale(1./_h_R1[0]->Integral());
+  _h_R1[1]->Scale(1./_h_R1[1]->Integral());
   _h_R3[0]->Scale(1./_h_R3[0]->Integral());
   _h_R3[1]->Scale(1./_h_R3[1]->Integral());
   _h_D0Mass[0]->Scale(1./_h_D0Mass[0]->Integral());

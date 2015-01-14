@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-process = cms.Process("MyRivetSelection")
+process = cms.Process("pTbasedSelection")
 
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000
@@ -37,8 +37,9 @@ process.TFileService = cms.Service("TFileService",
   fileName = cms.string('D0ForRivet_El.root')
 )
 
-process.MyRivetSelection = cms.EDAnalyzer('D0ForRivet_El'
+process.pTbasedSelection = cms.EDAnalyzer('D0ForRivet_El',
+        isCSVbased = cms.untracked.bool(False)
 )
 
 
-process.p = cms.Path(process.MyRivetSelection)
+process.p = cms.Path(process.pTbasedSelection)
