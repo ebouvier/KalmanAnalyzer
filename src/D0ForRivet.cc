@@ -145,6 +145,7 @@ D0ForRivet::D0ForRivet(const edm::ParameterSet& iConfig)
   _Nch[0] = 0; _Nch[1] = 0;
   _sump[0] = 0.; _sump[1] = 0.;
   _sumpvec[0].SetPtEtaPhiM(0.,0.,0.,0.);
+  _sumpvec[1].SetPtEtaPhiM(0.,0.,0.,0.);
 
 }
 
@@ -175,6 +176,7 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   _Nch[0] = 0; _Nch[1] = 0;
   _sump[0] = 0.; _sump[1] = 0.;
   _sumpvec[0].SetPtEtaPhiM(0.,0.,0.,0.);
+  _sumpvec[1].SetPtEtaPhiM(0.,0.,0.,0.);
   hasGoodMuons = false;
   hasGoodElectrons = false;
   hasGoodLeptons = false;
