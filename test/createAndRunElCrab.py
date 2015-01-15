@@ -46,8 +46,8 @@ for disc in ["pT", "csv"]:
     dataset_name = dataset[1]
     dataset_path = dataset[0]
 
-    task_name = ("\'Data_%s\'") % (dataset_name)
-    output_file = "%s/%s/crab_Data_%s.py" % (d, disc, dataset_name)
+    task_name = ("\'Data_%s_%s\'") % (disc, dataset_name)
+    output_file = "%s/%s/crab_Data_%s_%s.py" % (d, disc, disc, dataset_name)
     output_dir = ("\'crab_tasks/%s/%s\'") % (d, disc)
 
     print("\tCreating config file for %s" % (dataset_path))

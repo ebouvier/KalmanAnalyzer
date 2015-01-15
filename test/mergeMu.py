@@ -14,9 +14,9 @@ if not os.path.exists("crab_results/"+options.date):
   os.mkdir("crab_results/"+options.date)
 
 for disc in ["pT", "csv"]:
-  crabFolders = [name for name in os.listdir("crab_tasks/"+options.date+"/"+disc) if os.path.isdir(os.path.join("crab_tasks/"+options.date+"/"+disc, name)) and (name.startswith("crab_Data_Mu") or name.startswith("crab_Data_SingleMu"))]
+  crabFolders = [name for name in os.listdir("crab_tasks/"+options.date+"/"+disc) if os.path.isdir(os.path.join("crab_tasks/"+options.date+"/"+disc, name)) and (name.startswith("crab_Data_"+disc+"_Mu") or name.startswith("crab_Data_"+disc+"_SingleMu"))]
 
-  outputName = "crab_results/"+options.date+"/"+disc+"/"+"D0ForRivet_Mu_merged.root" 
+  outputName = "crab_results/"+options.date+"/D0ForRivet_"+disc+"_Mu_merged.root" 
   if os.path.exists(outputName):
     sys.exit("'%s' already exists." % outputName) 
   command = "hadd %s " % outputName
@@ -28,9 +28,6 @@ for disc in ["pT", "csv"]:
     for name in os.listdir(fullPath):
         if name.endswith(".root"):
           command = "%s%s%s " % (command, fullPath, name)
-
-  if not os.path.exists("crab_results/"+options.date+"/"+disc):
-    os.mkdir("crab_results/"+options.date+"/"+disc)
 
   os.system(command)
 
