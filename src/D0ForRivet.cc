@@ -107,9 +107,11 @@ class D0ForRivet : public edm::EDAnalyzer {
 
     double weight;
 
+    TH1D* _h_nVtx;
     TH1D* _h_nJets;
     TH1D* _h_CSVSelJets;
     TH1D* _h_pTSelJets;
+    TH1D* _h_genIdSelJets;
     TH1D* _h_etach[2];
 
     int _Nch[2];
@@ -347,6 +349,7 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       std::cout << " WARNING : no PV for this event ... " << std::endl;
       return;
     }
+    _h_nVtx->Fill((double)vtx.size(), weight);
 
     //--------------------------------------------------
     // Access the PF candidates for non-isolated mu/e
@@ -454,6 +457,8 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
         _h_CSVSelJets->Fill((*it).bDiscriminator("combinedSecondaryVertexBJetTags"), weight);
         _h_pTSelJets->Fill((*it).pt(), weight);
+        if ((*it).genParticle())
+          _h_genIdSelJets->Fill((double)abs(((*it).genParticle())->pdgId()), weight); 
 
         TLorentzVector p_Jet;
         p_Jet.SetPtEtaPhiM((*it).pt(), (*it).eta(), (*it).phi(), (*it).mass());
@@ -693,8 +698,10 @@ D0ForRivet::beginJob()
   //  std::cout << "Creating histos..." << std::endl;
 
   edm::Service<TFileService> fs;
+  _h_nVtx = fs->make<TH1D>("NPrimaryVtx", "NPrimaryVtx", 50, 0., 50.); 
   _h_nJets = fs->make<TH1D>("NJets", "NJets", 20, 0., 20.);
   _h_CSVSelJets = fs->make<TH1D>("CSV-b-jets", "CSV-b-jets", 100, 0., 1.);
+  _h_genIdSelJets = fs->make<TH1D>("GenID-b-jets", "GenID-b-jets", 22, 0., 22.);
   _h_pTSelJets = fs->make<TH1D>("TransverseMomentum-b-jets", "TransverseMomentum-b-jets", 100, 0., 500.);
   _h_etach[0] = fs->make<TH1D>("Etach-b-jet1", "Etach-b-jet1", 60, -3., 3.);
   _h_etach[1] = fs->make<TH1D>("Etach-b-jet2", "Etach-b-jet2", 60, -3., 3.);

@@ -105,6 +105,7 @@ class D0ForRivet_Mu : public edm::EDAnalyzer {
     bool isGoodEvt;
     bool passTrigger;
 
+    TH1D* _h_nVtx;
     TH1D* _h_nJets;
     TH1D* _h_CSVSelJets;
     TH1D* _h_pTSelJets;
@@ -328,6 +329,7 @@ D0ForRivet_Mu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       std::cout << " WARNING : no PV for this event ... " << std::endl;
       return;
     }
+    _h_nVtx->Fill((double)vtx.size());
 
     //--------------------------------------------------
     // Access the PF candidates for non-isolated mu/e
@@ -675,6 +677,7 @@ D0ForRivet_Mu::beginJob()
   //  std::cout << "Creating histos..." << std::endl;
 
   edm::Service<TFileService> fs;
+  _h_nVtx = fs->make<TH1D>("NPrimaryVtx", "NPrimaryVtx", 50, 0., 50.); 
   _h_nJets = fs->make<TH1D>("NJets", "NJets", 20, 0., 20.);
   _h_CSVSelJets = fs->make<TH1D>("CSV-b-jets", "CSV-b-jets", 100, 0., 1.);
   _h_pTSelJets = fs->make<TH1D>("TransverseMomentum-b-jets", "TransverseMomentum-b-jets", 100, 0., 500.);
