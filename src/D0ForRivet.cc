@@ -109,10 +109,16 @@ class D0ForRivet : public edm::EDAnalyzer {
 
     TH1D* _h_nVtx;
     TH1D* _h_nJets;
+    TH1D* _h_pTJets;
+    TH1D* _h_etaJets;
+    TH1D* _h_nCSVJets;
+
     TH1D* _h_CSVSelJets;
     TH1D* _h_pTSelJets;
+    TH1D* _h_etaSelJets;
     TH1D* _h_genIdSelJets;
     TH1D* _h_etach[2];
+    TH1D* _h_pTch[2];
 
     int _Nch[2];
     TH1D* _h_Nch[2];
@@ -125,7 +131,11 @@ class D0ForRivet : public edm::EDAnalyzer {
     TH1D* _h_R1[2];
     TH1D* _h_R3[2];
     TH1D* _h_D0Mass[2];
+    TH1D* _h_D0pT[2];
+    TH1D* _h_D0eta[2];
     TH1D* _h_D0MassClean[2];
+    TH1D* _h_D0pTClean[2];
+    TH1D* _h_D0etaClean[2];
     TH1D* _h_BMomentum[2];
 //    TH1D* _h_D0MassBlow[2];
 //    TH1D* _h_D0MassCleanBlow[2];
@@ -422,6 +432,7 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     float second_max = -1.0;
     int maxind2 = -1;
     int iSelJet = 0;
+    int iCSVJet = 0;
 
     for (pat::JetCollection::iterator it = jets.begin(); it != jets.end(); ++it)  {
       double disc = 0.;
@@ -442,8 +453,12 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         }
       }
       iSelJet++;
+      if ((*it).bDiscriminator("combinedSecondaryVertexBJetTags") > 0.783) iCSVJet++;
+      _h_pTJets->Fill((*it).pt(), weight);
+      _h_etaJets->Fill((*it).eta(), weight);
     }
     _h_nJets->Fill(iSelJet, weight);
+    _h_nCSVJets->Fill(iCSVJet, weight);
 
     iSelJet = -1;
 
@@ -457,6 +472,7 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
         _h_CSVSelJets->Fill((*it).bDiscriminator("combinedSecondaryVertexBJetTags"), weight);
         _h_pTSelJets->Fill((*it).pt(), weight);
+        _h_etaSelJets->Fill((*it).eta(), weight);
         if ((*it).genParticle())
           _h_genIdSelJets->Fill((double)abs(((*it).genParticle())->pdgId()), weight); 
 
@@ -555,6 +571,7 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           _sump[indJet] = _sump[indJet] + p_tr1.P();
           _sumpvec[indJet] = _sumpvec[indJet] + p_tr1;
           _h_etach[indJet]->Fill(p_tr1.Eta(), weight);
+          _h_pTch[indJet]->Fill(p_tr1.Pt(), weight);
           
         } // 1st jet's track loop
 
@@ -607,6 +624,8 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
             _h_D0Mass[indJet]->Fill(p_D0combi.M(), weight);
 //            _h_D0MassBlow[indJet]->Fill(p_D0combi.M(), weight);
+            _h_D0pT[indJet]->Fill(p_D0combi.Pt(), weight);
+            _h_D0eta[indJet]->Fill(p_D0combi.Eta(), weight);
 
             //~~~~~~~~~~~~~~~~~~~~~~~~~~~
             // associate D^0 to a PF muon
@@ -653,6 +672,8 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
           _h_D0MassClean[indJet]->Fill(p_D0optcombi.M(), weight);
 //          _h_D0MassCleanBlow[indJet]->Fill(p_D0optcombi.M(), weight);
+          _h_D0pTClean[indJet]->Fill(p_D0optcombi.Pt(), weight);
+          _h_D0etaClean[indJet]->Fill(p_D0optcombi.Eta(), weight);
 
           //~~~~~~~~~~~~~~~~~~~~~~~~~~~
           // associate D^0 to a PF muon
@@ -700,11 +721,18 @@ D0ForRivet::beginJob()
   edm::Service<TFileService> fs;
   _h_nVtx = fs->make<TH1D>("NPrimaryVtx", "NPrimaryVtx", 50, 0., 50.); 
   _h_nJets = fs->make<TH1D>("NJets", "NJets", 20, 0., 20.);
+  _h_pTJets = fs->make<TH1D>("TransverseMomentumJets", "TransverseMomentumJets", 100, 0., 500.);
+  _h_etaJets = fs->make<TH1D>("EtaJets", "EtaJets", 120, -6., 6.);
+  _h_nCSVJets = fs->make<TH1D>("NCSVJets", "NCSVJets", 10, 0., 10.);
+
   _h_CSVSelJets = fs->make<TH1D>("CSV-b-jets", "CSV-b-jets", 100, 0., 1.);
   _h_genIdSelJets = fs->make<TH1D>("GenID-b-jets", "GenID-b-jets", 22, 0., 22.);
   _h_pTSelJets = fs->make<TH1D>("TransverseMomentum-b-jets", "TransverseMomentum-b-jets", 100, 0., 500.);
+  _h_etaSelJets = fs->make<TH1D>("Eta-b-jets", "Eta-b-jets", 60, -3., 3.);
   _h_etach[0] = fs->make<TH1D>("Etach-b-jet1", "Etach-b-jet1", 60, -3., 3.);
   _h_etach[1] = fs->make<TH1D>("Etach-b-jet2", "Etach-b-jet2", 60, -3., 3.);
+  _h_pTch[0] = fs->make<TH1D>("TransverseMomentumch-b-jet1", "TransverseMomentumch-b-jet1", 100, 0., 100.);
+  _h_pTch[1] = fs->make<TH1D>("TransverseMomentumch-b-jet2", "TransvereMomentumch-b-jet2", 100, 0., 100.);
 
   _h_Nch[0] = fs->make<TH1D>("Nch-b-jet1", "Nch-b-jet1", 45, 0, 45);
   _h_Nch[1] = fs->make<TH1D>("Nch-b-jet2", "Nch-b-jet2", 45, 0, 45);
@@ -722,8 +750,16 @@ D0ForRivet::beginJob()
   _h_R3[1] = fs->make<TH1D>("R3-b-jet2", "R3-b-jet2", 50, 0, 1);
   _h_D0Mass[0] = fs->make<TH1D>("D0Mass-b-jet1", "D0Mass-b-jet1", 400, 0, 8);
   _h_D0Mass[1] = fs->make<TH1D>("D0Mass-b-jet2", "D0Mass-b-jet2", 400, 0, 8);
+  _h_D0pT[0] = fs->make<TH1D>("D0pT-b-jet1", "D0pT-b-jet1", 100, 0, 400);
+  _h_D0pT[1] = fs->make<TH1D>("D0pT-b-jet2", "D0pT-b-jet2", 100, 0, 400);
+  _h_D0eta[0] = fs->make<TH1D>("D0eta-b-jet1", "D0eta-b-jet1", 60, -3, 3);
+  _h_D0eta[1] = fs->make<TH1D>("D0eta-b-jet2", "D0eta-b-jet2", 60, -3, 3);
   _h_D0MassClean[0] = fs->make<TH1D>("D0MassClean-b-jet1", "D0MassClean-b-jet1", 400, 0, 8);
   _h_D0MassClean[1] = fs->make<TH1D>("D0MassClean-b-jet2", "D0MassClean-b-jet2", 4000, 0, 8);
+  _h_D0pTClean[0] = fs->make<TH1D>("D0pTClean-b-jet1", "D0pTClean-b-jet1", 100, 0, 400);
+  _h_D0pTClean[1] = fs->make<TH1D>("D0pTClean-b-jet2", "D0pTClean-b-jet2", 100, 0, 400);
+  _h_D0etaClean[0] = fs->make<TH1D>("D0etaClean-b-jet1", "D0etaClean-b-jet1", 60, -3, 3);
+  _h_D0etaClean[1] = fs->make<TH1D>("D0etaClean-b-jet2", "D0etaClean-b-jet2", 60, -3, 3);
   _h_BMomentum[0] = fs->make<TH1D>("BMomentum-b-jet1", "BMomentum-b-jet1", 100, 0, 400);
   _h_BMomentum[1] = fs->make<TH1D>("BMomentum-b-jet2", "BMomentum-b-jet2", 100, 0, 400);
 //  _h_D0MassBlow[0] = fs->make<TH1D>("D0Mass-b-jet1-blow", "D0Mass-b-jet1-blow", 30, 1.7, 2.);
