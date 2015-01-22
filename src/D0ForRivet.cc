@@ -68,6 +68,8 @@ Implementation: Using a simple Kalman vertex fitter for the D0
 
 #include "TFile.h"
 #include "TH1D.h"
+#include "TH2D.h"
+#include "TTree.h"
 #include "TLorentzVector.h"
 
 //
@@ -107,6 +109,9 @@ class D0ForRivet : public edm::EDAnalyzer {
 
     double weight;
 
+    TH1D* _h_idPFel;
+    TH1D* _h_dRPFel;
+
     TH1D* _h_nVtx;
     TH1D* _h_nJets;
     TH1D* _h_pTJets;
@@ -120,6 +125,8 @@ class D0ForRivet : public edm::EDAnalyzer {
     TH1D* _h_etach[2];
     TH1D* _h_pTch[2];
 
+    double _CSV[2];
+    double _vecP[2][3];
     int _Nch[2];
     TH1D* _h_Nch[2];
     double _sump[2];
@@ -129,16 +136,35 @@ class D0ForRivet : public edm::EDAnalyzer {
     TH1D* _h_sum1p[2];
     TH1D* _h_sum3p[2];
     TH1D* _h_R1[2];
+    TH2D* _h_R1_Nch[2];
     TH1D* _h_R3[2];
+    TH2D* _h_R3_Nch[2];
+    TH1D* _h_sum1p_nomu[2];
+    TH1D* _h_sum3p_nomu[2];
+    TH1D* _h_R1_nomu[2];
+    TH2D* _h_R1_Nch_nomu[2];
+    TH1D* _h_R3_nomu[2];
+    TH2D* _h_R3_Nch_nomu[2];
     TH1D* _h_D0Mass[2];
+    TH1D* _h_D0p[2];
     TH1D* _h_D0pT[2];
     TH1D* _h_D0eta[2];
+    TH1D* _h_BMomentum_unbiased[2];
     TH1D* _h_D0MassClean[2];
+    TH1D* _h_D0pClean[2];
     TH1D* _h_D0pTClean[2];
     TH1D* _h_D0etaClean[2];
     TH1D* _h_BMomentum[2];
+    TH1D* _h_mup[2];
+    TH1D* _h_BMomentumClean[2];
 //    TH1D* _h_D0MassBlow[2];
 //    TH1D* _h_D0MassCleanBlow[2];
+
+    TTree* _t_bjet1;
+    TTree* _t_bjet2;
+    double _tr1[2][4];
+    double _tr2[2][4];
+    double _tr3[2][4];
 
 };
 
@@ -161,10 +187,19 @@ _isCSVbased(iConfig.getUntrackedParameter<bool>("isCSVbased", false))
   nEvts2 = 0;
   nEvts3 = 0.;
 
-  _Nch[0] = 0; _Nch[1] = 0;
-  _sump[0] = 0.; _sump[1] = 0.;
+  _CSV[0] = -1; _CSV[1] = -1;
+  _vecP[0][0] = -100.; _vecP[0][1] = -100.; _vecP[0][2] = -100.;
+  _vecP[1][0] = -100.; _vecP[1][1] = -100.; _vecP[1][2] = -100.;
+  _Nch[0] = -1; _Nch[1] = -1;
+  _sump[0] = -1.; _sump[1] = -1.;
   _sumpvec[0].SetPtEtaPhiM(0.,0.,0.,0.);
   _sumpvec[1].SetPtEtaPhiM(0.,0.,0.,0.);
+  _tr1[0][0] = -100.; _tr1[0][1] = -100.; _tr1[0][2] = -100.; _tr1[0][3] = -1000.;
+  _tr1[1][0] = -100.; _tr1[1][1] = -100.; _tr1[1][2] = -100.; _tr1[1][3] = -1000.;
+  _tr2[0][0] = -100.; _tr2[0][1] = -100.; _tr2[0][2] = -100.; _tr2[0][3] = -1000.;
+  _tr2[1][0] = -100.; _tr2[1][1] = -100.; _tr2[1][2] = -100.; _tr2[1][3] = -1000.;
+  _tr3[0][0] = -100.; _tr3[0][1] = -100.; _tr3[0][2] = -100.; _tr3[0][3] = -1000.;
+  _tr3[1][0] = -100.; _tr3[1][1] = -100.; _tr3[1][2] = -100.; _tr3[1][3] = -1000.;
 
 }
 
@@ -192,10 +227,16 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   using namespace edm;
   nEvts++;
-  _Nch[0] = 0; _Nch[1] = 0;
-  _sump[0] = 0.; _sump[1] = 0.;
+  _Nch[0] = -1; _Nch[1] = -1;
+  _sump[0] = -1.; _sump[1] = -1.;
   _sumpvec[0].SetPtEtaPhiM(0.,0.,0.,0.);
   _sumpvec[1].SetPtEtaPhiM(0.,0.,0.,0.);
+  _tr1[0][0] = -100.; _tr1[0][1] = -100.; _tr1[0][2] = -100.; _tr1[0][3] = -1000.;
+  _tr1[1][0] = -100.; _tr1[1][1] = -100.; _tr1[1][2] = -100.; _tr1[1][3] = -1000.;
+  _tr2[0][0] = -100.; _tr2[0][1] = -100.; _tr2[0][2] = -100.; _tr2[0][3] = -1000.;
+  _tr2[1][0] = -100.; _tr2[1][1] = -100.; _tr2[1][2] = -100.; _tr2[1][3] = -1000.;
+  _tr3[0][0] = -100.; _tr3[0][1] = -100.; _tr3[0][2] = -100.; _tr3[0][3] = -1000.;
+  _tr3[1][0] = -100.; _tr3[1][1] = -100.; _tr3[1][2] = -100.; _tr3[1][3] = -1000.;
   hasGoodMuons = false;
   hasGoodElectrons = false;
   hasGoodLeptons = false;
@@ -393,6 +434,30 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       }
     }
 
+    edm::Handle<std::vector<reco::GenParticle> > mcHandle;
+    edm::InputTag tagGen("genParticles", "", "SIM");
+    iEvent.getByLabel(tagGen, mcHandle);
+    const reco::GenParticleCollection& mcparts = *(mcHandle.product());
+    for (unsigned int iPFel = 0; iPFel < myPFel.size(); iPFel++) {
+      TLorentzVector p_PFel;
+      p_PFel.SetPtEtaPhiM(myPFel[iPFel]->pt(), myPFel[iPFel]->eta(), myPFel[iPFel]->phi(), 0.);
+      double minDeltaRPFelGen = 200.;
+      int idGen = 0;
+      for (reco::GenParticleCollection::const_iterator it = mcparts.begin(); it != mcparts.end(); it++) {
+        if (fabs((*it).pt()) < 1e-10) continue;
+        TLorentzVector p_Gen;
+        p_Gen.SetPtEtaPhiM((*it).pt(), (*it).eta(), (*it).phi(), 0.);
+        if (p_Gen.DeltaR(p_PFel) < minDeltaRPFelGen) {
+          minDeltaRPFelGen = p_Gen.DeltaR(p_PFel);
+          idGen = (*it).pdgId();
+        }
+      }
+      if (abs(idGen) > 0) {
+        _h_idPFel->Fill((double)idGen, weight);
+        _h_dRPFel->Fill(minDeltaRPFelGen, weight);
+      }
+    }
+
     //-------------------------------------------
     // Access the jets 
     //-------------------------------------------
@@ -470,6 +535,10 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         if (iSelJet == maxind) indJet = 0;
         if (iSelJet == maxind2) indJet = 1;
 
+        _CSV[indJet] = (*it).bDiscriminator("combinedSecondaryVertexBJetTags");
+        _vecP[indJet][0] = (*it).pt();
+        _vecP[indJet][1] = (*it).eta();
+        _vecP[indJet][2] = (*it).phi();
         _h_CSVSelJets->Fill((*it).bDiscriminator("combinedSecondaryVertexBJetTags"), weight);
         _h_pTSelJets->Fill((*it).pt(), weight);
         _h_etaSelJets->Fill((*it).eta(), weight);
@@ -479,15 +548,23 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         TLorentzVector p_Jet;
         p_Jet.SetPtEtaPhiM((*it).pt(), (*it).eta(), (*it).phi(), (*it).mass());
 
-        double pt_trCand_D0combi[3]  = {0., 0., 0.};
-        double eta_trCand_D0combi[3] = {0., 0., 0.};
-        double phi_trCand_D0combi[3] = {0., 0., 0.};
-        double id_trCand_D0combi[3] = {0., 0., 0.};
+        double pt_trCand_nomu[3]  = {0., 0., 0.};
+        double eta_trCand_nomu[3] = {0., 0., 0.};
+        double phi_trCand_nomu[3] = {0., 0., 0.};
+        double id_trCand_nomu[3] = {0., 0., 0.};
+        TLorentzVector p_trCand_nomu[3];
 
+        double pt_trCand[3]  = {0., 0., 0.};
+        double eta_trCand[3] = {0., 0., 0.};
+        double phi_trCand[3] = {0., 0., 0.};
+        double id_trCand[3] = {0., 0., 0.};
         TLorentzVector p_trCand[3];
 
         reco::TrackRefVector jetTracks = (*it).associatedTracks();
 
+        _Nch[indJet] = 0; 
+        _sump[indJet] = 0.; 
+        std::vector<const reco::PFCandidate*> myPFmuInSelJet;
         for (reco::track_iterator iter1 = jetTracks.begin(); iter1 != jetTracks.end(); ++iter1) {
 
           const reco::Track& Track1 = **iter1;
@@ -495,8 +572,9 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           if ((**iter1).pt() < 4.) continue;
           if (!Track1.quality(reco::Track::highPurity)) continue;
 
-          // store the 3 traces with highest pT, excluding muons and electrons
+          //look for muons and electrons
           bool trCandIsMu = false;
+          int iMuInSelJet = 0;
           for (unsigned int iMuCand = 0; iMuCand < myPFmu.size(); iMuCand++) {
             TLorentzVector p_MuCand, p_trCand;
             p_MuCand.SetPtEtaPhiM(myPFmu[iMuCand]->pt(), myPFmu[iMuCand]->eta(), myPFmu[iMuCand]->phi(), gMassMu);
@@ -506,6 +584,7 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
               break;
             }
           }
+          if (trCandIsMu) myPFmuInSelJet.push_back(myPFmu[iMuInSelJet]);
           bool trCandIsEl = false;
           for (unsigned int iElCand = 0; iElCand < myPFel.size(); iElCand++) {
             TLorentzVector p_ElCand, p_trCand;
@@ -516,49 +595,120 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
               break;
             }
           }
-          if (!trCandIsMu && !trCandIsEl) {
-            if ((**iter1).pt() >= pt_trCand_D0combi[0]) {
-              pt_trCand_D0combi[2]  = pt_trCand_D0combi[1];
-              eta_trCand_D0combi[2] = eta_trCand_D0combi[1];
-              phi_trCand_D0combi[2] = phi_trCand_D0combi[1];
-              id_trCand_D0combi[2]  = id_trCand_D0combi[1];
-              pt_trCand_D0combi[1]  = pt_trCand_D0combi[0];
-              eta_trCand_D0combi[1] = eta_trCand_D0combi[0];
-              phi_trCand_D0combi[1] = phi_trCand_D0combi[0];
-              id_trCand_D0combi[1]  = id_trCand_D0combi[0];
-              pt_trCand_D0combi[0]  = (**iter1).pt();
-              eta_trCand_D0combi[0] = (**iter1).eta();
-              phi_trCand_D0combi[0] = (**iter1).phi();
-              id_trCand_D0combi[0]  = (**iter1).charge();
+          // store the 3 traces with highest pT
+          if ((**iter1).pt() >= pt_trCand[0]) {
+            pt_trCand[2]  = pt_trCand[1];
+            eta_trCand[2] = eta_trCand[1];
+            phi_trCand[2] = phi_trCand[1];
+            id_trCand[2]  = id_trCand[1];
+            pt_trCand[1]  = pt_trCand[0];
+            eta_trCand[1] = eta_trCand[0];
+            phi_trCand[1] = phi_trCand[0];
+            id_trCand[1]  = id_trCand[0];
+            pt_trCand[0]  = (**iter1).pt();
+            eta_trCand[0] = (**iter1).eta();
+            phi_trCand[0] = (**iter1).phi();
+            id_trCand[0]  = (**iter1).charge();
+            _tr3[indJet][3] = _tr2[indJet][3];
+            _tr2[indJet][3] = _tr1[indJet][3];
+            if (trCandIsEl) 
+              _tr1[indJet][3] = (**iter1).charge()*11.;
+            if (trCandIsMu)
+              _tr1[indJet][3] = (**iter1).charge()*13.;
+            if (!trCandIsMu && !trCandIsEl)
+              _tr1[indJet][3] = (**iter1).charge()*211.;
+          }
+          else {
+            if ((**iter1).pt() >= pt_trCand[1]) {
+              pt_trCand[2]  = pt_trCand[1];
+              eta_trCand[2] = eta_trCand[1];
+              phi_trCand[2] = phi_trCand[1];
+              id_trCand[2]  = id_trCand[1];
+              pt_trCand[1]  = (**iter1).pt();
+              eta_trCand[1] = (**iter1).eta();
+              phi_trCand[1] = (**iter1).phi();
+              id_trCand[1]  = (**iter1).charge();
+              _tr3[indJet][3] = _tr3[indJet][3];
+              if (trCandIsEl) 
+                _tr2[indJet][3] = (**iter1).charge()*11.;
+              if (trCandIsMu)
+                _tr2[indJet][3] = (**iter1).charge()*13.;
+              if (!trCandIsMu && !trCandIsEl)
+                _tr2[indJet][3] = (**iter1).charge()*211.;
+            }
+            else  
+              if ((**iter1).pt() >= pt_trCand[2]) {
+                pt_trCand[2]  = (**iter1).pt();
+                eta_trCand[2] = (**iter1).eta();
+                phi_trCand[2] = (**iter1).phi();
+                id_trCand[2]  = (**iter1).charge();
+                if (trCandIsEl) 
+                  _tr3[indJet][3] = (**iter1).charge()*11.;
+                if (trCandIsMu)
+                  _tr3[indJet][3] = (**iter1).charge()*13.;
+                if (!trCandIsMu && !trCandIsEl)
+                  _tr3[indJet][3] = (**iter1).charge()*211.;
+              }
+          }
+          if (fabs(_tr1[indJet][3]) < 999) {
+            _tr1[indJet][0] = pt_trCand[0];
+            _tr1[indJet][1] = eta_trCand[0];
+            _tr1[indJet][2] = phi_trCand[0];
+            if (fabs(_tr2[indJet][3]) < 999) {
+              _tr2[indJet][0] = pt_trCand[1];
+              _tr2[indJet][1] = eta_trCand[1];
+              _tr2[indJet][2] = phi_trCand[1];
+            if (fabs(_tr3[indJet][3]) < 999) {
+              _tr3[indJet][0] = pt_trCand[2];
+              _tr3[indJet][1] = eta_trCand[2];
+              _tr3[indJet][2] = phi_trCand[2];
+            }
+            }
+          }
+          // store the 3 traces with highest pT, excluding muons
+          if (!trCandIsMu) {
+            if ((**iter1).pt() >= pt_trCand_nomu[0]) {
+              pt_trCand_nomu[2]  = pt_trCand_nomu[1];
+              eta_trCand_nomu[2] = eta_trCand_nomu[1];
+              phi_trCand_nomu[2] = phi_trCand_nomu[1];
+              id_trCand_nomu[2]  = id_trCand_nomu[1];
+              pt_trCand_nomu[1]  = pt_trCand_nomu[0];
+              eta_trCand_nomu[1] = eta_trCand_nomu[0];
+              phi_trCand_nomu[1] = phi_trCand_nomu[0];
+              id_trCand_nomu[1]  = id_trCand_nomu[0];
+              pt_trCand_nomu[0]  = (**iter1).pt();
+              eta_trCand_nomu[0] = (**iter1).eta();
+              phi_trCand_nomu[0] = (**iter1).phi();
+              id_trCand_nomu[0]  = (**iter1).charge();
             }
             else {
-              if ((**iter1).pt() >= pt_trCand_D0combi[1]) {
-                pt_trCand_D0combi[2]  = pt_trCand_D0combi[1];
-                eta_trCand_D0combi[2] = eta_trCand_D0combi[1];
-                phi_trCand_D0combi[2] = phi_trCand_D0combi[1];
-                id_trCand_D0combi[2]  = id_trCand_D0combi[1];
-                pt_trCand_D0combi[1]  = (**iter1).pt();
-                eta_trCand_D0combi[1] = (**iter1).eta();
-                phi_trCand_D0combi[1] = (**iter1).phi();
-                id_trCand_D0combi[1]  = (**iter1).charge();
+              if ((**iter1).pt() >= pt_trCand_nomu[1]) {
+                pt_trCand_nomu[2]  = pt_trCand_nomu[1];
+                eta_trCand_nomu[2] = eta_trCand_nomu[1];
+                phi_trCand_nomu[2] = phi_trCand_nomu[1];
+                id_trCand_nomu[2]  = id_trCand_nomu[1];
+                pt_trCand_nomu[1]  = (**iter1).pt();
+                eta_trCand_nomu[1] = (**iter1).eta();
+                phi_trCand_nomu[1] = (**iter1).phi();
+                id_trCand_nomu[1]  = (**iter1).charge();
               }
               else  
-                if ((**iter1).pt() >= pt_trCand_D0combi[2]) {
-                  pt_trCand_D0combi[2]  = (**iter1).pt();
-                  eta_trCand_D0combi[2] = (**iter1).eta();
-                  phi_trCand_D0combi[2] = (**iter1).phi();
-                  id_trCand_D0combi[2]  = (**iter1).charge();
+                if ((**iter1).pt() >= pt_trCand_nomu[2]) {
+                  pt_trCand_nomu[2]  = (**iter1).pt();
+                  eta_trCand_nomu[2] = (**iter1).eta();
+                  phi_trCand_nomu[2] = (**iter1).phi();
+                  id_trCand_nomu[2]  = (**iter1).charge();
                 }
             }
           }
 
           TLorentzVector p_tr1;
           p_tr1.SetPtEtaPhiM((**iter1).pt(), (**iter1).eta(), (**iter1).phi(), gMassPi);
-          if (fabs(pt_trCand_D0combi[0]) > 1e-10) {
-            p_trCand[0].SetPtEtaPhiM(pt_trCand_D0combi[0], eta_trCand_D0combi[0], phi_trCand_D0combi[0], gMassPi);
-            if (fabs(pt_trCand_D0combi[1]) > 1e-10 && fabs(pt_trCand_D0combi[2]) > 1e-10) {
-              p_trCand[1].SetPtEtaPhiM(pt_trCand_D0combi[1], eta_trCand_D0combi[1], phi_trCand_D0combi[1], gMassPi);
-              p_trCand[2].SetPtEtaPhiM(pt_trCand_D0combi[2], eta_trCand_D0combi[2], phi_trCand_D0combi[2], gMassPi);
+          if (fabs(pt_trCand[0]) > 1e-10) {
+            p_trCand[0].SetPtEtaPhiM(pt_trCand[0], eta_trCand[0], phi_trCand[0], gMassPi);
+            if (fabs(pt_trCand[1]) > 1e-10 && fabs(pt_trCand[2]) > 1e-10) {
+              p_trCand[1].SetPtEtaPhiM(pt_trCand[1], eta_trCand[1], phi_trCand[1], gMassPi);
+              p_trCand[2].SetPtEtaPhiM(pt_trCand[2], eta_trCand[2], phi_trCand[2], gMassPi);
             }
             else {
               p_trCand[1].SetPtEtaPhiM(0., 0., 0., 0.);
@@ -566,13 +716,25 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             }
           }
           else p_trCand[0].SetPtEtaPhiM(0., 0., 0., 0.);
+          if (fabs(pt_trCand_nomu[0]) > 1e-10) {
+            p_trCand_nomu[0].SetPtEtaPhiM(pt_trCand_nomu[0], eta_trCand_nomu[0], phi_trCand_nomu[0], gMassPi);
+            if (fabs(pt_trCand_nomu[1]) > 1e-10 && fabs(pt_trCand_nomu[2]) > 1e-10) {
+              p_trCand_nomu[1].SetPtEtaPhiM(pt_trCand_nomu[1], eta_trCand_nomu[1], phi_trCand_nomu[1], gMassPi);
+              p_trCand_nomu[2].SetPtEtaPhiM(pt_trCand_nomu[2], eta_trCand_nomu[2], phi_trCand_nomu[2], gMassPi);
+            }
+            else {
+              p_trCand_nomu[1].SetPtEtaPhiM(0., 0., 0., 0.);
+              p_trCand_nomu[2].SetPtEtaPhiM(0., 0., 0., 0.);
+            }
+          }
+          else p_trCand_nomu[0].SetPtEtaPhiM(0., 0., 0., 0.);
 
           _Nch[indJet]++;
           _sump[indJet] = _sump[indJet] + p_tr1.P();
           _sumpvec[indJet] = _sumpvec[indJet] + p_tr1;
           _h_etach[indJet]->Fill(p_tr1.Eta(), weight);
           _h_pTch[indJet]->Fill(p_tr1.Pt(), weight);
-          
+
         } // 1st jet's track loop
 
         _h_Nch[indJet]->Fill((double)_Nch[indJet], weight);
@@ -581,9 +743,21 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         if (p_trCand[0].M() > 1e-10) {
           _h_sum1p[indJet]->Fill(p_trCand[0].P(), weight);
           _h_R1[indJet]->Fill(p_trCand[0].P() / _sump[indJet], weight);
+          _h_R1_Nch[indJet]->Fill(p_trCand[0].P() / _sump[indJet], (double)_Nch[indJet], weight);
           if (p_trCand[1].M() > 1e-10 && p_trCand[2].M() > 1e-10) {
             _h_sum3p[indJet]->Fill(p_trCand[0].P() + p_trCand[1].P() + p_trCand[2].P(), weight);
             _h_R3[indJet]->Fill((p_trCand[0].P() + p_trCand[1].P() + p_trCand[2].P()) / _sump[indJet], weight);
+            _h_R3_Nch[indJet]->Fill((p_trCand[0].P() + p_trCand[1].P() + p_trCand[2].P()) / _sump[indJet], (double)_Nch[indJet], weight);
+          }
+        }
+        if (p_trCand_nomu[0].M() > 1e-10) {
+          _h_sum1p_nomu[indJet]->Fill(p_trCand_nomu[0].P(), weight);
+          _h_R1_nomu[indJet]->Fill(p_trCand_nomu[0].P() / _sump[indJet], weight);
+          _h_R1_Nch_nomu[indJet]->Fill(p_trCand_nomu[0].P() / _sump[indJet], (double)_Nch[indJet], weight);
+          if (p_trCand_nomu[1].M() > 1e-10 && p_trCand_nomu[2].M() > 1e-10) {
+            _h_sum3p_nomu[indJet]->Fill(p_trCand_nomu[0].P() + p_trCand_nomu[1].P() + p_trCand_nomu[2].P(), weight);
+            _h_R3_nomu[indJet]->Fill((p_trCand_nomu[0].P() + p_trCand_nomu[1].P() + p_trCand_nomu[2].P()) / _sump[indJet], weight);
+            _h_R3_Nch_nomu[indJet]->Fill((p_trCand_nomu[0].P() + p_trCand_nomu[1].P() + p_trCand_nomu[2].P()) / _sump[indJet], (double)_Nch[indJet], weight);
           }
         }
 
@@ -596,9 +770,9 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
         TLorentzVector p_track1_D0combi, p_track2_D0combi, p_D0combi, p_D0optcombi;
         p_D0optcombi.SetPtEtaPhiM(0., 0., 0., 200.);
-        //int tk2charge = 0;
+        int tk2charge = 0;
 
-        if (fabs(pt_trCand_D0combi[0]) > 1e-10 && fabs(pt_trCand_D0combi[1]) > 1e-10 && fabs(pt_trCand_D0combi[2]) > 1e-10) {
+        if (fabs(pt_trCand_nomu[0]) > 1e-10 && fabs(pt_trCand_nomu[1]) > 1e-10 && fabs(pt_trCand_nomu[2]) > 1e-10) {
           for (unsigned int iD0combi = 0; iD0combi < 6; iD0combi++) {
 
             //~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -608,15 +782,26 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             int tk2 = p2[iD0combi];
 
             // Opposite sign
-            if (id_trCand_D0combi[tk1]*id_trCand_D0combi[tk2] > 0) continue;
+            if (id_trCand_nomu[tk1]*id_trCand_nomu[tk2] > 0) continue;
 
-            p_track1_D0combi.SetPtEtaPhiM(pt_trCand_D0combi[tk1], eta_trCand_D0combi[tk1], phi_trCand_D0combi[tk1], gMassPi);
-            p_track2_D0combi.SetPtEtaPhiM(pt_trCand_D0combi[tk2], eta_trCand_D0combi[tk2], phi_trCand_D0combi[tk2], gMassK);
+            p_track1_D0combi.SetPtEtaPhiM(pt_trCand_nomu[tk1], eta_trCand_nomu[tk1], phi_trCand_nomu[tk1], gMassPi);
+            p_track2_D0combi.SetPtEtaPhiM(pt_trCand_nomu[tk2], eta_trCand_nomu[tk2], phi_trCand_nomu[tk2], gMassK);
             p_D0combi = p_track1_D0combi + p_track2_D0combi;
+
+            int iMaxMuInSelJet = -1;
+            double maxMuInSelJet = -1;
+            for (unsigned int iMuCand = 0; iMuCand < myPFmuInSelJet.size(); iMuCand++) {
+              if (myPFmuInSelJet[iMuCand]->pdgId()*id_trCand_nomu[tk2] > 0) continue;
+              if (myPFmuInSelJet[iMuCand]->pt() > maxMuInSelJet) {
+                iMaxMuInSelJet = iMuCand;
+                maxMuInSelJet = myPFmuInSelJet[iMaxMuInSelJet]->pt();
+              }
+            }
 
             if (fabs(p_D0combi.M() - gMassD0) < fabs(p_D0optcombi.M() - gMassD0)) {
               p_D0optcombi.SetPtEtaPhiM(p_D0combi.Pt(), p_D0combi.Eta(), p_D0combi.Phi(), p_D0combi.M());
-              //tk2charge = id_trCand_D0combi[tk2];
+              //tk2charge = id_trCand_nomu[tk2];
+              tk2charge = iMaxMuInSelJet;
             }
 
             // cut on pT
@@ -624,6 +809,7 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
             _h_D0Mass[indJet]->Fill(p_D0combi.M(), weight);
 //            _h_D0MassBlow[indJet]->Fill(p_D0combi.M(), weight);
+            _h_D0p[indJet]->Fill(p_D0combi.P(), weight);
             _h_D0pT[indJet]->Fill(p_D0combi.Pt(), weight);
             _h_D0eta[indJet]->Fill(p_D0combi.Eta(), weight);
 
@@ -631,12 +817,13 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             // associate D^0 to a PF muon
             //~~~~~~~~~~~~~~~~~~~~~~~~~~
             TLorentzVector p_Mu;
+            /*
             int iMu = -1;
             double deltaRD0combiMu = 2000.;
 
             // find closest muon with opposite charged wrt the kaon
             for (unsigned int iMuCand = 0; iMuCand < myPFmu.size(); iMuCand++) {
-              if (myPFmu[iMuCand]->pdgId()*id_trCand_D0combi[tk2] > 0) continue;
+              if (myPFmu[iMuCand]->pdgId()*id_trCand_nomu[tk2] > 0) continue;
               TLorentzVector p_MuCand;
               p_MuCand.SetPtEtaPhiM(myPFmu[iMuCand]->pt(), myPFmu[iMuCand]->eta(), myPFmu[iMuCand]->phi(), gMassMu);
               double tmp_deltaRD0combiMu = p_D0combi.DeltaR(p_MuCand);
@@ -652,8 +839,13 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             if (deltaRD0combiMu > 0.4) continue;
 
             p_Mu.SetPtEtaPhiM(myPFmu[iMu]->pt(), myPFmu[iMu]->eta(), myPFmu[iMu]->phi(), gMassMu);
+            */
+            
+            if (iMaxMuInSelJet < 0) continue;
+
+            p_Mu.SetPtEtaPhiM(myPFmuInSelJet[iMaxMuInSelJet]->pt(), myPFmuInSelJet[iMaxMuInSelJet]->eta(), myPFmuInSelJet[iMaxMuInSelJet]->phi(), gMassMu);
             TLorentzVector p_Bcombi = p_Mu + p_D0combi;
-            _h_BMomentum[indJet]->Fill(p_Bcombi.P(), weight);
+            _h_BMomentum_unbiased[indJet]->Fill(p_Bcombi.P(), weight);
           }
         }
 
@@ -672,14 +864,16 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
           _h_D0MassClean[indJet]->Fill(p_D0optcombi.M(), weight);
 //          _h_D0MassCleanBlow[indJet]->Fill(p_D0optcombi.M(), weight);
+          _h_D0pClean[indJet]->Fill(p_D0optcombi.P(), weight);
           _h_D0pTClean[indJet]->Fill(p_D0optcombi.Pt(), weight);
           _h_D0etaClean[indJet]->Fill(p_D0optcombi.Eta(), weight);
 
           //~~~~~~~~~~~~~~~~~~~~~~~~~~~
           // associate D^0 to a PF muon
           //~~~~~~~~~~~~~~~~~~~~~~~~~~
-          /*
+
           TLorentzVector p_Mu;
+          /*
           int iMu = -1;
           double deltaRD0optcombiMu = 2000.;
 
@@ -699,13 +893,23 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
           // keep going if closest muon is close enough
           if (deltaRD0optcombiMu > 0.4) continue;
-          
+
           p_Mu.SetPtEtaPhiM(myPFmu[iMu]->pt(), myPFmu[iMu]->eta(), myPFmu[iMu]->phi(), gMassMu);
-          TLorentzVector p_Boptcombi = p_Mu + p_D0optcombi;
           */
+
+          if (tk2charge < 0) continue;
+
+          p_Mu.SetPtEtaPhiM(myPFmuInSelJet[tk2charge]->pt(), myPFmuInSelJet[tk2charge]->eta(), myPFmuInSelJet[tk2charge]->phi(), gMassMu);
+          TLorentzVector p_Boptcombi = p_Mu + p_D0optcombi;
+          _h_BMomentum[indJet]->Fill(p_Boptcombi.P(), weight);
+          _h_mup[indJet]->Fill(p_Mu.P(), weight);
+          if (p_D0optcombi.M() > 1.7 && p_D0optcombi.M() < 2.) 
+            _h_BMomentumClean[indJet]->Fill(p_Boptcombi.P(), weight);
         }
       }
       //iSelJet++;
+      _t_bjet1->Fill();
+      _t_bjet2->Fill();
     } // jet loop
   }
 }
@@ -719,6 +923,9 @@ D0ForRivet::beginJob()
   //  std::cout << "Creating histos..." << std::endl;
 
   edm::Service<TFileService> fs;
+  _h_idPFel = fs->make<TH1D>("pdgIdPFel", "pdgIdPFel", 1000, -500., 500.);
+  _h_dRPFel = fs->make<TH1D>("DeltaR-PFel-Gen", "DeltaR-PFel-Gen", 100, 0., 0.5);
+
   _h_nVtx = fs->make<TH1D>("NPrimaryVtx", "NPrimaryVtx", 50, 0., 50.); 
   _h_nJets = fs->make<TH1D>("NJets", "NJets", 20, 0., 20.);
   _h_pTJets = fs->make<TH1D>("TransverseMomentumJets", "TransverseMomentumJets", 100, 0., 500.);
@@ -744,28 +951,73 @@ D0ForRivet::beginJob()
   _h_sum1p[1] = fs->make<TH1D>("Highestp-b-jet2", "Highestp-b-jet2", 150, 0, 300);
   _h_sum3p[0] = fs->make<TH1D>("Sum3p-b-jet1", "Sum3p-b-jet1", 150, 0, 300);
   _h_sum3p[1] = fs->make<TH1D>("Sum3p-b-jet2", "Sum3p-b-jet2", 150, 0, 300);
-  _h_R1[0] = fs->make<TH1D>("R1-b-jet1", "R1-b-jet1", 50, 0, 1);
-  _h_R1[1] = fs->make<TH1D>("R1-b-jet2", "R1-b-jet2", 50, 0, 1);
-  _h_R3[0] = fs->make<TH1D>("R3-b-jet1", "R3-b-jet1", 50, 0, 1);
-  _h_R3[1] = fs->make<TH1D>("R3-b-jet2", "R3-b-jet2", 50, 0, 1);
+  _h_R1[0] = fs->make<TH1D>("R1-b-jet1", "R1-b-jet1", 51, 0, 1.02);
+  _h_R1[1] = fs->make<TH1D>("R1-b-jet2", "R1-b-jet2", 51, 0, 1.02);
+  _h_R1_Nch[0] = fs->make<TH2D>("R1-Nch-b-jet1", "R1-Nch-b-jet1", 51, 0, 1.02, 45, 0, 45);
+  _h_R1_Nch[1] = fs->make<TH2D>("R1-Nch-b-jet2", "R1-Nch-b-jet2", 51, 0, 1.02, 45, 0, 45);
+  _h_R3[0] = fs->make<TH1D>("R3-b-jet1", "R3-b-jet1", 51, 0, 1.02);
+  _h_R3[1] = fs->make<TH1D>("R3-b-jet2", "R3-b-jet2", 51, 0, 1.02);
+  _h_R3_Nch[0] = fs->make<TH2D>("R3-Nch-b-jet1", "R3-Nch-b-jet1", 51, 0, 1.02, 45, 0, 45);
+  _h_R3_Nch[1] = fs->make<TH2D>("R3-Nch-b-jet2", "R3-Nch-b-jet2", 51, 0, 1.02, 45, 0, 45);
+  _h_sum1p_nomu[0] = fs->make<TH1D>("Highestp-b-jet1-nomu", "Highestp-b-jet1-nomu", 150, 0, 300);
+  _h_sum1p_nomu[1] = fs->make<TH1D>("Highestp-b-jet2-nomu", "Highestp-b-jet2-nomu", 150, 0, 300);
+  _h_sum3p_nomu[0] = fs->make<TH1D>("Sum3p-b-jet1-nomu", "Sum3p-b-jet1-nomu", 150, 0, 300);
+  _h_sum3p_nomu[1] = fs->make<TH1D>("Sum3p-b-jet2-nomu", "Sum3p-b-jet2-nomu", 150, 0, 300);
+  _h_R1_nomu[0] = fs->make<TH1D>("R1-b-jet1-nomu", "R1-b-jet1-nomu", 51, 0, 1.02);
+  _h_R1_nomu[1] = fs->make<TH1D>("R1-b-jet2-nomu", "R1-b-jet2-nomu", 51, 0, 1.02);
+  _h_R1_Nch_nomu[0] = fs->make<TH2D>("R1-Nch-b-jet1-nomu", "R1-Nch-b-jet1-nomu", 51, 0, 1.02, 45, 0, 45);
+  _h_R1_Nch_nomu[1] = fs->make<TH2D>("R1-Nch-b-jet2-nomu", "R1-Nch-b-jet2-nomu", 51, 0, 1.02, 45, 0, 45);
+  _h_R3_nomu[0] = fs->make<TH1D>("R3-b-jet1-nomu", "R3-b-jet1-nomu", 51, 0, 1.02);
+  _h_R3_nomu[1] = fs->make<TH1D>("R3-b-jet2-nomu", "R3-b-jet2-nomu", 51, 0, 1.02);
+  _h_R3_Nch_nomu[0] = fs->make<TH2D>("R3-Nch-b-jet1-nomu", "R3-Nch-b-jet1-nomu", 51, 0, 1.02, 45, 0, 45);
+  _h_R3_Nch_nomu[1] = fs->make<TH2D>("R3-Nch-b-jet2-nomu", "R3-Nch-b-jet2-nomu", 51, 0, 1.02, 45, 0, 45);
   _h_D0Mass[0] = fs->make<TH1D>("D0Mass-b-jet1", "D0Mass-b-jet1", 400, 0, 8);
   _h_D0Mass[1] = fs->make<TH1D>("D0Mass-b-jet2", "D0Mass-b-jet2", 400, 0, 8);
+  _h_D0p[0] = fs->make<TH1D>("D0p-b-jet1", "D0p-b-jet1", 150, 0, 300);
+  _h_D0p[1] = fs->make<TH1D>("D0p-b-jet2", "D0p-b-jet2", 150, 0, 300);
   _h_D0pT[0] = fs->make<TH1D>("D0pT-b-jet1", "D0pT-b-jet1", 100, 0, 400);
   _h_D0pT[1] = fs->make<TH1D>("D0pT-b-jet2", "D0pT-b-jet2", 100, 0, 400);
   _h_D0eta[0] = fs->make<TH1D>("D0eta-b-jet1", "D0eta-b-jet1", 60, -3, 3);
   _h_D0eta[1] = fs->make<TH1D>("D0eta-b-jet2", "D0eta-b-jet2", 60, -3, 3);
+  _h_BMomentum_unbiased[0] = fs->make<TH1D>("BMomentum-b-jet1-nobias", "BMomentum-b-jet1-nobias", 100, 0, 400);
+  _h_BMomentum_unbiased[1] = fs->make<TH1D>("BMomentum-b-jet2-nobias", "BMomentum-b-jet2-nobias", 100, 0, 400);
   _h_D0MassClean[0] = fs->make<TH1D>("D0MassClean-b-jet1", "D0MassClean-b-jet1", 400, 0, 8);
   _h_D0MassClean[1] = fs->make<TH1D>("D0MassClean-b-jet2", "D0MassClean-b-jet2", 4000, 0, 8);
+  _h_D0pClean[0] = fs->make<TH1D>("D0pClean-b-jet1", "D0pClean-b-jet1", 150, 0, 300);
+  _h_D0pClean[1] = fs->make<TH1D>("D0pClean-b-jet2", "D0pClean-b-jet2", 150, 0, 300);
   _h_D0pTClean[0] = fs->make<TH1D>("D0pTClean-b-jet1", "D0pTClean-b-jet1", 100, 0, 400);
   _h_D0pTClean[1] = fs->make<TH1D>("D0pTClean-b-jet2", "D0pTClean-b-jet2", 100, 0, 400);
   _h_D0etaClean[0] = fs->make<TH1D>("D0etaClean-b-jet1", "D0etaClean-b-jet1", 60, -3, 3);
   _h_D0etaClean[1] = fs->make<TH1D>("D0etaClean-b-jet2", "D0etaClean-b-jet2", 60, -3, 3);
   _h_BMomentum[0] = fs->make<TH1D>("BMomentum-b-jet1", "BMomentum-b-jet1", 100, 0, 400);
   _h_BMomentum[1] = fs->make<TH1D>("BMomentum-b-jet2", "BMomentum-b-jet2", 100, 0, 400);
+  _h_mup[0] = fs->make<TH1D>("Muonp-b-jet1", "Muonp-b-jet1", 150, 0, 300);
+  _h_mup[1] = fs->make<TH1D>("Muonp-b-jet2", "Muonp-b-jet2", 150, 0, 300);
+  _h_BMomentumClean[0] = fs->make<TH1D>("BMomentum-b-jet1-D0cut", "BMomentum-b-jet1-D0cut", 100, 0, 400);
+  _h_BMomentumClean[1] = fs->make<TH1D>("BMomentum-b-jet2-D0cut", "BMomentum-b-jet2-D0cut", 100, 0, 400);
 //  _h_D0MassBlow[0] = fs->make<TH1D>("D0Mass-b-jet1-blow", "D0Mass-b-jet1-blow", 30, 1.7, 2.);
 //  _h_D0MassBlow[1] = fs->make<TH1D>("D0Mass-b-jet2-blow", "D0Mass-b-jet2-blow", 30, 1.7, 2.);
 //  _h_D0MassCleanBlow[0] = fs->make<TH1D>("D0MassClean-b-jet1-blow", "D0MassClean-b-jet1-blow", 30, 1.7, 2.);
 //  _h_D0MassCleanBlow[1] = fs->make<TH1D>("D0MassClean-b-jet2-blow", "D0MassClean-b-jet2-blow", 30, 1.7, 2.);
+//
+  _t_bjet1 = fs->make<TTree>("b-jet1", "b-jet1", 1);
+  _t_bjet1->Branch("Weight", &weight, "Weight/D");
+  _t_bjet1->Branch("CSV", &_CSV[0], "CSV/D");
+  _t_bjet1->Branch("vecP", _vecP[0], "vecP[3]/D");
+  _t_bjet1->Branch("Nch", &_Nch[0], "Nch/I");
+  _t_bjet1->Branch("Sump", &_sump[0], "Sump/D");
+  _t_bjet1->Branch("Tr1", _tr1[0] , "Tr1[4]/D");
+  _t_bjet1->Branch("Tr2", _tr2[0] , "Tr2[4]/D");
+  _t_bjet1->Branch("Tr3", _tr3[0] , "Tr3[4]/D");
+  _t_bjet2 = fs->make<TTree>("b-jet2", "b-jet2", 1);
+  _t_bjet2->Branch("Weight", &weight, "Weight/D");
+  _t_bjet2->Branch("CSV", &_CSV[1], "CSV/D");
+  _t_bjet2->Branch("vecP", _vecP[1], "vecP[3]/D");
+  _t_bjet2->Branch("Nch", &_Nch[1], "Nch/I");
+  _t_bjet2->Branch("Sump", &_sump[1], "Sump/D");
+  _t_bjet2->Branch("Tr1", _tr1[1] , "Tr1[4]/D");
+  _t_bjet2->Branch("Tr2", _tr2[1] , "Tr2[4]/D");
+  _t_bjet2->Branch("Tr3", _tr3[1] , "Tr3[4]/D");
 
 }
 
@@ -775,32 +1027,6 @@ D0ForRivet::endJob()
 {
 
   //  std::cout << "Closing histos..." << std::endl;
-  /* Uncomment for Integral() = 1.
-  _h_Nch[0]->Scale(1./_h_Nch[0]->Integral());
-  _h_Nch[1]->Scale(1./_h_Nch[1]->Integral());
-  _h_sump[0]->Scale(1./_h_sump[0]->Integral());
-  _h_sump[1]->Scale(1./_h_sump[1]->Integral());
-  _h_sumpvec[0]->Scale(1./_h_sumpvec[0]->Integral());
-  _h_sumpvec[1]->Scale(1./_h_sumpvec[1]->Integral());
-  _h_sum1p[0]->Scale(1./_h_sum1p[0]->Integral());
-  _h_sum1p[1]->Scale(1./_h_sum1p[1]->Integral());
-  _h_sum3p[0]->Scale(1./_h_sum3p[0]->Integral());
-  _h_sum3p[1]->Scale(1./_h_sum3p[1]->Integral());
-  _h_R1[0]->Scale(1./_h_R1[0]->Integral());
-  _h_R1[1]->Scale(1./_h_R1[1]->Integral());
-  _h_R3[0]->Scale(1./_h_R3[0]->Integral());
-  _h_R3[1]->Scale(1./_h_R3[1]->Integral());
-  _h_D0Mass[0]->Scale(1./_h_D0Mass[0]->Integral());
-  _h_D0Mass[1]->Scale(1./_h_D0Mass[1]->Integral());
-  _h_D0MassClean[0]->Scale(1./_h_D0MassClean[0]->Integral());
-  _h_D0MassClean[1]->Scale(1./_h_D0MassClean[1]->Integral());
-  _h_BMomentum[0]->Scale(1./_h_BMomentum[0]->Integral());
-  _h_BMomentum[1]->Scale(1./_h_BMomentum[1]->Integral());
-  _h_D0MassBlow[0]->Scale(1./_h_D0MassBlow[0]->Integral());
-  _h_D0MassBlow[1]->Scale(1./_h_D0MassBlow[1]->Integral());
-  _h_D0MassCleanBlow[0]->Scale(1./_h_D0MassCleanBlow[0]->Integral());
-  _h_D0MassCleanBlow[1]->Scale(1./_h_D0MassCleanBlow[1]->Integral());
-  */
 }
 
 // ------------ method called when starting to processes a run  ------------
