@@ -302,12 +302,14 @@ void doRivetJob_cut(bool inBatch, TString date, bool isCSVbased)
   TString fi_data_name = "../test/crab_results/"+date;
   TString fi_sl_name = "../test/crab_results/"+date;
   TString fi_dl_name = "../test/crab_results/"+date;
+  /*
   std::cout << "\t\t /!\\ Don't forget in " << fi_data_name << " /!\\ " << std::endl;
   if (isCSVbased)
     std::cout << "hadd D0ForRivet_csv_Data_merged.root D0ForRivet_csv_El_merged.root D0ForRivet_csv_Mu_merged.root" << std::endl;
   else 
     std::cout << "hadd D0ForRivet_pT_Data_merged.root D0ForRivet_pT_El_merged.root D0ForRivet_pT_Mu_merged.root" << std::endl;
   getchar();
+  */
   if (isCSVbased) {
     fi_data_name = fi_data_name + "/D0ForRivet_csv_Data_merged.root";
     fi_sl_name = fi_sl_name + "/D0ForRivet_csv_TTJets_SemiLeptMGDecays.root";
@@ -325,41 +327,41 @@ void doRivetJob_cut(bool inBatch, TString date, bool isCSVbased)
 
   plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "All", "NPrimaryVtx", "Primary vertices multiplicity", 0., 0.);
   plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "All", "NJets", "Jets multiplicity", 0., 0.);
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "All", "TransverseMomentumJets", "p(jets) (GeV/c)", 0., 0.);
+  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "All", "TransverseMomentumJets", "p(jets) (GeV/c)", 0., 250.);
   plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "All", "NCSVJets", "b-tagged jets multiplicity", 0., 0.);
 
   plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "Both jets", "CSV-b-jets", "CSV discriminant", 0., 0.);
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "Both jets", "TransverseMomentum-b-jets", "p(jets) (GeV/c)", 0., 0.);
+  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "Both jets", "TransverseMomentum-b-jets", "p(jets) (GeV/c)", 0., 300.);
 
   plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "1^{st} jet", "Nch-b-jet1", "Tracks multiplicity", 0., 20.);
   plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "2^{nd} jet", "Nch-b-jet2", "Tracks multiplicity", 0., 20.);
 
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "1^{st} jet", "Sump-b-jet1", "Scalar sum of tracks momenta (GeV/c)", 0., 0.);
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "2^{nd} jet", "Sump-b-jet2", "Scalar sum of tracks momenta (GeV/c)", 0., 0.);
+  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "1^{st} jet", "Sump-b-jet1", "Scalar sum of tracks momenta (GeV/c)", 0., 400.);
+  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "2^{nd} jet", "Sump-b-jet2", "Scalar sum of tracks momenta (GeV/c)", 0., 400.);
   
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "1^{st} jet", "VectorialSump-b-jet1", "Vectorial sum of tracks momenta (GeV/c)", 0., 0.);
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "2^{nd} jet", "VectorialSump-b-jet2", "Vectorial sum of tracks momenta (GeV/c)", 0., 0.);
+  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "1^{st} jet", "VectorialSump-b-jet1", "Vectorial sum of tracks momenta (GeV/c)", 0., 400.);
+  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "2^{nd} jet", "VectorialSump-b-jet2", "Vectorial sum of tracks momenta (GeV/c)", 0., 400.);
   
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "1^{st} jet", "Highestp-b-jet1", "Highest track momentum (GeV/c)", 0., 0.);
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "2^{nd} jet", "Highestp-b-jet2", "Highest track momentum (GeV/c)", 0., 0.);
+  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "1^{st} jet", "Highestp-b-jet1", "Highest track momentum (GeV/c)", 0., 200.);
+  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "2^{nd} jet", "Highestp-b-jet2", "Highest track momentum (GeV/c)", 0., 200.);
   
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "1^{st} jet", "Highestp-b-jet1", "Scalar sum of the 3 highest tracks momenta (GeV/c)", 0., 0.);
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "2^{nd} jet", "Highestp-b-jet2", "Scalar sum of the 3 highest tracks momenta (GeV/c)", 0., 0.);
+  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "1^{st} jet", "Sum3p-b-jet1", "Scalar sum of the 3 highest tracks momenta (GeV/c)", 0., 0.);
+  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "2^{nd} jet", "Sum3p-b-jet2", "Scalar sum of the 3 highest tracks momenta (GeV/c)", 0., 0.);
   
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "1^{st} jet", "R1-b-jet1", "#frac{Highest track momentum}{Scalar sum of tracks momenta}", 0., 0.);
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "2^{nd} jet", "R1-b-jet2", "#frac{Highest track momentum}{Scalar sum of tracks momenta}", 0., 0.);
+  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "1^{st} jet", "R1-b-jet1", "R_{1}", 0., 0.);
+  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "2^{nd} jet", "R1-b-jet2", "R_{1}", 0., 0.);
   
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "1^{st} jet", "R3-b-jet1", "#frac{Scalar sum of the 3 highest tracks momenta}{Scalar sum of tracks momenta}", 0., 0.);
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "2^{nd} jet", "R3-b-jet2", "#frac{Scalar sum of the 3 highest tracks momenta}{Scalar sum of tracks momenta}", 0., 0.);
+  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "1^{st} jet", "R3-b-jet1", "R_{3}", 0., 0.);
+  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "2^{nd} jet", "R3-b-jet2", "R_{3}", 0., 0.);
   
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "1^{st} jet", "D0Mass-b-jet1", "m(D^{0}#rightarrow#kappa^{#pm}#pi^{#mp}) (GeV/c^{2})", 0., 0.);
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "2^{nd} jet", "D0Mass-b-jet2", "m(D^{0}#rightarrow#kappa^{#pm}#pi^{#mp}) (GeV/c^{2})", 0., 0.);
+  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "1^{st} jet", "D0Mass-b-jet1", "m(D^{0}#rightarrow#kappa^{+}#pi^{-}) (GeV/c^{2})", 0., 0.);
+  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "2^{nd} jet", "D0Mass-b-jet2", "m(D^{0}#rightarrow#kappa^{+}#pi^{-}) (GeV/c^{2})", 0., 0.);
   
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "1^{st} jet", "D0p-b-jet1", "p(D^{0}#rightarrow#kappa^{#pm}#pi^{#mp}) (GeV/c)", 0., 0.);
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "2^{nd} jet", "D0p-b-jet2", "p(D^{0}#rightarrow#kappa^{#pm}#pi^{#mp}) (GeV/c)", 0., 0.);
+  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "1^{st} jet", "D0p-b-jet1", "p(D^{0}#rightarrow#kappa^{+}#pi^{-}) (GeV/c)", 0., 0.);
+  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "2^{nd} jet", "D0p-b-jet2", "p(D^{0}#rightarrow#kappa^{+}#pi^{-}) (GeV/c)", 0., 0.);
 
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "1^{st} jet", "BMomentum-b-nobias-jet1", "p(#kappa^{#pm}#pi^{#mp}+#mu^{#mp}) (GeV/c)", 0., 0.);
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "2^{nd} jet", "BMomentum-b-nobias-jet2", "p(#kappa^{#pm}#pi^{#mp}+#mu^{#mp}) (GeV/c)", 0., 0.);
+  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "1^{st} jet", "BMomentum-b-nobias-jet1", "p(#kappa^{+}#pi^{-}+#mu^{-}) (GeV/c)", 0., 350.);
+  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "2^{nd} jet", "BMomentum-b-nobias-jet2", "p(#kappa^{+}#pi^{-}+#mu^{-}) (GeV/c)", 0., 350.);
 
   fi_data->Close();
   fi_sl->Close();
