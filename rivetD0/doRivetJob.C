@@ -238,8 +238,8 @@ void plotHisto(bool inBatch, TString date, bool isCSVbased, TFile* fi_data, TFil
   TH1D* h_data = (TH1D*)fi_data->Get(dir_name+h_name);
   TH1D* h_sl = (TH1D*)fi_sl->Get(dir_name+h_name);
   TH1D* h_dl = (TH1D*)fi_dl->Get(dir_name+h_name);
-  h_sl->Scale(2.*25.8031*19769./12119013.);
-  h_dl->Scale(2.*107.6722*19769./25424818.);
+  h_sl->Scale(2.*25.8031*19769./12031276.);
+  h_dl->Scale(2.*107.6722*19769./25339818.);
   TH1D* h_mc = (TH1D*)h_sl->Clone();
   h_mc->Add(h_dl);
   
