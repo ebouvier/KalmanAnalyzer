@@ -360,8 +360,10 @@ void doRivetJob_cut(bool inBatch, TString date, bool isCSVbased)
   plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "1^{st} jet", "D0p-b-jet1", "p(D^{0}#rightarrow#kappa^{+}#pi^{-}) (GeV/c)", 0., 0.);
   plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "2^{nd} jet", "D0p-b-jet2", "p(D^{0}#rightarrow#kappa^{+}#pi^{-}) (GeV/c)", 0., 0.);
 
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "1^{st} jet", "BMomentum-b-nobias-jet1", "p(#kappa^{+}#pi^{-}+#mu^{-}) (GeV/c)", 0., 350.);
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "2^{nd} jet", "BMomentum-b-nobias-jet2", "p(#kappa^{+}#pi^{-}+#mu^{-}) (GeV/c)", 0., 350.);
+  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "1^{st} jet", "BMomentum-nobias-b-jet1", "p(#kappa^{+}#pi^{-}+#mu^{-}) (GeV/c)", 0., 350.);
+  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "2^{nd} jet", "BMomentum-nobias-b-jet2", "p(#kappa^{+}#pi^{-}+#mu^{-}) (GeV/c)", 0., 350.);
+  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "1^{st} jet", "BMomentum-D0window-b-jet1", "p(#kappa^{+}#pi^{-}+#mu^{-}) (GeV/c)", 0., 350.);
+  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "2^{nd} jet", "BMomentum-D0window-b-jet2", "p(#kappa^{+}#pi^{-}+#mu^{-}) (GeV/c)", 0., 350.);
 
   fi_data->Close();
   fi_sl->Close();

@@ -140,6 +140,7 @@ private:
   TH1D* _h_D0pT[2];
   TH1D* _h_D0eta[2];
 	TH1D* _h_BMomentum_unbiased[2];
+  TH1D* _h_BMomentum_window[2];
   TH1D* _h_D0MassClean[2];
 	TH1D* _h_D0pClean[2];
   TH1D* _h_D0pTClean[2];
@@ -790,6 +791,8 @@ D0ForRivet_Mu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             p_Mu.SetPtEtaPhiM(myPFmuInSelJet[iMaxMuInSelJet]->pt(), myPFmuInSelJet[iMaxMuInSelJet]->eta(), myPFmuInSelJet[iMaxMuInSelJet]->phi(), gMassMu);
             TLorentzVector p_Bcombi = p_Mu + p_D0combi;
             _h_BMomentum_unbiased[indJet]->Fill(p_Bcombi.P());            
+            if (p_D0combi.M() > 1.7 && p_D0combi.M() < 2.)
+              _h_BMomentum_window[indJet]->Fill(p_Bcombi.P());            
           }
         }
         
@@ -899,18 +902,18 @@ D0ForRivet_Mu::beginJob()
 	_h_R3[1] = fs->make<TH1D>("R3-b-jet2", "R3-b-jet2", 51, 0, 1.02);
 	_h_R3_Nch[0] = fs->make<TH2D>("R3-Nch-b-jet1", "R3-Nch-b-jet1", 51, 0, 1.02, 45, 0, 45);
 	_h_R3_Nch[1] = fs->make<TH2D>("R3-Nch-b-jet2", "R3-Nch-b-jet2", 51, 0, 1.02, 45, 0, 45);
-	_h_sum1p_nomu[0] = fs->make<TH1D>("Highestp-b-nomu-jet1", "Highestp-b-nomu-jet1", 150, 0, 300);
-	_h_sum1p_nomu[1] = fs->make<TH1D>("Highestp-b-nomu-jet2", "Highestp-b-nomu-jet2", 150, 0, 300);
-	_h_sum3p_nomu[0] = fs->make<TH1D>("Sum3p-b-nomu-jet1", "Sum3p-b-nomu-jet1", 150, 0, 300);
-	_h_sum3p_nomu[1] = fs->make<TH1D>("Sum3p-b-nomu-jet2", "Sum3p-b-nomu-jet2", 150, 0, 300);
-	_h_R1_nomu[0] = fs->make<TH1D>("R1-b-nomu-jet1", "R1-b-nomu-jet1", 51, 0, 1.02);
-	_h_R1_nomu[1] = fs->make<TH1D>("R1-b-nomu-jet2", "R1-b-nomu-jet2", 51, 0, 1.02);
-	_h_R1_Nch_nomu[0] = fs->make<TH2D>("R1-Nch-b-nomu-jet1", "R1-Nch-b-nomu-jet1", 51, 0, 1.02, 45, 0, 45);
-	_h_R1_Nch_nomu[1] = fs->make<TH2D>("R1-Nch-b-nomu-jet2", "R1-Nch-b-nomu-jet2", 51, 0, 1.02, 45, 0, 45);
-	_h_R3_nomu[0] = fs->make<TH1D>("R3-b-nomu-jet1", "R3-b-nomu-jet1", 51, 0, 1.02);
-	_h_R3_nomu[1] = fs->make<TH1D>("R3-b-nomu-jet2", "R3-b-nomu-jet2", 51, 0, 1.02);
-	_h_R3_Nch_nomu[0] = fs->make<TH2D>("R3-Nch-b-nomu-jet1", "R3-Nch-b-nomu-jet1", 51, 0, 1.02, 45, 0, 45);
-	_h_R3_Nch_nomu[1] = fs->make<TH2D>("R3-Nch-b-nomu-jet2", "R3-Nch-b-nomu-jet2", 51, 0, 1.02, 45, 0, 45);
+	_h_sum1p_nomu[0] = fs->make<TH1D>("Highestp-nomu-b-jet1", "Highestp-nomu-b-jet1", 150, 0, 300);
+	_h_sum1p_nomu[1] = fs->make<TH1D>("Highestp-nomu-b-jet2", "Highestp-nomu-b-jet2", 150, 0, 300);
+	_h_sum3p_nomu[0] = fs->make<TH1D>("Sum3p-nomu-b-jet1", "Sum3p-nomu-b-jet1", 150, 0, 300);
+	_h_sum3p_nomu[1] = fs->make<TH1D>("Sum3p-nomu-b-jet2", "Sum3p-nomu-b-jet2", 150, 0, 300);
+	_h_R1_nomu[0] = fs->make<TH1D>("R1-nomu-b-jet1", "R1-nomu-b-jet1", 51, 0, 1.02);
+	_h_R1_nomu[1] = fs->make<TH1D>("R1-nomu-b-jet2", "R1-nomu-b-jet2", 51, 0, 1.02);
+	_h_R1_Nch_nomu[0] = fs->make<TH2D>("R1-Nch-nomu-b-jet1", "R1-Nch-nomu-b-jet1", 51, 0, 1.02, 45, 0, 45);
+	_h_R1_Nch_nomu[1] = fs->make<TH2D>("R1-Nch-nomu-b-jet2", "R1-Nch-nomu-b-jet2", 51, 0, 1.02, 45, 0, 45);
+	_h_R3_nomu[0] = fs->make<TH1D>("R3-nomu-b-jet1", "R3-nomu-b-jet1", 51, 0, 1.02);
+	_h_R3_nomu[1] = fs->make<TH1D>("R3-nomu-b-jet2", "R3-nomu-b-jet2", 51, 0, 1.02);
+	_h_R3_Nch_nomu[0] = fs->make<TH2D>("R3-Nch-nomu-b-jet1", "R3-Nch-nomu-b-jet1", 51, 0, 1.02, 45, 0, 45);
+	_h_R3_Nch_nomu[1] = fs->make<TH2D>("R3-Nch-nomu-b-jet2", "R3-Nch-nomu-b-jet2", 51, 0, 1.02, 45, 0, 45);
 	_h_D0Mass[0] = fs->make<TH1D>("D0Mass-b-jet1", "D0Mass-b-jet1", 400, 0, 8);
 	_h_D0Mass[1] = fs->make<TH1D>("D0Mass-b-jet2", "D0Mass-b-jet2", 400, 0, 8);
 	_h_D0p[0] = fs->make<TH1D>("D0p-b-jet1", "D0p-b-jet1", 150, 0, 300);
@@ -919,10 +922,12 @@ D0ForRivet_Mu::beginJob()
 	_h_D0pT[1] = fs->make<TH1D>("D0pT-b-jet2", "D0pT-b-jet2", 100, 0, 400);
 	_h_D0eta[0] = fs->make<TH1D>("D0eta-b-jet1", "D0eta-b-jet1", 60, -3, 3);
 	_h_D0eta[1] = fs->make<TH1D>("D0eta-b-jet2", "D0eta-b-jet2", 60, -3, 3);
-	_h_BMomentum_unbiased[0] = fs->make<TH1D>("BMomentum-b-nobias-jet1", "BMomentum-b-nobias-jet1", 100, 0, 400);
-	_h_BMomentum_unbiased[1] = fs->make<TH1D>("BMomentum-b-nobias-jet2", "BMomentum-b-nobias-jet2", 100, 0, 400);
+	_h_BMomentum_unbiased[0] = fs->make<TH1D>("BMomentum-nobias-b-jet1", "BMomentum-nobias-b-jet1", 100, 0, 400);
+	_h_BMomentum_unbiased[1] = fs->make<TH1D>("BMomentum-nobias-b-jet2", "BMomentum-nobias-b-jet2", 100, 0, 400);
+  _h_BMomentum_window[0] = fs->make<TH1D>("BMomentum-D0window-b-jet1", "BMomentum-D0window-b-jet1", 100, 0, 400);
+  _h_BMomentum_window[1] = fs->make<TH1D>("BMomentum-D0window-b-jet2", "BMomentum-D0window-b-jet2", 100, 0, 400);
 	_h_D0MassClean[0] = fs->make<TH1D>("D0MassClean-b-jet1", "D0MassClean-b-jet1", 400, 0, 8);
-	_h_D0MassClean[1] = fs->make<TH1D>("D0MassClean-b-jet2", "D0MassClean-b-jet2", 4000, 0, 8);
+	_h_D0MassClean[1] = fs->make<TH1D>("D0MassClean-b-jet2", "D0MassClean-b-jet2", 400, 0, 8);
 	_h_D0pClean[0] = fs->make<TH1D>("D0pClean-b-jet1", "D0pClean-b-jet1", 150, 0, 300);
 	_h_D0pClean[1] = fs->make<TH1D>("D0pClean-b-jet2", "D0pClean-b-jet2", 150, 0, 300);
 	_h_D0pTClean[0] = fs->make<TH1D>("D0pTClean-b-jet1", "D0pTClean-b-jet1", 100, 0, 400);
@@ -933,8 +938,8 @@ D0ForRivet_Mu::beginJob()
 	_h_BMomentum[1] = fs->make<TH1D>("BMomentum-b-jet2", "BMomentum-b-jet2", 100, 0, 400);
 	_h_mup[0] = fs->make<TH1D>("Muonp-b-jet1", "Muonp-b-jet1", 150, 0, 300);
 	_h_mup[1] = fs->make<TH1D>("Muonp-b-jet2", "Muonp-b-jet2", 150, 0, 300);
-	_h_BMomentumClean[0] = fs->make<TH1D>("BMomentum-b-D0cut-jet1", "BMomentum-b-D0cut-jet1", 100, 0, 400);
-	_h_BMomentumClean[1] = fs->make<TH1D>("BMomentum-b-D0cut-jet2", "BMomentum-b-D0cut-jet2", 100, 0, 400);
+	_h_BMomentumClean[0] = fs->make<TH1D>("BMomentum-D0cut-b-jet1", "BMomentum-D0cut-b-jet1", 100, 0, 400);
+	_h_BMomentumClean[1] = fs->make<TH1D>("BMomentum-D0cut-b-jet2", "BMomentum-D0cut-b-jet2", 100, 0, 400);
   // _h_D0MassBlow[0] = fs->make<TH1D>("D0Mass-b-jet1-blow", "D0Mass-b-jet1-blow", 30, 1.7, 2.);
   // _h_D0MassBlow[1] = fs->make<TH1D>("D0Mass-b-jet2-blow", "D0Mass-b-jet2-blow", 30, 1.7, 2.);
   // _h_D0MassCleanBlow[0] = fs->make<TH1D>("D0MassClean-b-jet1-blow", "D0MassClean-b-jet1-blow", 30, 1.7, 2.);
