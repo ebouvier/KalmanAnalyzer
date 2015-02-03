@@ -140,7 +140,6 @@ private:
   TH1D* _h_D0pT[2];
   TH1D* _h_D0eta[2];
 	TH1D* _h_BMomentum_unbiased[2];
-  TH1D* _h_BMomentum_window[2];
   TH1D* _h_D0MassClean[2];
 	TH1D* _h_D0pClean[2];
   TH1D* _h_D0pTClean[2];
@@ -161,6 +160,13 @@ private:
 	double _tr2[2][4];
 	double _tr3[2][4];
 	
+  TTree* _t_D0window_bjets;
+  double weight;
+  double _D0mass;
+  double _CSVdisc;
+  double _Bmomentum;
+  double _R1;
+  double _R3;
 };
 
 //
@@ -180,6 +186,7 @@ _isCSVbased(iConfig.getUntrackedParameter<bool>("isCSVbased", false))
   // now do what ever initialization is needed
   nEvts = 0;
   nEvts2 = 0;
+  weight = 1.;
 	
 }
 
@@ -718,6 +725,11 @@ D0ForRivet_El::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         int tk2charge = 0;
         
         if (fabs(pt_trCand_nomu[0]) > 1e-10 && fabs(pt_trCand_nomu[1]) > 1e-10 && fabs(pt_trCand_nomu[2]) > 1e-10) {
+          _D0mass = 0.;
+          _CSVdisc = -1.;
+          _Bmomentum = 0.;
+          _R1 = 0.;
+          _R3 = 0.;          
           for (unsigned int iD0combi = 0; iD0combi < 6; iD0combi++) {
             
             //~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -791,8 +803,14 @@ D0ForRivet_El::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             p_Mu.SetPtEtaPhiM(myPFmuInSelJet[iMaxMuInSelJet]->pt(), myPFmuInSelJet[iMaxMuInSelJet]->eta(), myPFmuInSelJet[iMaxMuInSelJet]->phi(), gMassMu);				 
             TLorentzVector p_Bcombi = p_Mu + p_D0combi;
             _h_BMomentum_unbiased[indJet]->Fill(p_Bcombi.P());  
-            if (p_D0combi.M() > 1.7 && p_D0combi.M() < 2.)
-              _h_BMomentum_window[indJet]->Fill(p_Bcombi.P());            
+            if (p_D0combi.M() > 1.7 && p_D0combi.M() < 2.) {
+              _D0mass = p_D0combi.M();
+              _CSVdisc = (*it).bDiscriminator("combinedSecondaryVertexBJetTags");
+              _Bmomentum = p_Bcombi.P();
+              _R1 = p_trCand[0].P() / _sump[indJet];
+              _R3 = (p_trCand[0].P() + p_trCand[1].P() + p_trCand[2].P()) / _sump[indJet];
+              _t_D0window_bjets->Fill();
+            }              
           }
         }
         
@@ -924,8 +942,6 @@ D0ForRivet_El::beginJob()
 	_h_D0eta[1] = fs->make<TH1D>("D0eta-b-jet2", "D0eta-b-jet2", 60, -3, 3);
 	_h_BMomentum_unbiased[0] = fs->make<TH1D>("BMomentum-nobias-b-jet1", "BMomentum-nobias-b-jet1", 100, 0, 400);
 	_h_BMomentum_unbiased[1] = fs->make<TH1D>("BMomentum-nobias-b-jet2", "BMomentum-nobias-b-jet2", 100, 0, 400);
-  _h_BMomentum_window[0] = fs->make<TH1D>("BMomentum-D0window-b-jet1", "BMomentum-D0window-b-jet1", 100, 0, 400);
-  _h_BMomentum_window[1] = fs->make<TH1D>("BMomentum-D0window-b-jet2", "BMomentum-D0window-b-jet2", 100, 0, 400);
 	_h_D0MassClean[0] = fs->make<TH1D>("D0MassClean-b-jet1", "D0MassClean-b-jet1", 400, 0, 8);
 	_h_D0MassClean[1] = fs->make<TH1D>("D0MassClean-b-jet2", "D0MassClean-b-jet2", 400, 0, 8);
 	_h_D0pClean[0] = fs->make<TH1D>("D0pClean-b-jet1", "D0pClean-b-jet1", 150, 0, 300);
@@ -962,6 +978,14 @@ D0ForRivet_El::beginJob()
 	_t_bjet2->Branch("Tr2", _tr2[1] , "Tr2[4]/D");
 	_t_bjet2->Branch("Tr3", _tr3[1] , "Tr3[4]/D");
 	
+  _t_D0window_bjets = fs->make<TTree>("D0window-b-jets", "D0window-b-jets", 1);
+  _t_D0window_bjets->Branch("Weight", &weight, "Weight/D");
+  _t_D0window_bjets->Branch("D0mass", &_D0mass, "D0mass/D");
+  _t_D0window_bjets->Branch("CSVdisc", &_CSVdisc, "CSVdisc/D");
+  _t_D0window_bjets->Branch("Bmomentum", &_Bmomentum, "Bmomentum/D");
+  _t_D0window_bjets->Branch("R1", &_R1, "R1/D");
+  _t_D0window_bjets->Branch("R3", &_R3, "R3/D");
+  
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
