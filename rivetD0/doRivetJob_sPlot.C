@@ -222,7 +222,7 @@ void cms_style(bool isData = true){
 }
 
 //---------------------------------------------------------------
-TGraphAsymmErrors **treatHisto(bool inBatch, TStyle* my_style, TString date, bool isCSVbased, TFile* fi, TString name, TString channel)
+TGraphAsymmErrors **treatHisto(bool inBatch, TStyle* my_style, TString date, bool isCSVbased, const int NsPlots, TFile* fi, TString name, TString channel)
 //---------------------------------------------------------------
 {
   my_style->cd();
@@ -257,7 +257,17 @@ TGraphAsymmErrors **treatHisto(bool inBatch, TStyle* my_style, TString date, boo
   RooRealVar bmomentum("Bmomentum", "p(#kappa^{+}#pi^{-}+#mu^{-})", 0., 400., "GeV/c");
   RooRealVar r1("R1", "R1", 0., 1.);
   RooRealVar r3("R3", "R3", 0., 1.);
-  RooArgSet variables(weight, csvdisc, d0mass, bmomentum, r1, r3);
+  RooRealVar nch("Nch", "Tracks multiplicity", 0., 30.);
+  RooRealVar sumpT("SumpT", "#sum p_{T}", 0., 1000., "GeV/c");
+  RooRealVar averpT("AveragepT", "#LT pT #GT", 0., 100., "GeV/c");
+  RooRealVar r1_nomu("R1_nomu", "R1 (no #mu)", 0., 1.);
+  RooRealVar r3_nomu("R3_nomu", "R3 (no #mu)", 0., 1.);
+  RooRealVar genId("GenId", "True jets flavour", 0., 22.);
+  RooArgSet variables(weight, csvdisc, d0mass, bmomentum, r1, r3, nch, sumpT, averpT);
+  variables.add(r1_nomu);
+  variables.add(r3_nomu);
+  if (!name.Contains("Data")) 
+    variables.add(genId);
   RooDataSet *data = new RooDataSet("data", "data", variables, Import(*tree), WeightVar(weight));
   
   // Fit the D0 mass peak
@@ -313,6 +323,26 @@ TGraphAsymmErrors **treatHisto(bool inBatch, TStyle* my_style, TString date, boo
   RooPlot* fr_R3 = r3.frame();
   sigData->plotOn(fr_R3, Name("sigData_R3"), Binning(20), DataError(RooAbsData::SumW2), LineColor(kRed), LineWidth(2), MarkerColor(kRed), MarkerStyle(20));
   bckData->plotOn(fr_R3, Name("bckData_R3"), Binning(20), DataError(RooAbsData::SumW2), LineColor(kBlue), LineWidth(2), MarkerColor(kBlue), MarkerStyle(24));
+  
+  RooPlot* fr_Nch = nch.frame();
+  sigData->plotOn(fr_Nch, Name("sigData_Nch"), Binning(20), DataError(RooAbsData::SumW2), LineColor(kRed), LineWidth(2), MarkerColor(kRed), MarkerStyle(20));
+  bckData->plotOn(fr_Nch, Name("bckData_Nch"), Binning(20), DataError(RooAbsData::SumW2), LineColor(kBlue), LineWidth(2), MarkerColor(kBlue), MarkerStyle(24));
+  
+  RooPlot* fr_SumpT = sumpT.frame();
+  sigData->plotOn(fr_SumpT, Name("sigData_SumpT"), Binning(20), DataError(RooAbsData::SumW2), LineColor(kRed), LineWidth(2), MarkerColor(kRed), MarkerStyle(20));
+  bckData->plotOn(fr_SumpT, Name("bckData_SumpT"), Binning(20), DataError(RooAbsData::SumW2), LineColor(kBlue), LineWidth(2), MarkerColor(kBlue), MarkerStyle(24));
+  
+  RooPlot* fr_AveragepT = averpT.frame();
+  sigData->plotOn(fr_AveragepT, Name("sigData_AveragepT"), Binning(20), DataError(RooAbsData::SumW2), LineColor(kRed), LineWidth(2), MarkerColor(kRed), MarkerStyle(20));
+  bckData->plotOn(fr_AveragepT, Name("bckData_AveragepT"), Binning(20), DataError(RooAbsData::SumW2), LineColor(kBlue), LineWidth(2), MarkerColor(kBlue), MarkerStyle(24));
+  
+  RooPlot* fr_R1_nomu = r1_nomu.frame();
+  sigData->plotOn(fr_R1_nomu, Name("sigData_R1_nomu"), Binning(20), DataError(RooAbsData::SumW2), LineColor(kRed), LineWidth(2), MarkerColor(kRed), MarkerStyle(20));
+  bckData->plotOn(fr_R1_nomu, Name("bckData_R1_nomu"), Binning(20), DataError(RooAbsData::SumW2), LineColor(kBlue), LineWidth(2), MarkerColor(kBlue), MarkerStyle(24));
+  
+  RooPlot* fr_R3_nomu = r3_nomu.frame();
+  sigData->plotOn(fr_R3_nomu, Name("sigData_R3_nomu"), Binning(20), DataError(RooAbsData::SumW2), LineColor(kRed), LineWidth(2), MarkerColor(kRed), MarkerStyle(20));
+  bckData->plotOn(fr_R3_nomu, Name("bckData_R3_nomu"), Binning(20), DataError(RooAbsData::SumW2), LineColor(kBlue), LineWidth(2), MarkerColor(kBlue), MarkerStyle(24));
   
   TCanvas* cn_discvar = new TCanvas("cn_discvar","cn_discvar",800,800);
   cn_discvar->cd();
@@ -407,55 +437,238 @@ TGraphAsymmErrors **treatHisto(bool inBatch, TStyle* my_style, TString date, boo
   cn_R3->SaveAs(rep_name+"R3_sPlot_"+name+".eps");
   cn_R3->SaveAs(rep_name+"R3_sPlot_"+name+".pdf");
   
+  TCanvas* cn_Nch = new TCanvas("cn_Nch","cn_Nch",800,800);
+  cn_Nch->cd();
+  fr_Nch->Draw();
+  TLegend *leg_Nch = new TLegend(0.6,0.8,0.89,0.88);
+  leg_style(leg_Nch, 12);
+  leg_Nch->AddEntry("sigData_Nch","Weighted signal","P");
+  leg_Nch->AddEntry("bckData_Nch","Weighted background","P");
+  leg_Nch->Draw();
+  channel_tex_r->Draw("same");  
+  if (name.Contains("Data"))
+    cms_style();
+  else 
+    cms_style(false);
+  cn_Nch->SaveAs(rep_name+"Nch_sPlot_"+name+".C");
+  cn_Nch->SaveAs(rep_name+"Nch_sPlot_"+name+".eps");
+  cn_Nch->SaveAs(rep_name+"Nch_sPlot_"+name+".pdf");
+  
+  TCanvas* cn_SumpT = new TCanvas("cn_SumpT","cn_SumpT",800,800);
+  cn_SumpT->cd();
+  fr_SumpT->Draw();
+  TLegend *leg_SumpT = new TLegend(0.6,0.8,0.89,0.88);
+  leg_style(leg_SumpT, 12);
+  leg_SumpT->AddEntry("sigData_SumpT","Weighted signal","P");
+  leg_SumpT->AddEntry("bckData_SumpT","Weighted background","P");
+  leg_SumpT->Draw();
+  channel_tex_r->Draw("same");  
+  if (name.Contains("Data"))
+    cms_style();
+  else 
+    cms_style(false);
+  cn_SumpT->SaveAs(rep_name+"SumpT_sPlot_"+name+".C");
+  cn_SumpT->SaveAs(rep_name+"SumpT_sPlot_"+name+".eps");
+  cn_SumpT->SaveAs(rep_name+"SumpT_sPlot_"+name+".pdf");
+  
+  TCanvas* cn_AveragepT = new TCanvas("cn_AveragepT","cn_AveragepT",800,800);
+  cn_AveragepT->cd();
+  fr_AveragepT->Draw();
+  TLegend *leg_AveragepT = new TLegend(0.6,0.8,0.89,0.88);
+  leg_style(leg_AveragepT, 12);
+  leg_AveragepT->AddEntry("sigData_AveragepT","Weighted signal","P");
+  leg_AveragepT->AddEntry("bckData_AveragepT","Weighted background","P");
+  leg_AveragepT->Draw();
+  channel_tex_r->Draw("same");  
+  if (name.Contains("Data"))
+    cms_style();
+  else 
+    cms_style(false);
+  cn_AveragepT->SaveAs(rep_name+"AveragepT_sPlot_"+name+".C");
+  cn_AveragepT->SaveAs(rep_name+"AveragepT_sPlot_"+name+".eps");
+  cn_AveragepT->SaveAs(rep_name+"AveragepT_sPlot_"+name+".pdf");
+  
+  TCanvas* cn_R1_nomu = new TCanvas("cn_R1_nomu","cn_R1_nomu",800,800);
+  cn_R1_nomu->cd();
+  fr_R1_nomu->Draw();
+  TLegend *leg_R1_nomu = new TLegend(0.6,0.8,0.89,0.88);
+  leg_style(leg_R1_nomu, 12);
+  leg_R1_nomu->AddEntry("sigData_R1_nomu","Weighted signal","P");
+  leg_R1_nomu->AddEntry("bckData_R1_nomu","Weighted background","P");  
+  leg_R1_nomu->Draw();
+  channel_tex_r->Draw("same");  
+  if (name.Contains("Data"))
+    cms_style();
+  else 
+    cms_style(false);
+  cn_R1_nomu->SaveAs(rep_name+"R1_nomu_sPlot_"+name+".C");
+  cn_R1_nomu->SaveAs(rep_name+"R1_nomu_sPlot_"+name+".eps");
+  cn_R1_nomu->SaveAs(rep_name+"R1_nomu_sPlot_"+name+".pdf");
+
+  TCanvas* cn_R3_nomu = new TCanvas("cn_R3_nomu","cn_R3_nomu",800,800);
+  cn_R3_nomu->cd();
+  fr_R3_nomu->Draw();
+  TLegend *leg_R3_nomu = new TLegend(0.2,0.8,0.49,0.88);
+  leg_style(leg_R3_nomu, 12);
+  leg_R3_nomu->AddEntry("sigData_R3_nomu","Weighted signal","P");
+  leg_R3_nomu->AddEntry("bckData_R3_nomu","Weighted background","P");
+  leg_R3_nomu->Draw();  
+  channel_tex_l->Draw("same");  
+  if (name.Contains("Data"))
+    cms_style();
+  else 
+    cms_style(false);
+  cn_R3_nomu->SaveAs(rep_name+"R3_nomu_sPlot_"+name+".C");
+  cn_R3_nomu->SaveAs(rep_name+"R3_nomu_sPlot_"+name+".eps");
+  cn_R3_nomu->SaveAs(rep_name+"R3_nomu_sPlot_"+name+".pdf");
+  
   if (!inBatch) getchar();
   
-  TGraphAsymmErrors **gr_all = new TGraphAsymmErrors*[4];
+  TGraphAsymmErrors **gr_all = new TGraphAsymmErrors*[NsPlots];
+  int ig = 0;
   
-  gr_all[0] = (TGraphAsymmErrors*)cn_CSVdisc->GetPrimitive("sigData_CSVdisc"); 
-  gr_all[0]->GetXaxis()->SetRangeUser(0.,1.);
+  assert (ig < NsPlots);
+  gr_all[ig] = (TGraphAsymmErrors*)cn_CSVdisc->GetPrimitive("sigData_CSVdisc"); 
+  gr_all[ig]->GetXaxis()->SetRangeUser(0.,1.);
   if (name.Contains("Data"))
-    graphasymerror_mystyle(gr_all[0], "Data_Sig_CSVdisc", 2, 1, 1, 0, 0, -1111., -1111., 510, 510, 20, 1, 1.2);  
+    graphasymerror_mystyle(gr_all[ig], "Data_Sig_CSVdisc", 2, 1, 1, 0, 0, -1111., -1111., 510, 510, 20, 1, 1.2);  
   else 
-    graphasymerror_mystyle(gr_all[0], "MC_Sig_CSVdisc", 2, 862, 1, 862, 1001, -1111., -1111., 510, 510, 1, 862, 1.2);
-  
-  gr_all[1] = (TGraphAsymmErrors*)cn_Bmomentum->GetPrimitive("sigData_Bmomentum");
-  gr_all[1]->GetXaxis()->SetRangeUser(0.,400.);
+    graphasymerror_mystyle(gr_all[ig], "MC_Sig_CSVdisc", 2, 862, 1, 862, 1001, -1111., -1111., 510, 510, 1, 862, 1.2);
+  ig++;
+
+  assert (ig < NsPlots);
+  gr_all[ig] = (TGraphAsymmErrors*)cn_Bmomentum->GetPrimitive("sigData_Bmomentum");
+  gr_all[ig]->GetXaxis()->SetRangeUser(0.,400.);
   if (name.Contains("Data"))
-    graphasymerror_mystyle(gr_all[1], "Data_Sig_Bmomentum", 2, 1, 1, 0, 0, -1111., -1111., 510, 510, 20, 1, 1.2);  
+    graphasymerror_mystyle(gr_all[ig], "Data_Sig_Bmomentum", 2, 1, 1, 0, 0, -1111., -1111., 510, 510, 20, 1, 1.2);  
   else 
-    graphasymerror_mystyle(gr_all[1], "MC_Sig_Bmomentum", 2, 862, 1, 862, 1001, -1111., -1111., 510, 510, 1, 862, 1.2);
+    graphasymerror_mystyle(gr_all[ig], "MC_Sig_Bmomentum", 2, 862, 1, 862, 1001, -1111., -1111., 510, 510, 1, 862, 1.2);
+  ig++;
   
-  gr_all[2] = (TGraphAsymmErrors*)cn_R1->GetPrimitive("sigData_R1"); 
-  gr_all[2]->GetXaxis()->SetRangeUser(0.,1.);
+  assert (ig < NsPlots);
+  gr_all[ig] = (TGraphAsymmErrors*)cn_R1->GetPrimitive("sigData_R1"); 
+  gr_all[ig]->GetXaxis()->SetRangeUser(0.,1.);
   if (name.Contains("Data")) 
-    graphasymerror_mystyle(gr_all[2], "Data_Sig_R1", 2, 1, 1, 0, 0, -1111., -1111., 510, 510, 20, 1, 1.2);  
+    graphasymerror_mystyle(gr_all[ig], "Data_Sig_R1", 2, 1, 1, 0, 0, -1111., -1111., 510, 510, 20, 1, 1.2);  
   else 
-    graphasymerror_mystyle(gr_all[2], "MC_Sig_R1", 2, 862, 1, 862, 1001, -1111., -1111., 510, 510, 1, 862, 1.2);
+    graphasymerror_mystyle(gr_all[ig], "MC_Sig_R1", 2, 862, 1, 862, 1001, -1111., -1111., 510, 510, 1, 862, 1.2);
+  ig++;
   
-  gr_all[3] = (TGraphAsymmErrors*)cn_R3->GetPrimitive("sigData_R3"); 
-  gr_all[3]->GetXaxis()->SetRangeUser(0.,1.);
+  assert (ig < NsPlots);
+  gr_all[ig] = (TGraphAsymmErrors*)cn_R3->GetPrimitive("sigData_R3"); 
+  gr_all[ig]->GetXaxis()->SetRangeUser(0.,1.);
   if (name.Contains("Data"))
-    graphasymerror_mystyle(gr_all[3], "Data_Sig_R3", 2, 1, 1, 0, 0, -1111., -1111., 510, 510, 20, 1, 1.2);  
+    graphasymerror_mystyle(gr_all[ig], "Data_Sig_R3", 2, 1, 1, 0, 0, -1111., -1111., 510, 510, 20, 1, 1.2);  
   else 
-    graphasymerror_mystyle(gr_all[3], "MC_Sig_R3", 2, 862, 1, 862, 1001, -1111., -1111., 510, 510, 1, 862, 1.2);
+    graphasymerror_mystyle(gr_all[ig], "MC_Sig_R3", 2, 862, 1, 862, 1001, -1111., -1111., 510, 510, 1, 862, 1.2);
+  ig++;
+  
+  assert (ig < NsPlots);
+  gr_all[ig] = (TGraphAsymmErrors*)cn_Nch->GetPrimitive("sigData_Nch"); 
+  gr_all[ig]->GetXaxis()->SetRangeUser(0.,30.);
+  if (name.Contains("Data"))
+    graphasymerror_mystyle(gr_all[ig], "Data_Sig_Nch", 2, 1, 1, 0, 0, -1111., -1111., 510, 510, 20, 1, 1.2);  
+  else 
+    graphasymerror_mystyle(gr_all[ig], "MC_Sig_Nch", 2, 862, 1, 862, 1001, -1111., -1111., 510, 510, 1, 862, 1.2);
+  ig++;
+  
+  assert (ig < NsPlots);
+  gr_all[ig] = (TGraphAsymmErrors*)cn_SumpT->GetPrimitive("sigData_SumpT"); 
+  gr_all[ig]->GetXaxis()->SetRangeUser(0.,1000.);
+  if (name.Contains("Data"))
+    graphasymerror_mystyle(gr_all[ig], "Data_Sig_SumpT", 2, 1, 1, 0, 0, -1111., -1111., 510, 510, 20, 1, 1.2);  
+  else 
+    graphasymerror_mystyle(gr_all[ig], "MC_Sig_SumpT", 2, 862, 1, 862, 1001, -1111., -1111., 510, 510, 1, 862, 1.2);
+  ig++;
+  
+  assert (ig < NsPlots);
+  gr_all[ig] = (TGraphAsymmErrors*)cn_AveragepT->GetPrimitive("sigData_AveragepT"); 
+  gr_all[ig]->GetXaxis()->SetRangeUser(0.,100.);
+  if (name.Contains("Data"))
+    graphasymerror_mystyle(gr_all[ig], "Data_Sig_AveragepT", 2, 1, 1, 0, 0, -1111., -1111., 510, 510, 20, 1, 1.2);  
+  else 
+    graphasymerror_mystyle(gr_all[ig], "MC_Sig_AveragepT", 2, 862, 1, 862, 1001, -1111., -1111., 510, 510, 1, 862, 1.2);
+  ig++;
+  
+  assert (ig < NsPlots);
+  gr_all[ig] = (TGraphAsymmErrors*)cn_R1_nomu->GetPrimitive("sigData_R1_nomu"); 
+  gr_all[ig]->GetXaxis()->SetRangeUser(0.,1.);
+  if (name.Contains("Data")) 
+    graphasymerror_mystyle(gr_all[ig], "Data_Sig_R1_nomu", 2, 1, 1, 0, 0, -1111., -1111., 510, 510, 20, 1, 1.2);  
+  else 
+    graphasymerror_mystyle(gr_all[ig], "MC_Sig_R1_nomu", 2, 862, 1, 862, 1001, -1111., -1111., 510, 510, 1, 862, 1.2);
+  ig++;
+  
+  assert (ig < NsPlots);
+  gr_all[ig] = (TGraphAsymmErrors*)cn_R3_nomu->GetPrimitive("sigData_R3_nomu"); 
+  gr_all[ig]->GetXaxis()->SetRangeUser(0.,1.);
+  if (name.Contains("Data"))
+    graphasymerror_mystyle(gr_all[ig], "Data_Sig_R3_nomu", 2, 1, 1, 0, 0, -1111., -1111., 510, 510, 20, 1, 1.2);  
+  else 
+    graphasymerror_mystyle(gr_all[ig], "MC_Sig_R3_nomu", 2, 862, 1, 862, 1001, -1111., -1111., 510, 510, 1, 862, 1.2);
+  ig++;
+
+  if (!name.Contains("Data")) {
+    RooPlot* fr_GenId = genId.frame();
+    sigData->plotOn(fr_GenId, Name("sigData_GenId"), Binning(22), DataError(RooAbsData::SumW2), LineColor(kRed), LineWidth(2), MarkerColor(kRed), MarkerStyle(20));
+    bckData->plotOn(fr_GenId, Name("bckData_GenId"), Binning(22), DataError(RooAbsData::SumW2), LineColor(kBlue), LineWidth(2), MarkerColor(kBlue), MarkerStyle(24));
+
+    TCanvas* cn_GenId = new TCanvas("cn_GenId","cn_GenId",800,800);
+    cn_GenId->cd();
+    fr_GenId->Draw();
+    TLegend *leg_GenId = new TLegend(0.6,0.8,0.89,0.88);
+    leg_style(leg_GenId, 12);
+    leg_GenId->AddEntry("sigData_GenId","Weighted signal","P");
+    leg_GenId->AddEntry("bckData_GenId","Weighted background","P");
+    leg_GenId->Draw();  
+    channel_tex_r->Draw("same");  
+    if (name.Contains("Data"))
+      cms_style();
+    else 
+      cms_style(false);
+    cn_GenId->SaveAs(rep_name+"GenId_sPlot_"+name+".C");
+    cn_GenId->SaveAs(rep_name+"GenId_sPlot_"+name+".eps");
+    cn_GenId->SaveAs(rep_name+"GenId_sPlot_"+name+".pdf");
+
+    if (!inBatch) getchar();
+    
+    delete cn_GenId;
+    delete fr_GenId;
+    delete leg_GenId;
+  }
 
   delete cn_discvar;
 /*  delete cn_Bmomentum;
   delete cn_CSVdisc;
   delete cn_R1;
   delete cn_R3;
+  delete cn_Nch;
+  delete cn_SumpT;
+  delete cn_AveragepT;
+  delete cn_R1_nomu;
+  delete cn_R3_nomu;
 */  
   delete leg_discvar;
   delete leg_Bmomentum;
   delete leg_CSVdisc;
   delete leg_R1;
   delete leg_R3;
+  delete leg_Nch;
+  delete leg_SumpT;
+  delete leg_AveragepT;
+  delete leg_R1_nomu;
+  delete leg_R3_nomu;
   
   delete fr_discvar;
 /*  delete fr_Bmomentum;
   delete fr_CSVdisc;
   delete fr_R1;
   delete fr_R3;
+  delete fr_Nch;
+  delete fr_SumpT;
+  delete fr_AveragepT;
+  delete fr_R1_nomu;
+  delte fr_R3_nomu;
 */  
 //  delete bckData;
 //  delete sigData;
@@ -500,14 +713,19 @@ void doRivetJob_file(bool inBatch, TString date, bool isCSVbased)
   
   const double norm_sl = 2.*25.8031*19769./12031276.;
   const double norm_dl = 2.*107.6722*19769./25339818.;
+  const int NsPlots = 9;
   vector<TString> xtitle; xtitle.push_back("CSV discriminant"); xtitle.push_back("p(#kappa^{+}#pi^{-}+#mu^{-}) (GeV/c)"); xtitle.push_back("R1"); xtitle.push_back("R3");
+  xtitle.push_back("Tracks multiplicity"); xtitle.push_back("#sum p_{T} (GeV/c)"); xtitle.push_back("#LT p_{T} #GT = #frac{#sum p_{T}}{N_{tracks}} (GeV/c)"); xtitle.push_back("R1 (no #mu)"); xtitle.push_back("R3 (no #mu)");
   vector<TString> grtitle; grtitle.push_back("CSVdisc_Sig_Data2MC"); grtitle.push_back("Bmomentum_Sig_Data2MC"); grtitle.push_back("R1_Sig_Data2MC"); grtitle.push_back("R3_Sig_Data2MC");
+  grtitle.push_back("Nch_Sig_Data2MC"); grtitle.push_back("SumpT_Sig_Data2MC"); grtitle.push_back("AveragepT_Sig_Data2MC"); grtitle.push_back("R1_nomu_Sig_Data2MC"); grtitle.push_back("R3_nomu_Sig_Data2MC");
+  assert (xtitle.size() == grtitle.size());
+  assert (xtitle.size() == NsPlots);
   
-  TGraphAsymmErrors **gr_all_data = treatHisto(inBatch, my_style, date, isCSVbased, fi_data, "Data_merged", "Data - Run 2012 A,B,C,D");
-  TGraphAsymmErrors **gr_all_sl = treatHisto(inBatch, my_style, date, isCSVbased, fi_sl, "TTJets_SemiLeptMGDecays", "MG+PY6 Z2* Semilept. t#bar{t}");
-  TGraphAsymmErrors **gr_all_dl = treatHisto(inBatch, my_style, date, isCSVbased, fi_dl, "TTJets_FullLeptMGDecays", "MG+PY6 Z2* Dilept. t#bar{t}");
+  TGraphAsymmErrors **gr_all_data = treatHisto(inBatch, my_style, date, isCSVbased, NsPlots, fi_data, "Data_merged", "Data - Run 2012 A,B,C,D");
+  TGraphAsymmErrors **gr_all_sl = treatHisto(inBatch, my_style, date, isCSVbased, NsPlots, fi_sl, "TTJets_SemiLeptMGDecays", "MG+PY6 Z2* Semilept. t#bar{t}");
+  TGraphAsymmErrors **gr_all_dl = treatHisto(inBatch, my_style, date, isCSVbased, NsPlots, fi_dl, "TTJets_FullLeptMGDecays", "MG+PY6 Z2* Dilept. t#bar{t}");
 
-  for (int ig = 0; ig < 4; ig++) {
+  for (int ig = 0; ig < NsPlots; ig++) {
     TGraphAsymmErrors *gr_alldata = (TGraphAsymmErrors*)gr_all_data[ig]->Clone(); 
     TGraphAsymmErrors *gr_allmc = (TGraphAsymmErrors*)gr_all_sl[ig]->Clone(); 
     double x_data = 0.;

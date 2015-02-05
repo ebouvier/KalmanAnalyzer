@@ -156,6 +156,7 @@ private:
 	double _vecP[2][4];
 	int _Nch[2];
 	double _sump[2];
+	double _sumpt[2];
 	double _tr1[2][4];
 	double _tr2[2][4];
 	double _tr3[2][4];
@@ -167,6 +168,11 @@ private:
   double _Bmomentum;
   double _R1;
   double _R3;
+  double _Ntr;
+  double _sumpT;
+  double _averpT;
+  double _R1_nomu;
+  double _R3_nomu;
 };
 
 //
@@ -468,6 +474,7 @@ D0ForRivet_El::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     _vecP[1][0] = -1000.; _vecP[1][1] = -1000.; _vecP[1][2] = -1000.; _vecP[1][3] = -1000.;
     _Nch[0] = -1; _Nch[1] = -1;
     _sump[0] = -1.; _sump[1] = -1.;
+    _sumpt[0] = -1.; _sumpt[1] = -1.;
     _sumpvec[0].SetPtEtaPhiM(0.,0.,0.,0.);
     _sumpvec[1].SetPtEtaPhiM(0.,0.,0.,0.);
     _tr1[0][0] = -1000.; _tr1[0][1] = -1000.; _tr1[0][2] = -1000.; _tr1[0][3] = -1000.;
@@ -515,6 +522,7 @@ D0ForRivet_El::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         
         _Nch[indJet] = 0; 
         _sump[indJet] = 0.; 
+        _sumpt[indJet] = 0.; 
         std::vector<const reco::PFCandidate*> myPFmuInSelJet;
         for (reco::track_iterator iter1 = jetTracks.begin(); iter1 != jetTracks.end(); ++iter1) {
           
@@ -683,6 +691,7 @@ D0ForRivet_El::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           
           _Nch[indJet]++;
           _sump[indJet] = _sump[indJet] + p_tr1.P();
+          _sumpt[indJet] = _sumpt[indJet] + p_tr1.Pt();
           _sumpvec[indJet] = _sumpvec[indJet] + p_tr1;
           _h_etach[indJet]->Fill(p_tr1.Eta());
           _h_pTch[indJet]->Fill(p_tr1.Pt());
@@ -730,6 +739,11 @@ D0ForRivet_El::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           _Bmomentum = 0.;
           _R1 = 0.;
           _R3 = 0.;          
+          _Ntr = 0.;
+          _sumpT = 0.;
+          _averpT = 0.;
+          _R1_nomu = 0.;
+          _R3_nomu = 0.;                    
           for (unsigned int iD0combi = 0; iD0combi < 6; iD0combi++) {
             
             //~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -809,6 +823,11 @@ D0ForRivet_El::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
               _Bmomentum = p_Bcombi.P();
               _R1 = p_trCand[0].P() / _sump[indJet];
               _R3 = (p_trCand[0].P() + p_trCand[1].P() + p_trCand[2].P()) / _sump[indJet];
+              _Ntr = (double)_Nch[indJet];
+              _sumpT = _sumpt[indJet];
+              _averpT = _sumpT/_Ntr;
+              _R1_nomu = p_trCand_nomu[0].P() / _sump[indJet];
+              _R3_nomu = (p_trCand_nomu[0].P() + p_trCand_nomu[1].P() + p_trCand_nomu[2].P()) / _sump[indJet];
               _t_D0window_bjets->Fill();
             }              
           }
@@ -985,6 +1004,11 @@ D0ForRivet_El::beginJob()
   _t_D0window_bjets->Branch("Bmomentum", &_Bmomentum, "Bmomentum/D");
   _t_D0window_bjets->Branch("R1", &_R1, "R1/D");
   _t_D0window_bjets->Branch("R3", &_R3, "R3/D");
+  _t_D0window_bjets->Branch("Nch", &_Ntr, "Nch/D");
+  _t_D0window_bjets->Branch("SumpT", &_sumpT, "SumpT/D");
+  _t_D0window_bjets->Branch("AveragepT", &_averpT, "SumpT/D");
+  _t_D0window_bjets->Branch("R1_nomu", &_R1_nomu, "R1_nomu/D");
+  _t_D0window_bjets->Branch("R3_nomu", &_R3_nomu, "R3_nomu/D");
   
 }
 
