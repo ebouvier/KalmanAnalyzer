@@ -108,7 +108,14 @@ private:
   bool isGoodEvt;
   
   TH1D* _h_idPFel;
-  TH1D* _h_dRPFel;
+  TH2D* _h_id_pT_PFel;
+  TH2D* _h_dR_dpT_PFel;
+  TH1D* _h_idPFmu;
+  TH2D* _h_id_pT_PFmu;
+  TH2D* _h_dR_dpT_PFmu;
+  TH1D* _h_id1stPFmu;
+  TH2D* _h_id_pT_1stPFmu;
+  TH2D* _h_dR_dpT_1stPFmu;
   
   TH1D* _h_nVtx;
   TH1D* _h_nJets;
@@ -178,6 +185,19 @@ private:
   double _averpT;
   double _R1_nomu;
   double _R3_nomu;
+  
+  TTree* _t_D0KVFwindow_bjets;
+  double _D0mass_KVF;
+  double _genId_KVF;
+  double _CSVdisc_KVF;
+  double _Bmomentum_KVF;
+  double _R1_KVF;
+  double _R3_KVF;
+  double _Ntr_KVF;
+  double _sumpT_KVF;
+  double _averpT_KVF;
+  double _R1_nomu_KVF;
+  double _R3_nomu_KVF;
 };
 
 //
@@ -438,7 +458,7 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       }
     }
     
-    // Match PF electrons to genParticles
+    // Match PF e/mu to genParticles
     edm::Handle<std::vector<reco::GenParticle> > mcHandle;
     edm::InputTag tagGen("genParticles", "", "SIM");
     iEvent.getByLabel(tagGen, mcHandle);
@@ -447,19 +467,48 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       TLorentzVector p_PFel;
       p_PFel.SetPtEtaPhiM(myPFel[iPFel]->pt(), myPFel[iPFel]->eta(), myPFel[iPFel]->phi(), 0.);
       double minDeltaRPFelGen = 200.;
+      double minDeltaPtPFelGen = 200.;
       int idGen = 0;
+      double pTGen = 0.;
       for (reco::GenParticleCollection::const_iterator it = mcparts.begin(); it != mcparts.end(); it++) {
         if (fabs((*it).pt()) < 1e-10) continue;
         TLorentzVector p_Gen;
         p_Gen.SetPtEtaPhiM((*it).pt(), (*it).eta(), (*it).phi(), 0.);
-        if (p_Gen.DeltaR(p_PFel) < minDeltaRPFelGen) {
+        if (p_Gen.DeltaR(p_PFel) < minDeltaRPFelGen && fabs(p_Gen.Pt()-p_PFel.Pt()) < 0.15*p_PFel.Pt()) {
           minDeltaRPFelGen = p_Gen.DeltaR(p_PFel);
-          idGen = (*it).pdgId();
+          minDeltaPtPFelGen = fabs(p_Gen.Pt()-p_PFel.Pt());
+          idGen = abs((*it).pdgId());
+          pTGen = (*it).pt();
         }
       }
       if (abs(idGen) > 0) {
         _h_idPFel->Fill((double)idGen, weight);
-        _h_dRPFel->Fill(minDeltaRPFelGen, weight);
+        _h_id_pT_PFel->Fill((double)idGen, pTGen, weight);
+        _h_dR_dpT_PFel->Fill(minDeltaRPFelGen, minDeltaPtPFelGen, weight);
+      }
+    }
+    for (unsigned int iPFmu = 0; iPFmu < myPFmu.size(); iPFmu++) {
+      TLorentzVector p_PFmu;
+      p_PFmu.SetPtEtaPhiM(myPFmu[iPFmu]->pt(), myPFmu[iPFmu]->eta(), myPFmu[iPFmu]->phi(), 0.);
+      double minDeltaRPFmuGen = 200.;
+      double minDeltaPtPFmuGen = 200.;
+      int idGen = 0;
+      double pTGen = 0.;
+      for (reco::GenParticleCollection::const_iterator it = mcparts.begin(); it != mcparts.end(); it++) {
+        if (fabs((*it).pt()) < 1e-10) continue;
+        TLorentzVector p_Gen;
+        p_Gen.SetPtEtaPhiM((*it).pt(), (*it).eta(), (*it).phi(), 0.);
+        if (p_Gen.DeltaR(p_PFmu) < minDeltaRPFmuGen && fabs(p_Gen.Pt()-p_PFmu.Pt()) < 0.15*p_PFmu.Pt()) {
+          minDeltaRPFmuGen = p_Gen.DeltaR(p_PFmu);
+          minDeltaPtPFmuGen = fabs(p_Gen.Pt()-p_PFmu.Pt());
+          idGen = abs((*it).pdgId());
+          pTGen = (*it).pt();
+        }
+      }
+      if (abs(idGen) > 0) {
+        _h_idPFmu->Fill((double)idGen, weight);
+        _h_id_pT_PFmu->Fill((double)idGen, pTGen, weight);
+        _h_dR_dpT_PFmu->Fill(minDeltaRPFmuGen, minDeltaPtPFmuGen, weight);
       }
     }
     
@@ -481,10 +530,10 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     // float        gSigmaMu = 0.000000004; 
     
     ParticleMass gMassK  = 0.493677;
-    // float        gSigmaK = 0.000001;
+    float        gSigmaK = 0.000001;
     
     ParticleMass gMassPi  = 0.13957018;
-    // float        gSigmaPi = 0.00000001;
+    float        gSigmaPi = 0.00000001;
     
     // Track setup
     
@@ -758,7 +807,175 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           _sumpvec[indJet] = _sumpvec[indJet] + p_tr1;
           _h_etach[indJet]->Fill(p_tr1.Eta(), weight);
           _h_pTch[indJet]->Fill(p_tr1.Pt(), weight);
+
+          //============================
+          // simple Kalman Vertex Fitter
+          //============================
+
+          _D0mass_KVF = 0.;
+          _genId_KVF = 0.;
+          _CSVdisc_KVF = -1.;
+          _Bmomentum_KVF = 0.;
+          _R1_KVF = 0.;
+          _R3_KVF = 0.;                    
+          _Ntr_KVF = 0.;
+          _sumpT_KVF = 0.;
+          _averpT_KVF = 0.;
+          _R1_nomu_KVF = 0.;
+          _R3_nomu_KVF = 0.;                    
+          for (reco::track_iterator iter2 = jetTracks.begin(); iter2 != jetTracks.end(); ++iter2) {
+            const reco::Track& Track2 = **iter2;
+
+            if (iter2 == iter1) continue;
+            if ((**iter2).pt() < 4.) continue;
+            if (!Track2.quality(reco::Track::highPurity)) continue;
+
+            bool tr2CandIsMu = false;
+            for (unsigned int iMuCand = 0; iMuCand < myPFmu.size(); iMuCand++) {
+              TLorentzVector p_MuCand, p_trCand;
+              p_MuCand.SetPtEtaPhiM(myPFmu[iMuCand]->pt(), myPFmu[iMuCand]->eta(), myPFmu[iMuCand]->phi(), gMassMu);
+              p_trCand.SetPtEtaPhiM((**iter2).pt(), (**iter2).eta(), (**iter2).phi(), gMassPi);
+              if (p_trCand.DeltaR(p_MuCand) < 0.0005) {
+                tr2CandIsMu = true;
+                break;
+              }
+            }
+            bool tr2CandIsEl = false;
+            for (unsigned int iElCand = 0; iElCand < myPFel.size(); iElCand++) {
+              TLorentzVector p_ElCand, p_trCand;
+              p_ElCand.SetPtEtaPhiM(myPFel[iElCand]->pt(), myPFel[iElCand]->eta(), myPFel[iElCand]->phi(), 0.);
+              p_trCand.SetPtEtaPhiM((**iter2).pt(), (**iter2).eta(), (**iter2).phi(), gMassPi);
+              if (p_trCand.DeltaR(p_ElCand) < 0.005) {
+                tr2CandIsEl = true;
+                break;
+              }
+            }
+
+            if (!trCandIsEl && !trCandIsMu && !tr2CandIsMu && !tr2CandIsEl) {
+              reco::TransientTrack tr1 = (*theB).build((**iter1));
+              reco::TransientTrack tr2 = (*theB).build((**iter2));
+
+              //~~~~~~~~~~~~~~~~~~~~~~~~~~
+              // reconstruct D^0 -> K Pi
+              //~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+              // Select OS tracks
+              if ((**iter1).charge()*(**iter2).charge() > 0) continue;
+
+              // Compute the mass
+              TLorentzVector p_tr1_D0, p_tr2_D0, p_D0;
+              p_tr1_D0.SetPtEtaPhiM((**iter1).pt(), (**iter1).eta(), (**iter1).phi(), gMassK);
+              p_tr2_D0.SetPtEtaPhiM((**iter2).pt(), (**iter2).eta(), (**iter2).phi(), gMassPi);
+              p_D0 = p_tr1_D0 + p_tr2_D0;
+
+              //Creating a KinematicParticleFactory
+              KinematicParticleFactoryFromTransientTrack pFactory;
+
+              //initial chi2 and ndf before kinematic fits. The chi2 of the reconstruction is not considered
+              float chi_D0 = 0.;
+              float ndf_D0 = 0.;
+
+              //making particles
+              std::vector<RefCountedKinematicParticle> D0Particles;
+              D0Particles.push_back(pFactory.particle (tr1,gMassK,chi_D0,ndf_D0,gSigmaK));
+              D0Particles.push_back(pFactory.particle (tr2,gMassPi,chi_D0,ndf_D0,gSigmaPi));
+
+              /* Example of a simple vertex fit, without other constraints
+               * The reconstructed decay tree is a result of the kinematic fit
+               * The KinematicParticleVertexFitter fits the final state particles to their vertex and
+               * reconstructs the decayed state
+               */
+
+              // creating the vertex fitter
+              KinematicParticleVertexFitter D0fitter;
+              RefCountedKinematicTree D0vertexFitTree = D0fitter.fit(D0Particles);
+
+              if (D0vertexFitTree->isValid()) {
+
+                //accessing the tree components, move pointer to top
+                D0vertexFitTree->movePointerToTheTop();
+
+                //We are now at the top of the decay tree getting the d0 reconstructed KinematicPartlcle
+                RefCountedKinematicParticle D0 = D0vertexFitTree->currentParticle();
+                RefCountedKinematicVertex D0_vertex = D0vertexFitTree->currentDecayVertex();
+
+                // cut on chi2/NDOF
+                if (D0_vertex->vertexIsValid() && D0_vertex->chiSquared()/(double)D0_vertex->degreesOfFreedom() < 4.) {
+
+                  // Distance to PV :
+                  GlobalPoint D0_svPos    = D0_vertex->position();
+                  GlobalError D0_svPosErr = D0_vertex->error();
+
+                  double sigmax_vtx_D0vtx = sqrt(pow(vtx[0].xError(), 2.) + pow(D0_svPosErr.cxx(), 2.));
+                  double sigmay_vtx_D0vtx = sqrt(pow(vtx[0].yError(), 2.) + pow(D0_svPosErr.cyy(), 2.));
+                  double sigmaz_vtx_D0vtx = sqrt(pow(vtx[0].zError(), 2.) + pow(D0_svPosErr.czz(), 2.));
+
+                  double D0_interx = pow((p_D0.Px()/p_D0.M())/sigmax_vtx_D0vtx, 2.);
+                  double D0_intery = pow((p_D0.Py()/p_D0.M())/sigmay_vtx_D0vtx, 2.);
+                  double D0_interz = pow((p_D0.Pz()/p_D0.M())/sigmaz_vtx_D0vtx, 2.);
+
+                  double D0_sigmaL3D = pow(D0_interx + D0_intery + D0_interz, -0.5);
+
+                  double D0_part1 = (p_D0.Px()/p_D0.M())*pow(D0_sigmaL3D/sigmax_vtx_D0vtx,2.)*( D0_svPos.x() - vtx[0].x());
+                  double D0_part2 = (p_D0.Py()/p_D0.M())*pow(D0_sigmaL3D/sigmay_vtx_D0vtx,2.)*( D0_svPos.y() - vtx[0].y());
+                  double D0_part3 = (p_D0.Pz()/p_D0.M())*pow(D0_sigmaL3D/sigmaz_vtx_D0vtx,2.)*( D0_svPos.z() - vtx[0].z());
+
+                  double D0_L3D = fabs(D0_part1 + D0_part2 + D0_part3);
+
+                  double D0_L3DoverSigmaL3D = D0_L3D/D0_sigmaL3D;
+
+                  // cut on L/SigmaL
+                  if (D0_L3DoverSigmaL3D > 100.) {
+
+                    // cut on pT
+                    if (p_D0.Pt() > 15.) {
+
+                      // cut D0 mass window
+                      if (p_D0.M() > 1.7 && p_D0.M() < 2.) {
+
+                        //~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                        // associate D^0 to a PF muon
+                        //~~~~~~~~~~~~~~~~~~~~~~~~~~
+                        
+                        int iMaxMuInSelJet = -1;
+                        double maxMuInSelJet = -1;
+                        for (unsigned int iMuCand = 0; iMuCand < myPFmuInSelJet.size(); iMuCand++) {
+                          if (myPFmuInSelJet[iMuCand]->pdgId()*(**iter1).charge() > 0) continue;
+                          if (myPFmuInSelJet[iMuCand]->pt() > maxMuInSelJet) {
+                            iMaxMuInSelJet = iMuCand;
+                            maxMuInSelJet = myPFmuInSelJet[iMaxMuInSelJet]->pt();
+                          }
+                        }
+
+                        if (iMaxMuInSelJet >= 0) {
+
+                          TLorentzVector p_Mu;
+                          p_Mu.SetPtEtaPhiM(myPFmuInSelJet[iMaxMuInSelJet]->pt(), myPFmuInSelJet[iMaxMuInSelJet]->eta(), myPFmuInSelJet[iMaxMuInSelJet]->phi(), gMassMu);
+                          TLorentzVector p_B = p_Mu + p_D0;
+                          _D0mass_KVF = p_D0.M();
+                          if ((*it).genParticle())
+                            _genId_KVF = (double)abs(((*it).genParticle())->pdgId());
+                          _CSVdisc_KVF = (*it).bDiscriminator("combinedSecondaryVertexBJetTags");
+                          _Bmomentum_KVF = p_B.P();
+                          _R1_KVF = p_trCand[0].P() / _sump[indJet];
+                          _R3_KVF = (p_trCand[0].P() + p_trCand[1].P() + p_trCand[2].P()) / _sump[indJet];
+                          _Ntr_KVF = (double)_Nch[indJet];
+                          _sumpT_KVF = _sumpt[indJet];
+                          _averpT_KVF = _sumpT_KVF/_Ntr_KVF;
+                          _R1_nomu_KVF = p_trCand_nomu[0].P() / _sump[indJet];
+                          _R3_nomu_KVF = (p_trCand_nomu[0].P() + p_trCand_nomu[1].P() + p_trCand_nomu[2].P()) / _sump[indJet];
+                          _t_D0KVFwindow_bjets->Fill();
+
+                        } // there is a mu in the jet
+                      } // D0 mass window
+                    } // DO pT cut
+                  } // D0 L3D/SigmaL3D cut
+                } // D0 chi2 cut
+              } // D0 tree vertex is valid
+
+            } // exclude e/mu for D0 reco with KVF
           
+          } // 2nd jet's track loop
         } // 1st jet's track loop
         
         _h_Nch[indJet]->Fill((double)_Nch[indJet], weight);
@@ -879,6 +1096,28 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             if (iMaxMuInSelJet < 0) continue;
             
             p_Mu.SetPtEtaPhiM(myPFmuInSelJet[iMaxMuInSelJet]->pt(), myPFmuInSelJet[iMaxMuInSelJet]->eta(), myPFmuInSelJet[iMaxMuInSelJet]->phi(), gMassMu);
+            // Just for MC : look at the genId of the selected PF mu
+            double minDeltaRPFmuGen = 200.;
+            double minDeltaPtPFmuGen = 200.;
+            int idGen = 0;
+            double pTGen = 0.;
+            for (reco::GenParticleCollection::const_iterator it = mcparts.begin(); it != mcparts.end(); it++) {
+              if (fabs((*it).pt()) < 1e-10) continue;
+              TLorentzVector p_Gen;
+              p_Gen.SetPtEtaPhiM((*it).pt(), (*it).eta(), (*it).phi(), 0.);
+              if (p_Gen.DeltaR(p_Mu) < minDeltaRPFmuGen && fabs(p_Gen.Pt()-p_Mu.Pt()) < 0.15*p_Mu.Pt()) {
+                minDeltaRPFmuGen = p_Gen.DeltaR(p_Mu);
+                minDeltaPtPFmuGen = fabs(p_Gen.Pt()-p_Mu.Pt());
+                idGen = abs((*it).pdgId());
+                pTGen = (*it).pt();
+              }
+            }
+            if (abs(idGen) > 0) {
+              _h_id1stPFmu->Fill((double)idGen, weight);
+              _h_id_pT_1stPFmu->Fill((double)idGen, pTGen, weight);
+              _h_dR_dpT_1stPFmu->Fill(minDeltaRPFmuGen, minDeltaPtPFmuGen, weight);
+            }
+
             TLorentzVector p_Bcombi = p_Mu + p_D0combi;
             _h_BMomentum_unbiased[indJet]->Fill(p_Bcombi.P(), weight);
             if (p_D0combi.M() > 1.7 && p_D0combi.M() < 2.) {
@@ -973,8 +1212,15 @@ D0ForRivet::beginJob()
   // std::cout << "Creating histos..." << std::endl;
   
   edm::Service<TFileService> fs;
-  _h_idPFel = fs->make<TH1D>("pdgIdPFel", "pdgIdPFel", 1000, -500., 500.);
-  _h_dRPFel = fs->make<TH1D>("DeltaR-PFel-Gen", "DeltaR-PFel-Gen", 100, 0., 0.5);
+  _h_idPFel = fs->make<TH1D>("pdgIdPFel", "pdgIdPFel", 500, 0., 500.);
+  _h_id_pT_PFel = fs->make<TH2D>("pdgId-pT-PFel", "pdgId-pT-PFel", 500, 0., 500., 150, 0, 300);
+  _h_dR_dpT_PFel = fs->make<TH2D>("DeltaR-DeltapT-PFel-Gen", "DeltaR-DeltapT-PFel-Gen", 100, 0., 0.5, 100, 0., 5.);
+  _h_idPFmu = fs->make<TH1D>("pdgIdPFmu", "pdgIdPFmu", 500, 0., 500.);
+  _h_id_pT_PFmu = fs->make<TH2D>("pdgId-pT-PFmu", "pdgId-pT-PFmu", 500, 0., 500., 150, 0, 300);
+  _h_dR_dpT_PFmu = fs->make<TH2D>("DeltaR-DeltapT-PFmu-Gen", "DeltaR-DeltapT-PFmu-Gen", 100, 0., 0.5, 100, 0., 5.);
+  _h_id1stPFmu = fs->make<TH1D>("pdgId1stPFmu", "pdgId1stPFmu", 500, 0., 500.);
+  _h_id_pT_1stPFmu = fs->make<TH2D>("pdgId-pT-1stPFmu", "pdgId-pT-1stPFmu", 500, 0., 500., 150, 0, 300);
+  _h_dR_dpT_1stPFmu = fs->make<TH2D>("DeltaR-DeltapT-1stPFmu-Gen", "DeltaR-DeltapT-1stPFmu-Gen", 100, 0., 0.5, 100, 0., 5.);
   
   _h_nVtx = fs->make<TH1D>("NPrimaryVtx", "NPrimaryVtx", 50, 0., 50.); 
   _h_nJets = fs->make<TH1D>("NJets", "NJets", 20, 0., 20.);
@@ -1082,6 +1328,20 @@ D0ForRivet::beginJob()
   _t_D0window_bjets->Branch("AveragepT", &_averpT, "SumpT/D");
   _t_D0window_bjets->Branch("R1_nomu", &_R1_nomu, "R1_nomu/D");
   _t_D0window_bjets->Branch("R3_nomu", &_R3_nomu, "R3_nomu/D");
+  
+  _t_D0KVFwindow_bjets = fs->make<TTree>("D0KVFwindow-b-jets", "D0KVFwindow-b-jets", 1);
+  _t_D0KVFwindow_bjets->Branch("Weight", &weight, "Weight/D");
+  _t_D0KVFwindow_bjets->Branch("GenId", &_genId_KVF, "GenId/D");
+  _t_D0KVFwindow_bjets->Branch("CSVdisc", &_CSVdisc_KVF, "CSVdisc/D");
+  _t_D0KVFwindow_bjets->Branch("D0mass", &_D0mass_KVF, "D0mass/D");
+  _t_D0KVFwindow_bjets->Branch("Bmomentum", &_Bmomentum_KVF, "Bmomentum/D");
+  _t_D0KVFwindow_bjets->Branch("R1", &_R1_KVF, "R1/D");
+  _t_D0KVFwindow_bjets->Branch("R3", &_R3_KVF, "R3/D");
+  _t_D0KVFwindow_bjets->Branch("Nch", &_Ntr_KVF, "Nch/D");
+  _t_D0KVFwindow_bjets->Branch("SumpT", &_sumpT_KVF, "SumpT/D");
+  _t_D0KVFwindow_bjets->Branch("AveragepT", &_averpT_KVF, "SumpT/D");
+  _t_D0KVFwindow_bjets->Branch("R1_nomu", &_R1_nomu_KVF, "R1_nomu/D");
+  _t_D0KVFwindow_bjets->Branch("R3_nomu", &_R3_nomu_KVF, "R3_nomu/D");
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
