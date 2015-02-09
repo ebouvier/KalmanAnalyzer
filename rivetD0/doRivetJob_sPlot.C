@@ -222,7 +222,7 @@ void cms_style(bool isData = true){
 }
 
 //---------------------------------------------------------------
-TGraphAsymmErrors **treatHisto(bool inBatch, TStyle* my_style, TString date, bool isCSVbased, const int NsPlots, vector<TString> varName, vector<TString> varTitle, vector<double> varMin, vector<double> varMax, vector<TString> varUnit, vector<bool> atRight, TFile* fi, TString name, TString channel)
+TGraphAsymmErrors **treatHisto(bool inBatch, TStyle* my_style, TString date, bool isCSVbased, bool isKVF, const int NsPlots, vector<TString> varName, vector<TString> varTitle, vector<double> varMin, vector<double> varMax, vector<TString> varUnit, vector<bool> atRight, TFile* fi, TString name, TString channel)
 //---------------------------------------------------------------
 {
   my_style->cd();
@@ -248,9 +248,16 @@ TGraphAsymmErrors **treatHisto(bool inBatch, TStyle* my_style, TString date, boo
     dir_name = "pT" + dir_name;
     rep_name = rep_name + "/pT/sPlot/";
   }
+  if (isKVF)
+    rep_name = rep_name + "KVF/";
+  else
+    rep_name = rep_name + "Combi/";
   
   // Import the tree
-  TTree *tree = (TTree*) fi->Get(dir_name+"/D0window-b-jets");
+  TString tree_name = dir_name + "/D0window-b-jets";
+  if (isKVF)
+    tree_name = dir_name + "/D0KVFwindow-b-jets";
+  TTree *tree = (TTree*) fi->Get(tree_name);
   RooRealVar weight("Weight", "Weight", 0., 2.);
   RooRealVar d0mass("D0mass", "D^{0} mass", 1.7, 2., "GeV/c^{2}");  
   RooArgSet variables(weight, d0mass);
@@ -262,7 +269,6 @@ TGraphAsymmErrors **treatHisto(bool inBatch, TStyle* my_style, TString date, boo
   RooRealVar genId("GenId", "True jets flavour", 0., 22.);
   if (!name.Contains("Data")) 
     variables.add(genId);
-  variables.Print(); //FIXME
   RooDataSet *data = new RooDataSet("data", "data", variables, Import(*tree), WeightVar(weight));
   
   // Fit the D0 mass peak
@@ -419,7 +425,7 @@ TGraphAsymmErrors **treatHisto(bool inBatch, TStyle* my_style, TString date, boo
 }
 
 //---------------------------------------------------------------
-void doRivetJob_file(bool inBatch, TString date, bool isCSVbased)
+void doRivetJob_file(bool inBatch, TString date, bool isCSVbased, bool isKVF)
 //---------------------------------------------------------------
 {
   TStyle* my_style = createMyStyle();
@@ -442,6 +448,10 @@ void doRivetJob_file(bool inBatch, TString date, bool isCSVbased)
     fi_sl_name = fi_sl_name + "/D0ForRivet_pT_TTJets_SemiLeptMGDecays.root";
     fi_dl_name = fi_dl_name + "/D0ForRivet_pT_TTJets_FullLeptMGDecays.root";
   }
+  if (isKVF)
+    rep_name = rep_name + "KVF/";
+  else
+    rep_name = rep_name + "Combi/";
     
   TFile* fi_data = TFile::Open(fi_data_name);
   TFile* fi_sl = TFile::Open(fi_sl_name);
@@ -486,9 +496,9 @@ void doRivetJob_file(bool inBatch, TString date, bool isCSVbased)
   assert (varUnit.size() == NsPlots);
   assert (atRight.size() == NsPlots);
   
-  TGraphAsymmErrors **gr_all_data = treatHisto(inBatch, my_style, date, isCSVbased, NsPlots, varName, varTitle, varMin, varMax, varUnit, atRight, fi_data, "Data_merged", "Data - Run 2012 A,B,C,D");
-  TGraphAsymmErrors **gr_all_sl = treatHisto(inBatch, my_style, date, isCSVbased, NsPlots, varName, varTitle, varMin, varMax, varUnit, atRight, fi_sl, "TTJets_SemiLeptMGDecays", "MG+PY6 Z2* Semilept. t#bar{t}");
-  TGraphAsymmErrors **gr_all_dl = treatHisto(inBatch, my_style, date, isCSVbased, NsPlots, varName, varTitle, varMin, varMax, varUnit, atRight, fi_dl, "TTJets_FullLeptMGDecays", "MG+PY6 Z2* Dilept. t#bar{t}");
+  TGraphAsymmErrors **gr_all_data = treatHisto(inBatch, my_style, date, isCSVbased, isKVF, NsPlots, varName, varTitle, varMin, varMax, varUnit, atRight, fi_data, "Data_merged", "Data - Run 2012 A,B,C,D");
+  TGraphAsymmErrors **gr_all_sl = treatHisto(inBatch, my_style, date, isCSVbased, isKVF, NsPlots, varName, varTitle, varMin, varMax, varUnit, atRight, fi_sl, "TTJets_SemiLeptMGDecays", "MG+PY6 Z2* Semilept. t#bar{t}");
+  TGraphAsymmErrors **gr_all_dl = treatHisto(inBatch, my_style, date, isCSVbased, isKVF, NsPlots, varName, varTitle, varMin, varMax, varUnit, atRight, fi_dl, "TTJets_FullLeptMGDecays", "MG+PY6 Z2* Dilept. t#bar{t}");
 
   for (int ig = 0; ig < NsPlots; ig++) {
     TGraphAsymmErrors *gr_alldata = (TGraphAsymmErrors*)gr_all_data[ig]->Clone(); 
@@ -594,11 +604,17 @@ int doRivetJob_sPlot(bool inBatch = true, TString date = "")
     gROOT->ProcessLine(".! mkdir "+date);
     gROOT->ProcessLine(".! mkdir "+date+"/csv");
     gROOT->ProcessLine(".! mkdir "+date+"/csv/sPlot");
+    gROOT->ProcessLine(".! mkdir "+date+"/csv/sPlot/Combi");
+    gROOT->ProcessLine(".! mkdir "+date+"/csv/sPlot/KVF");
     gROOT->ProcessLine(".! mkdir "+date+"/pT");
     gROOT->ProcessLine(".! mkdir "+date+"/pT/sPlot");
+    gROOT->ProcessLine(".! mkdir "+date+"/pT/sPlot/Combi");
+    gROOT->ProcessLine(".! mkdir "+date+"/pT/sPlot/KVF");
 
-    doRivetJob_file(inBatch, date, true);
-    doRivetJob_file(inBatch, date, false);
+    doRivetJob_file(inBatch, date, true, true);
+    doRivetJob_file(inBatch, date, true, false);
+    doRivetJob_file(inBatch, date, false, true);
+    doRivetJob_file(inBatch, date, false, false);
     return 0;
   }
   else 
