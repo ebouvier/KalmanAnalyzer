@@ -145,6 +145,7 @@ class MuTagForRivet_Mu : public edm::EDAnalyzer {
     TH1D* _h_D0eta;
     TH1D* _h_BMomentum_unbiased;
     TH1D* _h_BMass_unbiased;
+    TH1D* _h_mup_unbiased;
     TH1D* _h_D0MassClean;
     TH1D* _h_D0pClean;
     TH1D* _h_D0pTClean;
@@ -761,7 +762,8 @@ MuTagForRivet_Mu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
           p_Mu.SetPtEtaPhiM(myPFmuInSelJet[iMaxMuInSelJet]->pt(), myPFmuInSelJet[iMaxMuInSelJet]->eta(), myPFmuInSelJet[iMaxMuInSelJet]->phi(), gMassMu);
           TLorentzVector p_Bcombi = p_Mu + p_D0combi;
           _h_BMomentum_unbiased->Fill(p_Bcombi.P());            
-          _h_BMass_unbiased->Fill(p_Bcombi.M());            
+          _h_BMass_unbiased->Fill(p_Bcombi.M());    
+          _h_mup_unbiased->Fill(p_Mu.P());
         }
       }
 
@@ -848,16 +850,17 @@ MuTagForRivet_Mu::beginJob()
   _h_D0pT = fs->make<TH1D>("D0pT-b-jets", "D0pT-b-jets", 100, 0, 400);
   _h_D0eta = fs->make<TH1D>("D0eta-b-jets", "D0eta-b-jets", 60, -3, 3);
   _h_BMomentum_unbiased = fs->make<TH1D>("BMomentum-nobias-b-jets", "BMomentum-nobias-b-jets", 100, 0, 400);
-  _h_BMass_unbiased = fs->make<TH1D>("BMass-nobias-b-jets", "BMass-nobias-b-jets", 100, 0, 400);
+  _h_BMass_unbiased = fs->make<TH1D>("BMass-nobias-b-jets", "BMass-nobias-b-jets", 400, 0., 10.);
+  _h_mup_unbiased = fs->make<TH1D>("Muonp-nobias-b-jets", "Muonp-nobias-b-jets", 150, 0, 300);
   _h_D0MassClean = fs->make<TH1D>("D0MassClean-b-jets", "D0MassClean-b-jets", 400, 0, 8);
   _h_D0pClean = fs->make<TH1D>("D0pClean-b-jets", "D0pClean-b-jets", 150, 0, 300);
   _h_D0pTClean = fs->make<TH1D>("D0pTClean-b-jets", "D0pTClean-b-jets", 100, 0, 400);
   _h_D0etaClean = fs->make<TH1D>("D0etaClean-b-jets", "D0etaClean-b-jets", 60, -3, 3);
   _h_BMomentum = fs->make<TH1D>("BMomentum-b-jets", "BMomentum-b-jets", 100, 0, 400);
-  _h_BMass = fs->make<TH1D>("BMass-b-jets", "BMass-b-jets", 100, 0, 400);
+  _h_BMass = fs->make<TH1D>("BMass-b-jets", "BMass-b-jets", 400, 0., 10.);
   _h_mup = fs->make<TH1D>("Muonp-b-jets", "Muonp-b-jets", 150, 0, 300);
   _h_BMomentumClean = fs->make<TH1D>("BMomentum-D0cut-b-jets", "BMomentum-D0cut-b-jets", 100, 0, 400);
-  _h_BMassClean = fs->make<TH1D>("BMass-D0cut-b-jets", "BMass-D0cut-b-jets", 100, 0, 400);
+  _h_BMassClean = fs->make<TH1D>("BMass-D0cut-b-jets", "BMass-D0cut-b-jets", 400, 0., 10.);
 
   _t_bjets = fs->make<TTree>("b-jets", "b-jets", 1);
   _t_bjets->Branch("CSV", &_CSV, "CSV/D");

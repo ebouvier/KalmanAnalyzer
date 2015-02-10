@@ -117,9 +117,10 @@ class MuTagForRivet : public edm::EDAnalyzer {
     TH2D* _h_id_pT_1stPFmu;
     TH2D* _h_dR_dpT_1stPFmu;
     TH2D* _h_origin_id_1stPFmu_Inf100;
+    TH2D* _h_idOrigin_pT_1stPFmu_Inf100;
     TH2D* _h_eta_dpz_1stPFmu_Inf100;
     TH2D* _h_origin_id_1stPFmu_Sup100;
-    TH2D* _h_idOrigin_id_1stPFmu_Sup100;
+    TH2D* _h_idOrigin_pT_1stPFmu_Sup100;
     TH2D* _h_eta_dpz_1stPFmu_Sup100;
     TH2D* _h_genId_pT_NonSelJets;
 
@@ -162,6 +163,7 @@ class MuTagForRivet : public edm::EDAnalyzer {
     TH1D* _h_D0eta;
     TH1D* _h_BMomentum_unbiased;
     TH1D* _h_BMass_unbiased;
+    TH1D* _h_mup_unbiased;
     TH1D* _h_D0MassClean;
     TH1D* _h_D0pClean;
     TH1D* _h_D0pTClean;
@@ -927,13 +929,14 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             _h_id1stPFmu->Fill((double)idGen, weight);
             _h_id_pT_1stPFmu->Fill((double)idGen, pTGen, weight);
             _h_dR_dpT_1stPFmu->Fill(minDeltaRPFmuGen, minDeltaPtPFmuGen, weight);
-            if (pTGen < 100) {
+            if (p_Mu.Pt() < 100) {
               _h_origin_id_1stPFmu_Inf100->Fill(origin, (double)idGen, weight);
+              _h_idOrigin_pT_1stPFmu_Inf100->Fill((double) idOrigin, pTGen, weight);
               _h_eta_dpz_1stPFmu_Inf100->Fill(p_Mu.Eta(), dpz, weight);
             }
             else {
               _h_origin_id_1stPFmu_Sup100->Fill(origin, (double)idGen, weight);
-              _h_idOrigin_id_1stPFmu_Sup100->Fill((double) idOrigin, (double) idGen, weight);
+              _h_idOrigin_pT_1stPFmu_Sup100->Fill((double) idOrigin, pTGen, weight);
               _h_eta_dpz_1stPFmu_Sup100->Fill(p_Mu.Eta(), dpz, weight);
             }
           }
@@ -941,6 +944,7 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           TLorentzVector p_Bcombi = p_Mu + p_D0combi;
           _h_BMomentum_unbiased->Fill(p_Bcombi.P(), weight);
           _h_BMass_unbiased->Fill(p_Bcombi.M(), weight);
+          _h_mup_unbiased->Fill(p_Mu.P(), weight);
         }
       }
 
@@ -1003,9 +1007,10 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       _h_id_pT_1stPFmu = fs->make<TH2D>("pdgId-pT-1stPFmu", "pdgId-pT-1stPFmu", 500, 0., 500., 150, 0, 300);
       _h_dR_dpT_1stPFmu = fs->make<TH2D>("DeltaR-DeltapT-1stPFmu-Gen", "DeltaR-DeltapT-1stPFmu-Gen", 100, 0., 0.5, 100, 0., 5.);
       _h_origin_id_1stPFmu_Inf100 = fs->make<TH2D>("Origin-pdgId-1stPFmu-Under100GeV", "Origin-pdgId-1stPFmu-Under100GeV", 2, 0., 2., 500, 0., 500.); 
+      _h_idOrigin_pT_1stPFmu_Inf100 = fs->make<TH2D>("PdgIdOrigin-pT-1stPFmu-Under100GeV", "PdgIdOrigin-pT-1stPFmu-Under100GeV", 5000, 0., 5000., 150, 0., 300.); 
       _h_eta_dpz_1stPFmu_Inf100 = fs->make<TH2D>("Eta-RelDeltaPz-1stPFmu-Under100GeV", "Eta-RelDeltaPz-1stPFmu-Under100GeV", 60, -3., 3., 100, 0., 1.); 
       _h_origin_id_1stPFmu_Sup100 = fs->make<TH2D>("Origin-pdgId-1stPFmu-Above100GeV", "Origin-pdgId-1stPFmu-Above100GeV", 2, 0., 2., 500, 0., 500.); 
-      _h_idOrigin_id_1stPFmu_Sup100 = fs->make<TH2D>("PdgIdOrigin-pdgId-1stPFmu-Above100GeV", "PdgIdOrigin-pdgId-1stPFmu-Above100GeV", 5000, 0., 5000., 500, 0., 500.); 
+      _h_idOrigin_pT_1stPFmu_Sup100 = fs->make<TH2D>("PdgIdOrigin-pT-1stPFmu-Above100GeV", "PdgIdOrigin-pT-1stPFmu-Above100GeV", 5000, 0., 5000., 150, 0., 300.); 
       _h_eta_dpz_1stPFmu_Sup100 = fs->make<TH2D>("Eta-RelDeltaPz-1stPFmu-Above100GeV", "Eta-RelDeltaPz-1stPFmu-Above100GeV", 60, -3., 3., 100, 0., 1.); 
       _h_genId_pT_NonSelJets = fs->make<TH2D>("GenID-pT-below30GeVjets", "GenID-pT-below30GeVjets", 22, 0., 22., 30, 0., 30.);
 
@@ -1046,16 +1051,17 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       _h_D0pT = fs->make<TH1D>("D0pT-b-jets", "D0pT-b-jets", 100, 0, 400);
       _h_D0eta = fs->make<TH1D>("D0eta-b-jets", "D0eta-b-jets", 60, -3, 3);
       _h_BMomentum_unbiased = fs->make<TH1D>("BMomentum-nobias-b-jets", "BMomentum-nobias-b-jets", 100, 0, 400);
-      _h_BMass_unbiased = fs->make<TH1D>("BMass-nobias-b-jets", "BMass-nobias-b-jets", 100, 0, 400);
+      _h_BMass_unbiased = fs->make<TH1D>("BMass-nobias-b-jets", "BMass-nobias-b-jets", 400, 0., 10.);
+      _h_mup_unbiased = fs->make<TH1D>("Muonp-nobias-b-jets", "Muonp-nobias-b-jets", 150, 0, 300);
       _h_D0MassClean = fs->make<TH1D>("D0MassClean-b-jets", "D0MassClean-b-jets", 400, 0, 8);
       _h_D0pClean = fs->make<TH1D>("D0pClean-b-jets", "D0pClean-b-jets", 150, 0, 300);
       _h_D0pTClean = fs->make<TH1D>("D0pTClean-b-jets", "D0pTClean-b-jets", 100, 0, 400);
       _h_D0etaClean = fs->make<TH1D>("D0etaClean-b-jets", "D0etaClean-b-jets", 60, -3, 3);
       _h_BMomentum = fs->make<TH1D>("BMomentum-b-jets", "BMomentum-b-jets", 100, 0, 400);
-      _h_BMass = fs->make<TH1D>("BMass-b-jets", "BMass-b-jets", 100, 0, 400);
+      _h_BMass = fs->make<TH1D>("BMass-b-jets", "BMass-b-jets", 400, 0, 10.);
       _h_mup = fs->make<TH1D>("Muonp-b-jets", "Muonp-b-jets", 150, 0, 300);
       _h_BMomentumClean = fs->make<TH1D>("BMomentum-D0cut-b-jets", "BMomentum-D0cut-b-jets", 100, 0, 400);
-      _h_BMassClean = fs->make<TH1D>("BMass-D0cut-b-jets", "BMass-D0cut-b-jets", 100, 0, 400);
+      _h_BMassClean = fs->make<TH1D>("BMass-D0cut-b-jets", "BMass-D0cut-b-jets", 400, 0., 10.);
 
       _t_bjets = fs->make<TTree>("b-jets", "b-jets", 1);
       _t_bjets->Branch("Weight", &weight, "Weight/D");
