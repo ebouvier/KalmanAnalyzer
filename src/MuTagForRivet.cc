@@ -108,7 +108,19 @@ class MuTagForRivet : public edm::EDAnalyzer {
     bool isGoodEvt;
 
     TH1D* _h_idPFel;
-    TH1D* _h_dRPFel;
+    TH2D* _h_id_pT_PFel;
+    TH2D* _h_dR_dpT_PFel;
+    TH1D* _h_idPFmu;
+    TH2D* _h_id_pT_PFmu;
+    TH2D* _h_dR_dpT_PFmu;
+    TH1D* _h_id1stPFmu;
+    TH2D* _h_id_pT_1stPFmu;
+    TH2D* _h_dR_dpT_1stPFmu;
+    TH2D* _h_origin_id_1stPFmu_Inf100;
+    TH2D* _h_eta_dpz_1stPFmu_Inf100;
+    TH2D* _h_origin_id_1stPFmu_Sup100;
+    TH2D* _h_eta_dpz_1stPFmu_Sup100;
+    TH2D* _h_genId_pT_NonSelJets;
 
     TH1D* _h_nVtx;
 
@@ -124,13 +136,17 @@ class MuTagForRivet : public edm::EDAnalyzer {
     TLorentzVector _sumpvec;
     TH1D* _h_sumpvec;
     TH1D* _h_sum1p;
+    TH1D* _h_sum2p;
     TH1D* _h_sum3p;
+    TH1D* _h_mass3;
     TH1D* _h_R1;
     TH2D* _h_R1_Nch;
     TH1D* _h_R3;
     TH2D* _h_R3_Nch;
     TH1D* _h_sum1p_nomu;
+    TH1D* _h_sum2p_nomu;
     TH1D* _h_sum3p_nomu;
+    TH1D* _h_mass3_nomu;
     TH1D* _h_R1_nomu;
     TH2D* _h_R1_Nch_nomu;
     TH1D* _h_R3_nomu;
@@ -418,7 +434,7 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       }
     }
 
-    // Match PF electrons to genParticles
+    // Match PF e/mu to genParticles
     edm::Handle<std::vector<reco::GenParticle> > mcHandle;
     edm::InputTag tagGen("genParticles", "", "SIM");
     iEvent.getByLabel(tagGen, mcHandle);
@@ -427,19 +443,48 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       TLorentzVector p_PFel;
       p_PFel.SetPtEtaPhiM(myPFel[iPFel]->pt(), myPFel[iPFel]->eta(), myPFel[iPFel]->phi(), 0.);
       double minDeltaRPFelGen = 200.;
+      double minDeltaPtPFelGen = 200.;
       int idGen = 0;
+      double pTGen = 0.;
       for (reco::GenParticleCollection::const_iterator it = mcparts.begin(); it != mcparts.end(); it++) {
         if (fabs((*it).pt()) < 1e-10) continue;
         TLorentzVector p_Gen;
         p_Gen.SetPtEtaPhiM((*it).pt(), (*it).eta(), (*it).phi(), 0.);
-        if (p_Gen.DeltaR(p_PFel) < minDeltaRPFelGen) {
+        if (p_Gen.DeltaR(p_PFel) < minDeltaRPFelGen && fabs(p_Gen.Pt()-p_PFel.Pt()) < 0.15*p_PFel.Pt()) {
           minDeltaRPFelGen = p_Gen.DeltaR(p_PFel);
-          idGen = (*it).pdgId();
+          minDeltaPtPFelGen = fabs(p_Gen.Pt()-p_PFel.Pt());
+          idGen = abs((*it).pdgId());
+          pTGen = (*it).pt();
         }
       }
       if (abs(idGen) > 0) {
         _h_idPFel->Fill((double)idGen, weight);
-        _h_dRPFel->Fill(minDeltaRPFelGen, weight);
+        _h_id_pT_PFel->Fill((double)idGen, pTGen, weight);
+        _h_dR_dpT_PFel->Fill(minDeltaRPFelGen, minDeltaPtPFelGen, weight);
+      }
+    }
+    for (unsigned int iPFmu = 0; iPFmu < myPFmu.size(); iPFmu++) {
+      TLorentzVector p_PFmu;
+      p_PFmu.SetPtEtaPhiM(myPFmu[iPFmu]->pt(), myPFmu[iPFmu]->eta(), myPFmu[iPFmu]->phi(), 0.);
+      double minDeltaRPFmuGen = 200.;
+      double minDeltaPtPFmuGen = 200.;
+      int idGen = 0;
+      double pTGen = 0.;
+      for (reco::GenParticleCollection::const_iterator it = mcparts.begin(); it != mcparts.end(); it++) {
+        if (fabs((*it).pt()) < 1e-10) continue;
+        TLorentzVector p_Gen;
+        p_Gen.SetPtEtaPhiM((*it).pt(), (*it).eta(), (*it).phi(), 0.);
+        if (p_Gen.DeltaR(p_PFmu) < minDeltaRPFmuGen && fabs(p_Gen.Pt()-p_PFmu.Pt()) < 0.15*p_PFmu.Pt()) {
+          minDeltaRPFmuGen = p_Gen.DeltaR(p_PFmu);
+          minDeltaPtPFmuGen = fabs(p_Gen.Pt()-p_PFmu.Pt());
+          idGen = abs((*it).pdgId());
+          pTGen = (*it).pt();
+        }
+      }
+      if (abs(idGen) > 0) {
+        _h_idPFmu->Fill((double)idGen, weight);
+        _h_id_pT_PFmu->Fill((double)idGen, pTGen, weight);
+        _h_dR_dpT_PFmu->Fill(minDeltaRPFmuGen, minDeltaPtPFmuGen, weight);
       }
     }
 
@@ -493,8 +538,7 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
     for (pat::JetCollection::iterator it = jets.begin(); it != jets.end(); ++it)  {
 
-      // select jet with pT > 30 GeV/c and a muon inside
-      if ( (*it).pt() < 30. ) continue;
+      // select jet with pT > 20 GeV/c and a muon inside
       bool hasMuInside = false;
       reco::TrackRefVector jetTracks = (*it).associatedTracks();
       for (reco::track_iterator iter1 = jetTracks.begin(); iter1 != jetTracks.end(); ++iter1) {
@@ -516,6 +560,9 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         }
       }
       if (!hasMuInside) continue;
+      if ((*it).genParticle() &&  (*it).pt() < 30.)
+        _h_genId_pT_NonSelJets->Fill((double)abs(((*it).genParticle())->pdgId()), (*it).pt(), weight); 
+      if ((*it).pt() < 20.) continue;
 
       _CSV = (*it).bDiscriminator("combinedSecondaryVertexBJetTags");
       _vecP[0] = (*it).pt();
@@ -728,20 +775,28 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         _h_sum1p->Fill(p_trCand[0].P(), weight);
         _h_R1->Fill(p_trCand[0].P() / _sump, weight);
         _h_R1_Nch->Fill(p_trCand[0].P() / _sump, (double)_Nch, weight);
-        if (p_trCand[1].M() > 1e-10 && p_trCand[2].M() > 1e-10) {
-          _h_sum3p->Fill(p_trCand[0].P() + p_trCand[1].P() + p_trCand[2].P(), weight);
-          _h_R3->Fill((p_trCand[0].P() + p_trCand[1].P() + p_trCand[2].P()) / _sump, weight);
-          _h_R3_Nch->Fill((p_trCand[0].P() + p_trCand[1].P() + p_trCand[2].P()) / _sump, (double)_Nch, weight);
+        if (p_trCand[1].M() > 1e-10) {
+          _h_sum2p->Fill(p_trCand[0].P() + p_trCand[1].P(), weight);
+          if (p_trCand[2].M() > 1e-10) {
+            _h_sum3p->Fill(p_trCand[0].P() + p_trCand[1].P() + p_trCand[2].P(), weight);
+            _h_mass3->Fill((p_trCand[0] + p_trCand[1] + p_trCand[2]).M(), weight);
+            _h_R3->Fill((p_trCand[0].P() + p_trCand[1].P() + p_trCand[2].P()) / _sump, weight);
+            _h_R3_Nch->Fill((p_trCand[0].P() + p_trCand[1].P() + p_trCand[2].P()) / _sump, (double)_Nch, weight);
+          }
         }
       }
       if (p_trCand_nomu[0].M() > 1e-10) {
         _h_sum1p_nomu->Fill(p_trCand_nomu[0].P(), weight);
         _h_R1_nomu->Fill(p_trCand_nomu[0].P() / _sump, weight);
         _h_R1_Nch_nomu->Fill(p_trCand_nomu[0].P() / _sump, (double)_Nch, weight);
-        if (p_trCand_nomu[1].M() > 1e-10 && p_trCand_nomu[2].M() > 1e-10) {
-          _h_sum3p_nomu->Fill(p_trCand_nomu[0].P() + p_trCand_nomu[1].P() + p_trCand_nomu[2].P(), weight);
-          _h_R3_nomu->Fill((p_trCand_nomu[0].P() + p_trCand_nomu[1].P() + p_trCand_nomu[2].P()) / _sump, weight);
-          _h_R3_Nch_nomu->Fill((p_trCand_nomu[0].P() + p_trCand_nomu[1].P() + p_trCand_nomu[2].P()) / _sump, (double)_Nch, weight);
+        if (p_trCand_nomu[1].M() > 1e-10) {
+          _h_sum2p_nomu->Fill(p_trCand_nomu[0].P() + p_trCand_nomu[1].P(), weight);
+          if (p_trCand_nomu[2].M() > 1e-10) {
+            _h_sum3p_nomu->Fill(p_trCand_nomu[0].P() + p_trCand_nomu[1].P() + p_trCand_nomu[2].P(), weight);
+            _h_mass3_nomu->Fill((p_trCand_nomu[0] + p_trCand_nomu[1] + p_trCand_nomu[2]).M(), weight);
+            _h_R3_nomu->Fill((p_trCand_nomu[0].P() + p_trCand_nomu[1].P() + p_trCand_nomu[2].P()) / _sump, weight);
+            _h_R3_Nch_nomu->Fill((p_trCand_nomu[0].P() + p_trCand_nomu[1].P() + p_trCand_nomu[2].P()) / _sump, (double)_Nch, weight);
+          }
         }
       }
 
@@ -804,6 +859,54 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           if (iMaxMuInSelJet < 0) continue;
 
           p_Mu.SetPtEtaPhiM(myPFmuInSelJet[iMaxMuInSelJet]->pt(), myPFmuInSelJet[iMaxMuInSelJet]->eta(), myPFmuInSelJet[iMaxMuInSelJet]->phi(), gMassMu);
+          // Just for MC : look at the genId of the selected PF mu
+          double minDeltaRPFmuGen = 200.;
+          double minDeltaPtPFmuGen = 200.;
+          int idGen = 0;
+          double pTGen = 0.;
+          double dpz = 0.;
+          double origin = 0.; // will b 1 if mu comes from t->W
+          for (reco::GenParticleCollection::const_iterator it = mcparts.begin(); it != mcparts.end(); it++) {
+            if (fabs((*it).pt()) < 1e-10) continue;
+            TLorentzVector p_Gen;
+            p_Gen.SetPtEtaPhiM((*it).pt(), (*it).eta(), (*it).phi(), 0.);
+            if (p_Gen.DeltaR(p_Mu) < minDeltaRPFmuGen && fabs(p_Gen.Pt()-p_Mu.Pt()) < 0.15*p_Mu.Pt()) {
+              minDeltaRPFmuGen = p_Gen.DeltaR(p_Mu);
+              minDeltaPtPFmuGen = fabs(p_Gen.Pt()-p_Mu.Pt());
+              idGen = abs((*it).pdgId());
+              pTGen = p_Gen.Pt();
+              dpz = fabs((p_Gen.Pz()-p_Mu.Pz())/p_Gen.Pz());
+              origin = 0.;
+              reco::GenParticle mutmp = *it;
+              reco::GenParticle *mothertmp = NULL;
+              for (int i=0; i<100; i++) {
+                if (mutmp.mother(i) != 0 && fabs(mutmp.mother(i)->pdgId())==24) {
+                  mothertmp = (reco::GenParticle*) mutmp.mother(i);
+                  for (int i=0; i<100; i++) {
+                    if (mothertmp->mother(i) != 0 && fabs(mothertmp->mother(i)->pdgId()) == 6) {
+                      origin = 1.;
+                      break;
+                    }
+                  }
+                  break;
+                } 
+              }
+            }
+          }
+          if (abs(idGen) > 0) {
+            _h_id1stPFmu->Fill((double)idGen, weight);
+            _h_id_pT_1stPFmu->Fill((double)idGen, pTGen, weight);
+            _h_dR_dpT_1stPFmu->Fill(minDeltaRPFmuGen, minDeltaPtPFmuGen, weight);
+            if (pTGen < 100) {
+              _h_origin_id_1stPFmu_Inf100->Fill(origin, (double)idGen, weight);
+              _h_eta_dpz_1stPFmu_Inf100->Fill(p_Mu.Eta(), dpz, weight);
+            }
+            else {
+              _h_origin_id_1stPFmu_Sup100->Fill(origin, (double)idGen, weight);
+              _h_eta_dpz_1stPFmu_Sup100->Fill(p_Mu.Eta(), dpz, weight);
+            }
+          }
+
           TLorentzVector p_Bcombi = p_Mu + p_D0combi;
           _h_BMomentum_unbiased->Fill(p_Bcombi.P(), weight);
         }
@@ -856,8 +959,20 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       // std::cout << "Creating histos..." << std::endl;
 
       edm::Service<TFileService> fs;
-      _h_idPFel = fs->make<TH1D>("pdgIdPFel", "pdgIdPFel", 1000, -500., 500.);
-      _h_dRPFel = fs->make<TH1D>("DeltaR-PFel-Gen", "DeltaR-PFel-Gen", 100, 0., 0.5);
+      _h_idPFel = fs->make<TH1D>("pdgIdPFel", "pdgIdPFel", 500, 0., 500.);
+      _h_id_pT_PFel = fs->make<TH2D>("pdgId-pT-PFel", "pdgId-pT-PFel", 500, 0., 500., 150, 0, 300);
+      _h_dR_dpT_PFel = fs->make<TH2D>("DeltaR-DeltapT-PFel-Gen", "DeltaR-DeltapT-PFel-Gen", 100, 0., 0.5, 100, 0., 5.);
+      _h_idPFmu = fs->make<TH1D>("pdgIdPFmu", "pdgIdPFmu", 500, 0., 500.);
+      _h_id_pT_PFmu = fs->make<TH2D>("pdgId-pT-PFmu", "pdgId-pT-PFmu", 500, 0., 500., 150, 0, 300);
+      _h_dR_dpT_PFmu = fs->make<TH2D>("DeltaR-DeltapT-PFmu-Gen", "DeltaR-DeltapT-PFmu-Gen", 100, 0., 0.5, 100, 0., 5.);
+      _h_id1stPFmu = fs->make<TH1D>("pdgId1stPFmu", "pdgId1stPFmu", 500, 0., 500.);
+      _h_id_pT_1stPFmu = fs->make<TH2D>("pdgId-pT-1stPFmu", "pdgId-pT-1stPFmu", 500, 0., 500., 150, 0, 300);
+      _h_dR_dpT_1stPFmu = fs->make<TH2D>("DeltaR-DeltapT-1stPFmu-Gen", "DeltaR-DeltapT-1stPFmu-Gen", 100, 0., 0.5, 100, 0., 5.);
+      _h_origin_id_1stPFmu_Inf100 = fs->make<TH2D>("Origin-pdgId-1stPFmu-Under100GeV", "Origin-pdgId-1stPFmu-Under100GeV", 2, 0., 2., 500, 0., 500.); 
+      _h_eta_dpz_1stPFmu_Inf100 = fs->make<TH2D>("Eta-RelDeltaPz-1stPFmu-Under100GeV", "Eta-RelDeltaPz-1stPFmu-Under100GeV", 60, -3., 3., 100, 0., 1.); 
+      _h_origin_id_1stPFmu_Sup100 = fs->make<TH2D>("Origin-pdgId-1stPFmu-Above100GeV", "Origin-pdgId-1stPFmu-Above100GeV", 2, 0., 2., 500, 0., 500.); 
+      _h_eta_dpz_1stPFmu_Sup100 = fs->make<TH2D>("Eta-RelDeltaPz-1stPFmu-Above100GeV", "Eta-RelDeltaPz-1stPFmu-Above100GeV", 60, -3., 3., 100, 0., 1.); 
+      _h_genId_pT_NonSelJets = fs->make<TH2D>("GenID-pT-below30GeVjets", "GenID-pT-below30GeVjets", 22, 0., 22., 30, 0., 30.);
 
       _h_nVtx = fs->make<TH1D>("NPrimaryVtx", "NPrimaryVtx", 50, 0., 50.); 
 
@@ -872,13 +987,17 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       _h_sump = fs->make<TH1D>("Sump-b-jets", "Sump-b-jets", 200, 0, 1000);
       _h_sumpvec = fs->make<TH1D>("VectorialSump-b-jets", "VectorialSump-b-jets", 300, 0, 1500);
       _h_sum1p = fs->make<TH1D>("Highestp-b-jets", "Highestp-b-jets", 150, 0, 300);
+      _h_sum2p = fs->make<TH1D>("Sum2p-b-jets", "Sum2p-b-jets", 150, 0, 300);
       _h_sum3p = fs->make<TH1D>("Sum3p-b-jets", "Sum3p-b-jets", 150, 0, 300);
+      _h_mass3 = fs->make<TH1D>("Mass3-b-jets", "Mass3-b-jets", 400, 0., 10.);
       _h_R1 = fs->make<TH1D>("R1-b-jets", "R1-b-jets", 51, 0, 1.02);
       _h_R1_Nch = fs->make<TH2D>("R1-Nch-b-jets", "R1-Nch-b-jets", 51, 0, 1.02, 45, 0, 45);
       _h_R3 = fs->make<TH1D>("R3-b-jets", "R3-b-jets", 51, 0, 1.02);
       _h_R3_Nch = fs->make<TH2D>("R3-Nch-b-jets", "R3-Nch-b-jets", 51, 0, 1.02, 45, 0, 45);
       _h_sum1p_nomu = fs->make<TH1D>("Highestp-nomu-b-jets", "Highestp-nomu-b-jets", 150, 0, 300);
+      _h_sum2p_nomu = fs->make<TH1D>("Sum2p-nomu-b-jets", "Sum2p-nomu-b-jets", 150, 0, 300);
       _h_sum3p_nomu = fs->make<TH1D>("Sum3p-nomu-b-jets", "Sum3p-nomu-b-jets", 150, 0, 300);
+      _h_mass3_nomu = fs->make<TH1D>("Mass3-nomu-b-jets", "Mass3-nomu-b-jets", 400, 0., 10.);
       _h_R1_nomu = fs->make<TH1D>("R1-nomu-b-jets", "R1-nomu-b-jets", 51, 0, 1.02);
       _h_R1_Nch_nomu = fs->make<TH2D>("R1-Nch-nomu-b-jets", "R1-Nch-nomu-b-jets", 51, 0, 1.02, 45, 0, 45);
       _h_R3_nomu = fs->make<TH1D>("R3-nomu-b-jets", "R3-nomu-b-jets", 51, 0, 1.02);

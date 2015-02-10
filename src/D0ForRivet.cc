@@ -928,7 +928,7 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                   if (D0_L3DoverSigmaL3D > 100.) {
 
                     // cut on pT
-                    if (p_D0.Pt() > 15.) {
+                    if (p_D0.Pt() > 12.) {
 
                       // cut D0 mass window
                       if (p_D0.M() > 1.7 && p_D0.M() < 2.) {
