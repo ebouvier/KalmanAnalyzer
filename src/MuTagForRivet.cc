@@ -119,6 +119,7 @@ class MuTagForRivet : public edm::EDAnalyzer {
     TH2D* _h_origin_id_1stPFmu_Inf100;
     TH2D* _h_eta_dpz_1stPFmu_Inf100;
     TH2D* _h_origin_id_1stPFmu_Sup100;
+    TH2D* _h_idOrigin_id_1stPFmu_Sup100;
     TH2D* _h_eta_dpz_1stPFmu_Sup100;
     TH2D* _h_genId_pT_NonSelJets;
 
@@ -141,6 +142,8 @@ class MuTagForRivet : public edm::EDAnalyzer {
     TH1D* _h_mass3;
     TH1D* _h_R1;
     TH2D* _h_R1_Nch;
+    TH1D* _h_R2;
+    TH2D* _h_R2_Nch;
     TH1D* _h_R3;
     TH2D* _h_R3_Nch;
     TH1D* _h_sum1p_nomu;
@@ -149,6 +152,8 @@ class MuTagForRivet : public edm::EDAnalyzer {
     TH1D* _h_mass3_nomu;
     TH1D* _h_R1_nomu;
     TH2D* _h_R1_Nch_nomu;
+    TH1D* _h_R2_nomu;
+    TH2D* _h_R2_Nch_nomu;
     TH1D* _h_R3_nomu;
     TH2D* _h_R3_Nch_nomu;
     TH1D* _h_D0Mass;
@@ -156,13 +161,16 @@ class MuTagForRivet : public edm::EDAnalyzer {
     TH1D* _h_D0pT;
     TH1D* _h_D0eta;
     TH1D* _h_BMomentum_unbiased;
+    TH1D* _h_BMass_unbiased;
     TH1D* _h_D0MassClean;
     TH1D* _h_D0pClean;
     TH1D* _h_D0pTClean;
     TH1D* _h_D0etaClean;
     TH1D* _h_BMomentum;
+    TH1D* _h_BMass;
     TH1D* _h_mup;
     TH1D* _h_BMomentumClean;
+    TH1D* _h_BMassClean;
 
     TTree* _t_bjets;
     double weight;
@@ -777,6 +785,8 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         _h_R1_Nch->Fill(p_trCand[0].P() / _sump, (double)_Nch, weight);
         if (p_trCand[1].M() > 1e-10) {
           _h_sum2p->Fill(p_trCand[0].P() + p_trCand[1].P(), weight);
+          _h_R2->Fill((p_trCand[0].P() + p_trCand[1].P()) / _sump, weight);
+          _h_R2_Nch->Fill((p_trCand[0].P() + p_trCand[1].P()) / _sump, (double)_Nch, weight);
           if (p_trCand[2].M() > 1e-10) {
             _h_sum3p->Fill(p_trCand[0].P() + p_trCand[1].P() + p_trCand[2].P(), weight);
             _h_mass3->Fill((p_trCand[0] + p_trCand[1] + p_trCand[2]).M(), weight);
@@ -791,6 +801,8 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         _h_R1_Nch_nomu->Fill(p_trCand_nomu[0].P() / _sump, (double)_Nch, weight);
         if (p_trCand_nomu[1].M() > 1e-10) {
           _h_sum2p_nomu->Fill(p_trCand_nomu[0].P() + p_trCand_nomu[1].P(), weight);
+          _h_R2_nomu->Fill((p_trCand_nomu[0].P() + p_trCand_nomu[1].P()) / _sump, weight);
+          _h_R2_Nch_nomu->Fill((p_trCand_nomu[0].P() + p_trCand_nomu[1].P()) / _sump, (double)_Nch, weight);
           if (p_trCand_nomu[2].M() > 1e-10) {
             _h_sum3p_nomu->Fill(p_trCand_nomu[0].P() + p_trCand_nomu[1].P() + p_trCand_nomu[2].P(), weight);
             _h_mass3_nomu->Fill((p_trCand_nomu[0] + p_trCand_nomu[1] + p_trCand_nomu[2]).M(), weight);
@@ -866,6 +878,7 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           double pTGen = 0.;
           double dpz = 0.;
           double origin = 0.; // will b 1 if mu comes from t->W
+          int idOrigin = 0;
           for (reco::GenParticleCollection::const_iterator it = mcparts.begin(); it != mcparts.end(); it++) {
             if (fabs((*it).pt()) < 1e-10) continue;
             TLorentzVector p_Gen;
@@ -879,6 +892,23 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
               origin = 0.;
               reco::GenParticle mutmp = *it;
               reco::GenParticle *mothertmp = NULL;
+              if (mutmp.mother() != 0)
+                idOrigin = abs(mutmp.mother()->pdgId());
+              if (idOrigin == 13) {
+                mothertmp = (reco::GenParticle*) mutmp.mother();
+                for (int i=0; i<100; i++) {
+                  if (mothertmp->mother() != 0) { 
+                    if (fabs(mothertmp->mother()->pdgId()) == 13) 
+                      mothertmp = (reco::GenParticle*) mothertmp->mother();
+                    else {
+                      idOrigin = mothertmp->mother()->pdgId();
+                      break;
+                    }
+                  }
+                  else
+                    break;
+                }
+              }
               for (int i=0; i<100; i++) {
                 if (mutmp.mother(i) != 0 && fabs(mutmp.mother(i)->pdgId())==24) {
                   mothertmp = (reco::GenParticle*) mutmp.mother(i);
@@ -903,12 +933,14 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             }
             else {
               _h_origin_id_1stPFmu_Sup100->Fill(origin, (double)idGen, weight);
+              _h_idOrigin_id_1stPFmu_Sup100->Fill((double) idOrigin, (double) idGen, weight);
               _h_eta_dpz_1stPFmu_Sup100->Fill(p_Mu.Eta(), dpz, weight);
             }
           }
 
           TLorentzVector p_Bcombi = p_Mu + p_D0combi;
           _h_BMomentum_unbiased->Fill(p_Bcombi.P(), weight);
+          _h_BMass_unbiased->Fill(p_Bcombi.M(), weight);
         }
       }
 
@@ -941,9 +973,11 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         p_Mu.SetPtEtaPhiM(myPFmuInSelJet[tk2charge]->pt(), myPFmuInSelJet[tk2charge]->eta(), myPFmuInSelJet[tk2charge]->phi(), gMassMu);
         TLorentzVector p_Boptcombi = p_Mu + p_D0optcombi;
         _h_BMomentum->Fill(p_Boptcombi.P(), weight);
+        _h_BMass->Fill(p_Boptcombi.M(), weight);
         _h_mup->Fill(p_Mu.P(), weight);
         if (p_D0optcombi.M() > 1.7 && p_D0optcombi.M() < 2.) 
           _h_BMomentumClean->Fill(p_Boptcombi.P(), weight);
+          _h_BMassClean->Fill(p_Boptcombi.M(), weight);
       }
     } // jet loop
     _t_bjets->Fill();
@@ -971,6 +1005,7 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       _h_origin_id_1stPFmu_Inf100 = fs->make<TH2D>("Origin-pdgId-1stPFmu-Under100GeV", "Origin-pdgId-1stPFmu-Under100GeV", 2, 0., 2., 500, 0., 500.); 
       _h_eta_dpz_1stPFmu_Inf100 = fs->make<TH2D>("Eta-RelDeltaPz-1stPFmu-Under100GeV", "Eta-RelDeltaPz-1stPFmu-Under100GeV", 60, -3., 3., 100, 0., 1.); 
       _h_origin_id_1stPFmu_Sup100 = fs->make<TH2D>("Origin-pdgId-1stPFmu-Above100GeV", "Origin-pdgId-1stPFmu-Above100GeV", 2, 0., 2., 500, 0., 500.); 
+      _h_idOrigin_id_1stPFmu_Sup100 = fs->make<TH2D>("PdgIdOrigin-pdgId-1stPFmu-Above100GeV", "PdgIdOrigin-pdgId-1stPFmu-Above100GeV", 5000, 0., 5000., 500, 0., 500.); 
       _h_eta_dpz_1stPFmu_Sup100 = fs->make<TH2D>("Eta-RelDeltaPz-1stPFmu-Above100GeV", "Eta-RelDeltaPz-1stPFmu-Above100GeV", 60, -3., 3., 100, 0., 1.); 
       _h_genId_pT_NonSelJets = fs->make<TH2D>("GenID-pT-below30GeVjets", "GenID-pT-below30GeVjets", 22, 0., 22., 30, 0., 30.);
 
@@ -992,6 +1027,8 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       _h_mass3 = fs->make<TH1D>("Mass3-b-jets", "Mass3-b-jets", 400, 0., 10.);
       _h_R1 = fs->make<TH1D>("R1-b-jets", "R1-b-jets", 51, 0, 1.02);
       _h_R1_Nch = fs->make<TH2D>("R1-Nch-b-jets", "R1-Nch-b-jets", 51, 0, 1.02, 45, 0, 45);
+      _h_R2 = fs->make<TH1D>("R2-b-jets", "R2-b-jets", 51, 0, 1.02);
+      _h_R2_Nch = fs->make<TH2D>("R2-Nch-b-jets", "R2-Nch-b-jets", 51, 0, 1.02, 45, 0, 45);
       _h_R3 = fs->make<TH1D>("R3-b-jets", "R3-b-jets", 51, 0, 1.02);
       _h_R3_Nch = fs->make<TH2D>("R3-Nch-b-jets", "R3-Nch-b-jets", 51, 0, 1.02, 45, 0, 45);
       _h_sum1p_nomu = fs->make<TH1D>("Highestp-nomu-b-jets", "Highestp-nomu-b-jets", 150, 0, 300);
@@ -1000,6 +1037,8 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       _h_mass3_nomu = fs->make<TH1D>("Mass3-nomu-b-jets", "Mass3-nomu-b-jets", 400, 0., 10.);
       _h_R1_nomu = fs->make<TH1D>("R1-nomu-b-jets", "R1-nomu-b-jets", 51, 0, 1.02);
       _h_R1_Nch_nomu = fs->make<TH2D>("R1-Nch-nomu-b-jets", "R1-Nch-nomu-b-jets", 51, 0, 1.02, 45, 0, 45);
+      _h_R2_nomu = fs->make<TH1D>("R2-nomu-b-jets", "R2-nomu-b-jets", 51, 0, 1.02);
+      _h_R2_Nch_nomu = fs->make<TH2D>("R2-Nch-nomu-b-jets", "R2-Nch-nomu-b-jets", 51, 0, 1.02, 45, 0, 45);
       _h_R3_nomu = fs->make<TH1D>("R3-nomu-b-jets", "R3-nomu-b-jets", 51, 0, 1.02);
       _h_R3_Nch_nomu = fs->make<TH2D>("R3-Nch-nomu-b-jets", "R3-Nch-nomu-b-jets", 51, 0, 1.02, 45, 0, 45);
       _h_D0Mass = fs->make<TH1D>("D0Mass-b-jets", "D0Mass-b-jets", 400, 0, 8);
@@ -1007,13 +1046,16 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       _h_D0pT = fs->make<TH1D>("D0pT-b-jets", "D0pT-b-jets", 100, 0, 400);
       _h_D0eta = fs->make<TH1D>("D0eta-b-jets", "D0eta-b-jets", 60, -3, 3);
       _h_BMomentum_unbiased = fs->make<TH1D>("BMomentum-nobias-b-jets", "BMomentum-nobias-b-jets", 100, 0, 400);
+      _h_BMass_unbiased = fs->make<TH1D>("BMass-nobias-b-jets", "BMass-nobias-b-jets", 100, 0, 400);
       _h_D0MassClean = fs->make<TH1D>("D0MassClean-b-jets", "D0MassClean-b-jets", 400, 0, 8);
       _h_D0pClean = fs->make<TH1D>("D0pClean-b-jets", "D0pClean-b-jets", 150, 0, 300);
       _h_D0pTClean = fs->make<TH1D>("D0pTClean-b-jets", "D0pTClean-b-jets", 100, 0, 400);
       _h_D0etaClean = fs->make<TH1D>("D0etaClean-b-jets", "D0etaClean-b-jets", 60, -3, 3);
       _h_BMomentum = fs->make<TH1D>("BMomentum-b-jets", "BMomentum-b-jets", 100, 0, 400);
+      _h_BMass = fs->make<TH1D>("BMass-b-jets", "BMass-b-jets", 100, 0, 400);
       _h_mup = fs->make<TH1D>("Muonp-b-jets", "Muonp-b-jets", 150, 0, 300);
       _h_BMomentumClean = fs->make<TH1D>("BMomentum-D0cut-b-jets", "BMomentum-D0cut-b-jets", 100, 0, 400);
+      _h_BMassClean = fs->make<TH1D>("BMass-D0cut-b-jets", "BMass-D0cut-b-jets", 100, 0, 400);
 
       _t_bjets = fs->make<TTree>("b-jets", "b-jets", 1);
       _t_bjets->Branch("Weight", &weight, "Weight/D");
