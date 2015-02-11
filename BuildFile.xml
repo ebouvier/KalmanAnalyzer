@@ -52,6 +52,7 @@
 <lib   name="MathMore"/>
 
 <flags EDM_PLUGIN="1"/>
+<flags CXXFLAGS="-g" />
 <export>
    <lib name="1"/>
 </export>
