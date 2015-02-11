@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-process = cms.Process("CSVbasedSelection")
+process = cms.Process("muTagBasedSelection")
 
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000
@@ -236,8 +236,8 @@ process.TFileService = cms.Service("TFileService",
   fileName = cms.string('MuTagForRivet.root')
 )
 
-process.CSVbasedSelection = cms.EDAnalyzer('MuTagForRivet',
-        isCSVbased = cms.untracked.bool(True)
+process.muTagBasedSelection = cms.EDAnalyzer('MuTagForRivet',
 )
 
-process.p = cms.Path(process.CSVbasedSelection)
+
+process.p = cms.Path(process.muTagBasedSelection)

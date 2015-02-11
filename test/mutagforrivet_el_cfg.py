@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-process = cms.Process("CSVbasedSelection")
+process = cms.Process("muTagBasedSelection")
 
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000
@@ -13,7 +13,7 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.GlobalTag.globaltag = 'START53_V19PR::All'
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(5000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10000) )
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(50000) )
 
 process.source = cms.Source("PoolSource",
@@ -37,8 +37,8 @@ process.TFileService = cms.Service("TFileService",
   fileName = cms.string('MuTagForRivet_El.root')
 )
 
-process.CSVbasedSelection = cms.EDAnalyzer('MuTagForRivet_El',
-        isCSVbased = cms.untracked.bool(True)
+process.muTagBasedSelection = cms.EDAnalyzer('MuTagForRivet_El',
 )
 
-process.p = cms.Path(process.CSVbasedSelection)
+
+process.p = cms.Path(process.muTagBasedSelection)

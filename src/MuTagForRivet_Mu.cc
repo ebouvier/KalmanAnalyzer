@@ -95,7 +95,6 @@ class MuTagForRivet_Mu : public edm::EDAnalyzer {
     virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
 
     // ----------member data ---------------------------
-    bool _isCSVbased;
 
     // evts properties
     unsigned int nEvts;
@@ -178,8 +177,7 @@ class MuTagForRivet_Mu : public edm::EDAnalyzer {
 //
 // constructors and destructor
 //
-MuTagForRivet_Mu::MuTagForRivet_Mu(const edm::ParameterSet& iConfig) :
-  _isCSVbased(iConfig.getUntrackedParameter<bool>("isCSVbased", false))
+MuTagForRivet_Mu::MuTagForRivet_Mu(const edm::ParameterSet& iConfig)
 {
   // now do what ever initialization is needed
   nEvts = 0;
@@ -632,14 +630,16 @@ MuTagForRivet_Mu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
         p_tr1.SetPtEtaPhiM((**iter1).pt(), (**iter1).eta(), (**iter1).phi(), gMassPi);
         if (fabs(pt_trCand[0]) > 1e-10) {
           p_trCand[0].SetPtEtaPhiM(pt_trCand[0], eta_trCand[0], phi_trCand[0], gMassPi);
-          if (fabs(pt_trCand[1]) > 1e-10 && fabs(pt_trCand[2]) > 1e-10) {
+          if (fabs(pt_trCand[1]) > 1e-10) {
             p_trCand[1].SetPtEtaPhiM(pt_trCand[1], eta_trCand[1], phi_trCand[1], gMassPi);
-            p_trCand[2].SetPtEtaPhiM(pt_trCand[2], eta_trCand[2], phi_trCand[2], gMassPi);
+            if (fabs(pt_trCand[2]) > 1e-10) {
+              p_trCand[2].SetPtEtaPhiM(pt_trCand[2], eta_trCand[2], phi_trCand[2], gMassPi);
+            }
+            else
+              p_trCand[2].SetPtEtaPhiM(0., 0., 0., 0.);
           }
-          else {
+          else 
             p_trCand[1].SetPtEtaPhiM(0., 0., 0., 0.);
-            p_trCand[2].SetPtEtaPhiM(0., 0., 0., 0.);
-          }
         }
         else p_trCand[0].SetPtEtaPhiM(0., 0., 0., 0.);
         if (fabs(pt_trCand_nomu[0]) > 1e-10) {
@@ -852,17 +852,17 @@ MuTagForRivet_Mu::beginJob()
   _h_D0pT = fs->make<TH1D>("D0pT-b-jets", "D0pT-b-jets", 100, 0, 400);
   _h_D0eta = fs->make<TH1D>("D0eta-b-jets", "D0eta-b-jets", 60, -3, 3);
   _h_BMomentum_unbiased = fs->make<TH1D>("BMomentum-nobias-b-jets", "BMomentum-nobias-b-jets", 100, 0, 400);
-  _h_BMass_unbiased = fs->make<TH1D>("BMass-nobias-b-jets", "BMass-nobias-b-jets", 400, 0., 10.);
+  _h_BMass_unbiased = fs->make<TH1D>("BMass-nobias-b-jets", "BMass-nobias-b-jets", 100, 0., 10.);
   _h_mup_unbiased = fs->make<TH1D>("Muonp-nobias-b-jets", "Muonp-nobias-b-jets", 150, 0, 300);
   _h_D0MassClean = fs->make<TH1D>("D0MassClean-b-jets", "D0MassClean-b-jets", 400, 0, 8);
   _h_D0pClean = fs->make<TH1D>("D0pClean-b-jets", "D0pClean-b-jets", 150, 0, 300);
   _h_D0pTClean = fs->make<TH1D>("D0pTClean-b-jets", "D0pTClean-b-jets", 100, 0, 400);
   _h_D0etaClean = fs->make<TH1D>("D0etaClean-b-jets", "D0etaClean-b-jets", 60, -3, 3);
   _h_BMomentum = fs->make<TH1D>("BMomentum-b-jets", "BMomentum-b-jets", 100, 0, 400);
-  _h_BMass = fs->make<TH1D>("BMass-b-jets", "BMass-b-jets", 400, 0., 10.);
+  _h_BMass = fs->make<TH1D>("BMass-b-jets", "BMass-b-jets", 100, 0., 10.);
   _h_mup = fs->make<TH1D>("Muonp-b-jets", "Muonp-b-jets", 150, 0, 300);
   _h_BMomentumClean = fs->make<TH1D>("BMomentum-D0cut-b-jets", "BMomentum-D0cut-b-jets", 100, 0, 400);
-  _h_BMassClean = fs->make<TH1D>("BMass-D0cut-b-jets", "BMass-D0cut-b-jets", 400, 0., 10.);
+  _h_BMassClean = fs->make<TH1D>("BMass-D0cut-b-jets", "BMass-D0cut-b-jets", 100, 0., 10.);
 
   _t_bjets = fs->make<TTree>("b-jets", "b-jets", 1);
   _t_bjets->Branch("CSV", &_CSV, "CSV/D");

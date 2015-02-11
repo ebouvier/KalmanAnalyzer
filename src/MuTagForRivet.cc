@@ -95,7 +95,6 @@ class MuTagForRivet : public edm::EDAnalyzer {
     virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
 
     // ----------member data ---------------------------
-    bool _isCSVbased;
 
     // evts properties
     unsigned int nEvts;
@@ -197,8 +196,7 @@ class MuTagForRivet : public edm::EDAnalyzer {
 //
 // constructors and destructor
 //
-MuTagForRivet::MuTagForRivet(const edm::ParameterSet& iConfig) :
-  _isCSVbased(iConfig.getUntrackedParameter<bool>("isCSVbased", false))
+MuTagForRivet::MuTagForRivet(const edm::ParameterSet& iConfig)
 {
   // now do what ever initialization is needed
   nEvts = 0;
@@ -394,20 +392,11 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       return;
     }
 
-    if (_isCSVbased) {
-      double vtxWeight[45] = {23./16.24817, 157./96.10187, 608./389.7191, 1653./1092.023, 3518./2428.246, 6185./4495.628, 9848./7287.974, 13907./10632.4, 17801./14183.71, 21165./17578., 24344./20656.52, 26132./22919.96, 26440./24470.79, 26610./25254.18, 25605./25303.6, 23974./24804.25, 21937./23480.46, 19587./21797.11, 17451./19784.64, 14764./17591.69, 12440./15221.65, 10121./12837., 8188./10599.46, 6449./6746.303, 4873./8565.719, 3690./5220.74, 2741./3919.616, 1977./2855.812, 1451./2064.941, 990./1440.364, 656./1021.42, 479./686.967, 315./451.8202, 210./290.9677, 140./184.5276, 71./118.4836, 72./73.5648, 41./44.23643, 23./26.39862, 13./16.03296, 7./9.068202, 10./6.257565, 4./3.187427, 1./1.576181, 1./1.232338};
-      if (vtx.size() < 46)
-        weight *= vtxWeight[vtx.size()];
-      else 
-        weight *= vtxWeight[44];
-    }
-    else {
-      double vtxWeight[45] = {23./16.24817, 157./96.10187, 608./389.7191, 1653./1092.023, 3518./2428.246, 6185./4495.628, 9848./7287.974, 13907./10632.4, 17801./14183.71, 21165./17578., 24344./20656.52, 26132./22919.96, 26440./24470.79, 26610./25254.18, 25605./25303.6, 23974./24804.25, 21937./23480.46, 19587./21797.11, 17451./19784.64, 14764./17591.69, 12440./15221.65, 10121./12837., 8188./10599.46, 6449./8565.719, 4873./6746.303, 3690./5220.74, 2741./3919.616, 1977./2855.812, 1451./2064.941, 990./1440.364, 656./1021.42, 479./686.967, 315./451.8202, 210./290.9677, 140./184.5276, 71./118.4836, 72./73.5648, 41./44.23643, 23./26.39862, 13./16.03296, 7./9.068202, 10./6.257565, 4./3.187427, 1./1.576181, 1./1.232338};
-      if (vtx.size() < 46)
-        weight *= vtxWeight[vtx.size()-1];
-      else 
-        weight *= vtxWeight[44];
-    }
+    double vtxWeight[45] = {23./16.24817, 157./96.10187, 608./389.7191, 1653./1092.023, 3518./2428.246, 6185./4495.628, 9848./7287.974, 13907./10632.4, 17801./14183.71, 21165./17578., 24344./20656.52, 26132./22919.96, 26440./24470.79, 26610./25254.18, 25605./25303.6, 23974./24804.25, 21937./23480.46, 19587./21797.11, 17451./19784.64, 14764./17591.69, 12440./15221.65, 10121./12837., 8188./10599.46, 6449./8565.719, 4873./6746.303, 3690./5220.74, 2741./3919.616, 1977./2855.812, 1451./2064.941, 990./1440.364, 656./1021.42, 479./686.967, 315./451.8202, 210./290.9677, 140./184.5276, 71./118.4836, 72./73.5648, 41./44.23643, 23./26.39862, 13./16.03296, 7./9.068202, 10./6.257565, 4./3.187427, 1./1.576181, 1./1.232338};
+    if (vtx.size() < 46)
+      weight *= vtxWeight[vtx.size()-1];
+    else 
+      weight *= vtxWeight[44];
 
     nEvts3 = nEvts3 + weight;
     _h_nVtx->Fill((double)vtx.size(), weight);
@@ -746,26 +735,30 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         p_tr1.SetPtEtaPhiM((**iter1).pt(), (**iter1).eta(), (**iter1).phi(), gMassPi);
         if (fabs(pt_trCand[0]) > 1e-10) {
           p_trCand[0].SetPtEtaPhiM(pt_trCand[0], eta_trCand[0], phi_trCand[0], gMassPi);
-          if (fabs(pt_trCand[1]) > 1e-10 && fabs(pt_trCand[2]) > 1e-10) {
+          if (fabs(pt_trCand[1]) > 1e-10) { 
             p_trCand[1].SetPtEtaPhiM(pt_trCand[1], eta_trCand[1], phi_trCand[1], gMassPi);
-            p_trCand[2].SetPtEtaPhiM(pt_trCand[2], eta_trCand[2], phi_trCand[2], gMassPi);
+            if (fabs(pt_trCand[2]) > 1e-10) { 
+              p_trCand[2].SetPtEtaPhiM(pt_trCand[2], eta_trCand[2], phi_trCand[2], gMassPi);
+            }
+            else
+              p_trCand[2].SetPtEtaPhiM(0., 0., 0., 0.);
           }
-          else {
+          else 
             p_trCand[1].SetPtEtaPhiM(0., 0., 0., 0.);
-            p_trCand[2].SetPtEtaPhiM(0., 0., 0., 0.);
-          }
         }
         else p_trCand[0].SetPtEtaPhiM(0., 0., 0., 0.);
         if (fabs(pt_trCand_nomu[0]) > 1e-10) {
           p_trCand_nomu[0].SetPtEtaPhiM(pt_trCand_nomu[0], eta_trCand_nomu[0], phi_trCand_nomu[0], gMassPi);
-          if (fabs(pt_trCand_nomu[1]) > 1e-10 && fabs(pt_trCand_nomu[2]) > 1e-10) {
+          if (fabs(pt_trCand_nomu[1]) > 1e-10) {
             p_trCand_nomu[1].SetPtEtaPhiM(pt_trCand_nomu[1], eta_trCand_nomu[1], phi_trCand_nomu[1], gMassPi);
-            p_trCand_nomu[2].SetPtEtaPhiM(pt_trCand_nomu[2], eta_trCand_nomu[2], phi_trCand_nomu[2], gMassPi);
+            if (fabs(pt_trCand_nomu[2]) > 1e-10) {
+              p_trCand_nomu[2].SetPtEtaPhiM(pt_trCand_nomu[2], eta_trCand_nomu[2], phi_trCand_nomu[2], gMassPi);
+            }
+            else
+              p_trCand_nomu[2].SetPtEtaPhiM(0., 0., 0., 0.);
           }
-          else {
+          else 
             p_trCand_nomu[1].SetPtEtaPhiM(0., 0., 0., 0.);
-            p_trCand_nomu[2].SetPtEtaPhiM(0., 0., 0., 0.);
-          }
         }
         else p_trCand_nomu[0].SetPtEtaPhiM(0., 0., 0., 0.);
 
@@ -1051,17 +1044,17 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       _h_D0pT = fs->make<TH1D>("D0pT-b-jets", "D0pT-b-jets", 100, 0, 400);
       _h_D0eta = fs->make<TH1D>("D0eta-b-jets", "D0eta-b-jets", 60, -3, 3);
       _h_BMomentum_unbiased = fs->make<TH1D>("BMomentum-nobias-b-jets", "BMomentum-nobias-b-jets", 100, 0, 400);
-      _h_BMass_unbiased = fs->make<TH1D>("BMass-nobias-b-jets", "BMass-nobias-b-jets", 400, 0., 10.);
+      _h_BMass_unbiased = fs->make<TH1D>("BMass-nobias-b-jets", "BMass-nobias-b-jets", 100, 0., 10.);
       _h_mup_unbiased = fs->make<TH1D>("Muonp-nobias-b-jets", "Muonp-nobias-b-jets", 150, 0, 300);
       _h_D0MassClean = fs->make<TH1D>("D0MassClean-b-jets", "D0MassClean-b-jets", 400, 0, 8);
       _h_D0pClean = fs->make<TH1D>("D0pClean-b-jets", "D0pClean-b-jets", 150, 0, 300);
       _h_D0pTClean = fs->make<TH1D>("D0pTClean-b-jets", "D0pTClean-b-jets", 100, 0, 400);
       _h_D0etaClean = fs->make<TH1D>("D0etaClean-b-jets", "D0etaClean-b-jets", 60, -3, 3);
       _h_BMomentum = fs->make<TH1D>("BMomentum-b-jets", "BMomentum-b-jets", 100, 0, 400);
-      _h_BMass = fs->make<TH1D>("BMass-b-jets", "BMass-b-jets", 400, 0, 10.);
+      _h_BMass = fs->make<TH1D>("BMass-b-jets", "BMass-b-jets", 100, 0, 10.);
       _h_mup = fs->make<TH1D>("Muonp-b-jets", "Muonp-b-jets", 150, 0, 300);
       _h_BMomentumClean = fs->make<TH1D>("BMomentum-D0cut-b-jets", "BMomentum-D0cut-b-jets", 100, 0, 400);
-      _h_BMassClean = fs->make<TH1D>("BMass-D0cut-b-jets", "BMass-D0cut-b-jets", 400, 0., 10.);
+      _h_BMassClean = fs->make<TH1D>("BMass-D0cut-b-jets", "BMass-D0cut-b-jets", 100, 0., 10.);
 
       _t_bjets = fs->make<TTree>("b-jets", "b-jets", 1);
       _t_bjets->Branch("Weight", &weight, "Weight/D");

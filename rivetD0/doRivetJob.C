@@ -212,7 +212,7 @@ void cms_style(bool isData = true){
 }
 
 //---------------------------------------------------------------
-void plotHisto(bool inBatch, TString date, bool isCSVbased, TFile* fi_data, TFile* fi_sl, TFile* fi_dl, TString channel, TString h_name, TString xtitle, double xmin, double xmax)
+void plotHisto(bool inBatch, TString date, TString type, TFile* fi_data, TFile* fi_sl, TFile* fi_dl, TString channel, TString h_name, TString xtitle, double xmin, double xmax)
 //---------------------------------------------------------------
 {
   TStyle* my_style = createMyStyle();
@@ -226,13 +226,17 @@ void plotHisto(bool inBatch, TString date, bool isCSVbased, TFile* fi_data, TFil
 
   TString dir_name = "basedSelection/";
   TString rep_name = date;
-  if (isCSVbased) {
+  if (type.Contains("csv", kIgnoreCase)) {
     dir_name = "CSV" + dir_name;
     rep_name = rep_name + "/csv/";
   }
-  else { 
+  else if (type.Contains("pT", kIgnoreCase)) { 
     dir_name = "pT" + dir_name;
     rep_name = rep_name + "/pT/";
+  }
+  else if (type.Contains("muTag", kIgnoreCase)) {
+    dir_name = "muTagBasedSelection/";
+    rep_name = rep_name + "/muTag/";
   }
   
   TH1D* h_data = (TH1D*)fi_data->Get(dir_name+h_name);
@@ -296,12 +300,13 @@ void plotHisto(bool inBatch, TString date, bool isCSVbased, TFile* fi_data, TFil
 }
 
 //---------------------------------------------------------------
-void doRivetJob_cut(bool inBatch, TString date, bool isCSVbased)
+void doRivetJob_d0(bool inBatch, TString date, bool isCSVbased)
 //---------------------------------------------------------------
 {
   TString fi_data_name = "../test/crab_results/"+date;
   TString fi_sl_name = "../test/crab_results/"+date;
   TString fi_dl_name = "../test/crab_results/"+date;
+  TString type;
   /*
   std::cout << "\t\t /!\\ Don't forget in " << fi_data_name << " /!\\ " << std::endl;
   if (isCSVbased)
@@ -314,56 +319,105 @@ void doRivetJob_cut(bool inBatch, TString date, bool isCSVbased)
     fi_data_name = fi_data_name + "/D0ForRivet_csv_Data_merged.root";
     fi_sl_name = fi_sl_name + "/D0ForRivet_csv_TTJets_SemiLeptMGDecays.root";
     fi_dl_name = fi_dl_name + "/D0ForRivet_csv_TTJets_FullLeptMGDecays.root";
+    type = "csv";
   }
   else {
     fi_data_name = fi_data_name + "/D0ForRivet_pT_Data_merged.root";
     fi_sl_name = fi_sl_name + "/D0ForRivet_pT_TTJets_SemiLeptMGDecays.root";
     fi_dl_name = fi_dl_name + "/D0ForRivet_pT_TTJets_FullLeptMGDecays.root";
+    type = "pT";
   }
   
   TFile* fi_data = TFile::Open(fi_data_name);
   TFile* fi_sl = TFile::Open(fi_sl_name);
   TFile* fi_dl = TFile::Open(fi_dl_name);
 
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "All", "NPrimaryVtx", "Primary vertices multiplicity", 0., 0.);
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "All", "NJets", "Jets multiplicity", 0., 0.);
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "All", "TransverseMomentumJets", "p(jets) (GeV/c)", 0., 250.);
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "All", "NCSVJets", "b-tagged jets multiplicity", 0., 0.);
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, "All", "NPrimaryVtx", "Primary vertices multiplicity", 0., 0.);
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, "All", "NJets", "Jets multiplicity", 0., 0.);
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, "All", "TransverseMomentumJets", "p(jets) (GeV/c)", 0., 250.);
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, "All", "NCSVJets", "b-tagged jets multiplicity", 0., 0.);
 
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "Both jets", "CSV-b-jets", "CSV discriminant", 0., 0.);
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "Both jets", "TransverseMomentum-b-jets", "p(jets) (GeV/c)", 0., 300.);
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, "Both jets", "CSV-b-jets", "CSV discriminant", 0., 0.);
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, "Both jets", "TransverseMomentum-b-jets", "p(jets) (GeV/c)", 0., 300.);
 
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "1^{st} jet", "Nch-b-jet1", "Tracks multiplicity", 0., 20.);
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "2^{nd} jet", "Nch-b-jet2", "Tracks multiplicity", 0., 20.);
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, "1^{st} jet", "Nch-b-jet1", "Tracks multiplicity", 0., 20.);
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, "2^{nd} jet", "Nch-b-jet2", "Tracks multiplicity", 0., 20.);
 
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "1^{st} jet", "Sump-b-jet1", "Scalar sum of tracks momenta (GeV/c)", 0., 400.);
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "2^{nd} jet", "Sump-b-jet2", "Scalar sum of tracks momenta (GeV/c)", 0., 400.);
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, "1^{st} jet", "Sump-b-jet1", "Scalar sum of tracks momenta (GeV/c)", 0., 400.);
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, "2^{nd} jet", "Sump-b-jet2", "Scalar sum of tracks momenta (GeV/c)", 0., 400.);
   
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "1^{st} jet", "VectorialSump-b-jet1", "Vectorial sum of tracks momenta (GeV/c)", 0., 400.);
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "2^{nd} jet", "VectorialSump-b-jet2", "Vectorial sum of tracks momenta (GeV/c)", 0., 400.);
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, "1^{st} jet", "VectorialSump-b-jet1", "Vectorial sum of tracks momenta (GeV/c)", 0., 400.);
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, "2^{nd} jet", "VectorialSump-b-jet2", "Vectorial sum of tracks momenta (GeV/c)", 0., 400.);
   
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "1^{st} jet", "Highestp-b-jet1", "Highest track momentum (GeV/c)", 0., 200.);
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "2^{nd} jet", "Highestp-b-jet2", "Highest track momentum (GeV/c)", 0., 200.);
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, "1^{st} jet", "Highestp-b-jet1", "Highest track momentum (GeV/c)", 0., 200.);
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, "2^{nd} jet", "Highestp-b-jet2", "Highest track momentum (GeV/c)", 0., 200.);
   
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "1^{st} jet", "Sum3p-b-jet1", "Scalar sum of the 3 highest tracks momenta (GeV/c)", 0., 0.);
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "2^{nd} jet", "Sum3p-b-jet2", "Scalar sum of the 3 highest tracks momenta (GeV/c)", 0., 0.);
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, "1^{st} jet", "Sum3p-b-jet1", "Scalar sum of the 3 highest tracks momenta (GeV/c)", 0., 0.);
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, "2^{nd} jet", "Sum3p-b-jet2", "Scalar sum of the 3 highest tracks momenta (GeV/c)", 0., 0.);
   
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "1^{st} jet", "R1-b-jet1", "R_{1}", 0., 0.);
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "2^{nd} jet", "R1-b-jet2", "R_{1}", 0., 0.);
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, "1^{st} jet", "R1-b-jet1", "R_{1}", 0., 0.);
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, "2^{nd} jet", "R1-b-jet2", "R_{1}", 0., 0.);
   
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "1^{st} jet", "R3-b-jet1", "R_{3}", 0., 0.);
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "2^{nd} jet", "R3-b-jet2", "R_{3}", 0., 0.);
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, "1^{st} jet", "R3-b-jet1", "R_{3}", 0., 0.);
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, "2^{nd} jet", "R3-b-jet2", "R_{3}", 0., 0.);
   
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "1^{st} jet", "D0Mass-b-jet1", "m(D^{0}#rightarrow#kappa^{+}#pi^{-}) (GeV/c^{2})", 0., 0.);
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "2^{nd} jet", "D0Mass-b-jet2", "m(D^{0}#rightarrow#kappa^{+}#pi^{-}) (GeV/c^{2})", 0., 0.);
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, "1^{st} jet", "D0Mass-b-jet1", "m(D^{0}#rightarrow#kappa^{+}#pi^{-}) (GeV/c^{2})", 0., 0.);
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, "2^{nd} jet", "D0Mass-b-jet2", "m(D^{0}#rightarrow#kappa^{+}#pi^{-}) (GeV/c^{2})", 0., 0.);
   
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "1^{st} jet", "D0p-b-jet1", "p(D^{0}#rightarrow#kappa^{+}#pi^{-}) (GeV/c)", 0., 0.);
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "2^{nd} jet", "D0p-b-jet2", "p(D^{0}#rightarrow#kappa^{+}#pi^{-}) (GeV/c)", 0., 0.);
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, "1^{st} jet", "D0p-b-jet1", "p(D^{0}#rightarrow#kappa^{+}#pi^{-}) (GeV/c)", 0., 0.);
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, "2^{nd} jet", "D0p-b-jet2", "p(D^{0}#rightarrow#kappa^{+}#pi^{-}) (GeV/c)", 0., 0.);
 
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "1^{st} jet", "BMomentum-nobias-b-jet1", "p(#kappa^{+}#pi^{-}+#mu^{-}) (GeV/c)", 0., 350.);
-  plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "2^{nd} jet", "BMomentum-nobias-b-jet2", "p(#kappa^{+}#pi^{-}+#mu^{-}) (GeV/c)", 0., 350.);
-  // plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "1^{st} jet", "BMomentum-D0window-b-jet1", "p(#kappa^{+}#pi^{-}+#mu^{-}) (GeV/c)", 0., 350.);
-  // plotHisto(inBatch, date, isCSVbased, fi_data, fi_sl, fi_dl, "2^{nd} jet", "BMomentum-D0window-b-jet2", "p(#kappa^{+}#pi^{-}+#mu^{-}) (GeV/c)", 0., 350.);
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, "1^{st} jet", "BMomentum-nobias-b-jet1", "p(#kappa^{+}#pi^{-}+#mu^{-}) (GeV/c)", 0., 350.);
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, "2^{nd} jet", "BMomentum-nobias-b-jet2", "p(#kappa^{+}#pi^{-}+#mu^{-}) (GeV/c)", 0., 350.);
+  // plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, "1^{st} jet", "BMomentum-D0window-b-jet1", "p(#kappa^{+}#pi^{-}+#mu^{-}) (GeV/c)", 0., 350.);
+  // plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, "2^{nd} jet", "BMomentum-D0window-b-jet2", "p(#kappa^{+}#pi^{-}+#mu^{-}) (GeV/c)", 0., 350.);
+
+  fi_data->Close();
+  fi_sl->Close();
+  fi_dl->Close();
+  delete fi_data;
+  delete fi_sl;
+  delete fi_dl;
+}
+
+//---------------------------------------------------------------
+void doRivetJob_mutag(bool inBatch, TString date)
+//---------------------------------------------------------------
+{
+  TString fi_data_name = "../test/crab_results/"+date;
+  TString fi_sl_name = "../test/crab_results/"+date;
+  TString fi_dl_name = "../test/crab_results/"+date;
+  /*
+  std::cout << "\t\t /!\\ Don't forget in " << fi_data_name << " /!\\ " << std::endl;
+  std::cout << "hadd MuTagForRivet_Data_merged.root MuTagForRivet_El_merged.root MuTagForRivet_Mu_merged.root" << std::endl;
+  getchar();
+  */
+  fi_data_name = fi_data_name + "/MuTagForRivet_csv_Data_merged.root";
+  fi_sl_name = fi_sl_name + "/MuTagForRivet_csv_TTJets_SemiLeptMGDecays.root";
+  fi_dl_name = fi_dl_name + "/MuTagForRivet_csv_TTJets_FullLeptMGDecays.root";
+  
+  TFile* fi_data = TFile::Open(fi_data_name);
+  TFile* fi_sl = TFile::Open(fi_sl_name);
+  TFile* fi_dl = TFile::Open(fi_dl_name);
+
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, "All", "NPrimaryVtx", "Primary vertices multiplicity", 0., 0.);
+
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, "Tagged jets", "CSV-b-jets", "CSV discriminant", 0., 0.);
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, "Tagged jets", "TransverseMomentum-b-jets", "p(jets) (GeV/c)", 0., 300.);
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, "Tagged jets", "Nch-b-jets", "Tracks multiplicity", 0., 20.);
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, "Tagged jets", "Sump-b-jets", "Scalar sum of tracks momenta (GeV/c)", 0., 400.);
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, "Tagged jets", "VectorialSump-b-jets", "Vectorial sum of tracks momenta (GeV/c)", 0., 400.);
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, "Tagged jets", "Highestp-b-jets", "Highest track momentum (GeV/c)", 0., 200.);
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, "Tagged jets", "Sum2p-b-jets", "Scalar sum of the 2 highest tracks momenta (GeV/c)", 0., 0.);
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, "Tagged jets", "Sum3p-b-jets", "Scalar sum of the 3 highest tracks momenta (GeV/c)", 0., 0.);
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, "Tagged jets", "R1-b-jets", "R_{1}", 0., 0.);
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, "Tagged jets", "R2-b-jets", "R_{2}", 0., 0.);
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, "Tagged jets", "R3-b-jets", "R_{3}", 0., 0.);
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, "Tagged jets", "D0Mass-b-jets", "m(D^{0}#rightarrow#kappa^{+}#pi^{-}) (GeV/c^{2})", 0., 0.);
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, "Tagged jets", "D0p-b-jets", "p(D^{0}#rightarrow#kappa^{+}#pi^{-}) (GeV/c)", 0., 0.);
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, "Tagged jets", "BMomentum-nobias-b-jets", "p(#kappa^{+}#pi^{-}+#mu^{-}) (GeV/c)", 0., 350.);
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, "Tagged jets", "BMass-nobias-b-jets", "M(#kappa^{+}#pi^{-}+#mu^{-}) (GeV/c^{2})", 0., 0);
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, "Tagged jets", "Muonp-nobias-b-jets", "p(#mu) (GeV/c)", 0., 0);
 
   fi_data->Close();
   fi_sl->Close();
@@ -374,7 +428,7 @@ void doRivetJob_cut(bool inBatch, TString date, bool isCSVbased)
 }
   
 //---------------------------------------------------------------
-int doRivetJob(bool inBatch = true, TString date = "")
+int doRivetJob(bool inBatch = true, TString date = "", TString type = "D0")
 //---------------------------------------------------------------
 {  
   if (date.Length() > 0)  {
@@ -382,8 +436,13 @@ int doRivetJob(bool inBatch = true, TString date = "")
     gROOT->ProcessLine(".! mkdir "+date+"/csv");
     gROOT->ProcessLine(".! mkdir "+date+"/pT");
 
-    doRivetJob_cut(inBatch, date, true);
-    doRivetJob_cut(inBatch, date, false);
+    if (type.Contains("D0", kIgnoreCase) {
+        doRivetJob_d0(inBatch, date, true);
+        doRivetJob_d0(inBatch, date, false);
+    }
+    else if (type.Contains("MuTag", kIgnoreCase) {
+      doRivetJob_mutag(inBatch, date);
+    }
     return 0;
   }
   else 
