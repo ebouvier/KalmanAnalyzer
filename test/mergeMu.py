@@ -36,7 +36,7 @@ if options.type.lower() == "mutag":
 
 elif options.type.lower() == "d0":
     for disc in ["pT", "csv"]:
-            crabFolders = [name for name in os.listdir("crab_tasks/"+options.date+"/"+disc) if os.path.isdir(os.path.join("crab_tasks/"+options.date+"/"+disc, name)) and (name.startswith("crab_Data_"+disc+"_Mu") or name.startswith("crab_Data_"+disc+"_SingleMu"))]
+        crabFolders = [name for name in os.listdir("crab_tasks/"+options.date+"/"+disc) if os.path.isdir(os.path.join("crab_tasks/"+options.date+"/"+disc, name)) and (name.startswith("crab_Data_"+disc+"_Mu") or name.startswith("crab_Data_"+disc+"_SingleMu"))]
 
         outputName = "crab_results/"+options.date+"/D0ForRivet_"+disc+"_Mu_merged.root" 
         if os.path.exists(outputName):

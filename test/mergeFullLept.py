@@ -35,21 +35,21 @@ if options.type.lower() == "mutag":
     os.system(command)
 
 elif options.type.lower() == "d0":
-for disc in ["pT", "csv"]:
-    crabFolders = [name for name in os.listdir("crab_tasks/"+options.date+"/"+disc) if os.path.isdir(os.path.join("crab_tasks/"+options.date+"/"+disc, name)) and name.startswith("crab_MC_"+disc+"_TTJets_FullLept")]
+    for disc in ["pT", "csv"]:
+        crabFolders = [name for name in os.listdir("crab_tasks/"+options.date+"/"+disc) if os.path.isdir(os.path.join("crab_tasks/"+options.date+"/"+disc, name)) and name.startswith("crab_MC_"+disc+"_TTJets_FullLept")]
 
-    outputName = "crab_results/"+options.date+"/D0ForRivet_"+disc+"_TTJets_FullLeptMGDecays.root" 
-    if os.path.exists(outputName):
-        sys.exit("'%s' already exists." % outputName) 
-    command = "hadd %s " % outputName
+        outputName = "crab_results/"+options.date+"/D0ForRivet_"+disc+"_TTJets_FullLeptMGDecays.root" 
+        if os.path.exists(outputName):
+            sys.exit("'%s' already exists." % outputName) 
+        command = "hadd %s " % outputName
 
-    for crabFolder in crabFolders:
-        dataset = crabFolder.rstrip("/").replace("crab_MC_", "")
-        print("Browsing %s" % dataset)
-        fullPath = "crab_tasks/%s/%s/%s/results/" % (options.date, disc, crabFolder)
-        for name in os.listdir(fullPath):
-            if name.endswith(".root"):
-                command = "%s%s%s " % (command, fullPath, name)
+        for crabFolder in crabFolders:
+            dataset = crabFolder.rstrip("/").replace("crab_MC_", "")
+            print("Browsing %s" % dataset)
+            fullPath = "crab_tasks/%s/%s/%s/results/" % (options.date, disc, crabFolder)
+            for name in os.listdir(fullPath):
+                if name.endswith(".root"):
+                    command = "%s%s%s " % (command, fullPath, name)
 
-    os.system(command)
+        os.system(command)
 

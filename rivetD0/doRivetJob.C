@@ -219,22 +219,23 @@ void plotHisto(bool inBatch, TString date, TString type, TFile* fi_data, TFile* 
   my_style->cd();
   if (inBatch) gROOT->SetBatch(true);
   
-  TLatex* channel_tex = new TLatex(0.87, 0.9, channel);
+  //TLatex* channel_tex = new TLatex(0.87, 0.9, channel);
+  TLatex* channel_tex = new TLatex(0.8, 0.9, channel);
   channel_tex->SetNDC(true);
   channel_tex->SetTextFont(43);
   channel_tex->SetTextSize(TITLE_FONTSIZE - 6);  
 
   TString dir_name = "basedSelection/";
   TString rep_name = date;
-  if (type.Contains("csv", kIgnoreCase)) {
+  if (type.Contains("csv", TString::kIgnoreCase)) {
     dir_name = "CSV" + dir_name;
     rep_name = rep_name + "/csv/";
   }
-  else if (type.Contains("pT", kIgnoreCase)) { 
+  else if (type.Contains("pT", TString::kIgnoreCase)) { 
     dir_name = "pT" + dir_name;
     rep_name = rep_name + "/pT/";
   }
-  else if (type.Contains("muTag", kIgnoreCase)) {
+  else if (type.Contains("muTag", TString::kIgnoreCase)) {
     dir_name = "muTagBasedSelection/";
     rep_name = rep_name + "/muTag/";
   }
@@ -392,9 +393,9 @@ void doRivetJob_mutag(bool inBatch, TString date)
   std::cout << "hadd MuTagForRivet_Data_merged.root MuTagForRivet_El_merged.root MuTagForRivet_Mu_merged.root" << std::endl;
   getchar();
   */
-  fi_data_name = fi_data_name + "/MuTagForRivet_csv_Data_merged.root";
-  fi_sl_name = fi_sl_name + "/MuTagForRivet_csv_TTJets_SemiLeptMGDecays.root";
-  fi_dl_name = fi_dl_name + "/MuTagForRivet_csv_TTJets_FullLeptMGDecays.root";
+  fi_data_name = fi_data_name + "/MuTagForRivet_Data_merged.root";
+  fi_sl_name = fi_sl_name + "/MuTagForRivet_TTJets_SemiLeptMGDecays.root";
+  fi_dl_name = fi_dl_name + "/MuTagForRivet_TTJets_FullLeptMGDecays.root";
   
   TFile* fi_data = TFile::Open(fi_data_name);
   TFile* fi_sl = TFile::Open(fi_sl_name);
@@ -433,14 +434,15 @@ int doRivetJob(bool inBatch = true, TString date = "", TString type = "D0")
 {  
   if (date.Length() > 0)  {
     gROOT->ProcessLine(".! mkdir "+date);
-    gROOT->ProcessLine(".! mkdir "+date+"/csv");
-    gROOT->ProcessLine(".! mkdir "+date+"/pT");
 
-    if (type.Contains("D0", kIgnoreCase) {
-        doRivetJob_d0(inBatch, date, true);
-        doRivetJob_d0(inBatch, date, false);
+    if (type.Contains("D0", TString::kIgnoreCase)) {
+      gROOT->ProcessLine(".! mkdir "+date+"/csv");
+      gROOT->ProcessLine(".! mkdir "+date+"/pT");
+      doRivetJob_d0(inBatch, date, true);
+      doRivetJob_d0(inBatch, date, false);
     }
-    else if (type.Contains("MuTag", kIgnoreCase) {
+    else if (type.Contains("MuTag", TString::kIgnoreCase)) {
+      gROOT->ProcessLine(".! mkdir "+date+"/muTag");
       doRivetJob_mutag(inBatch, date);
     }
     return 0;
