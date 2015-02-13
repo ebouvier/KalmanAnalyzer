@@ -801,7 +801,7 @@ MuTagForRivet_El::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
         _h_mup->Fill(p_Mu.P());
         if (p_D0optcombi.M() > 1.7 && p_D0optcombi.M() < 2.) 
           _h_BMomentumClean->Fill(p_Boptcombi.P());
-          _h_BMassClean->Fill(p_Boptcombi.M());
+        _h_BMassClean->Fill(p_Boptcombi.M());
       }
     } // jet loop
     _t_bjets->Fill();

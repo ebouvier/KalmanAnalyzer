@@ -4,11 +4,11 @@
 // Class:      D0ForRivet
 // 
 /**\class D0ForRivet D0ForRivet.cc UserCode/KalmanAnalyzer/src/D0ForRivet.cc
- 
- Description: Reconstruct Bpm -> D0 + mupm (+ nu) -> K Pi + mu (+ nu)
- 
- Implementation: Using a simple Kalman vertex fitter for the D0
- */
+
+Description: Reconstruct Bpm -> D0 + mupm (+ nu) -> K Pi + mu (+ nu)
+
+Implementation: Using a simple Kalman vertex fitter for the D0
+*/
 
 
 // system include files
@@ -77,127 +77,125 @@
 //
 
 class D0ForRivet : public edm::EDAnalyzer {
-public:
-  explicit D0ForRivet(const edm::ParameterSet&);
-  ~D0ForRivet();
-  
-  static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
-  
-  
-private:
-  virtual void beginJob() ;
-  virtual void analyze(const edm::Event&, const edm::EventSetup&);
-  virtual void endJob() ;
-  
-  virtual void beginRun(edm::Run const&, edm::EventSetup const&);
-  virtual void endRun(edm::Run const&, edm::EventSetup const&);
-  virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
-  virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
-  
-  // ----------member data ---------------------------
-  bool _isCSVbased;
-  
-  // evts properties
-  unsigned int nEvts;
-  unsigned int nEvts2;
-  double nEvts3;
-  bool hasGoodMuons;
-  bool hasGoodElectrons;
-  bool hasGoodLeptons;
-  bool hasGoodJets;
-  bool isGoodEvt;
-  
-  TH1D* _h_idPFel;
-  TH2D* _h_id_pT_PFel;
-  TH2D* _h_dR_dpT_PFel;
-  TH1D* _h_idPFmu;
-  TH2D* _h_id_pT_PFmu;
-  TH2D* _h_dR_dpT_PFmu;
-  TH1D* _h_id1stPFmu;
-  TH2D* _h_id_pT_1stPFmu;
-  TH2D* _h_dR_dpT_1stPFmu;
-  
-  TH1D* _h_nVtx;
-  TH1D* _h_nJets;
-  TH1D* _h_pTJets;
-  TH1D* _h_etaJets;
-  TH1D* _h_nCSVJets;
-  
-  TH1D* _h_CSVSelJets;
-  TH1D* _h_pTSelJets;
-  TH1D* _h_etaSelJets;
-  TH1D* _h_genIdSelJets;
-  TH1D* _h_etach[2];
-  TH1D* _h_pTch[2];
-  
-  TH1D* _h_Nch[2];
-  TH1D* _h_sump[2];
-  TLorentzVector _sumpvec[2];
-  TH1D* _h_sumpvec[2];
-  TH1D* _h_sum1p[2];
-  TH1D* _h_sum3p[2];
-  TH1D* _h_R1[2];
-  TH2D* _h_R1_Nch[2];
-  TH1D* _h_R3[2];
-  TH2D* _h_R3_Nch[2];
-  TH1D* _h_sum1p_nomu[2];
-  TH1D* _h_sum3p_nomu[2];
-  TH1D* _h_R1_nomu[2];
-  TH2D* _h_R1_Nch_nomu[2];
-  TH1D* _h_R3_nomu[2];
-  TH2D* _h_R3_Nch_nomu[2];
-  TH1D* _h_D0Mass[2];
-  TH1D* _h_D0p[2];
-  TH1D* _h_D0pT[2];
-  TH1D* _h_D0eta[2];
-  TH1D* _h_BMomentum_unbiased[2];
-  TH1D* _h_D0MassClean[2];
-  TH1D* _h_D0pClean[2];
-  TH1D* _h_D0pTClean[2];
-  TH1D* _h_D0etaClean[2];
-  TH1D* _h_BMomentum[2];
-  TH1D* _h_mup[2];
-  TH1D* _h_BMomentumClean[2];
-  // TH1D* _h_D0MassBlow[2];
-  // TH1D* _h_D0MassCleanBlow[2];
-  
-  TTree* _t_bjet1;
-  TTree* _t_bjet2;
-  double weight;
-  double _CSV[2];
-  double _vecP[2][4];
-  int _Nch[2];
-  double _sump[2];
-  double _sumpt[2];
-  double _tr1[2][4];
-  double _tr2[2][4];
-  double _tr3[2][4];
-  
-  TTree* _t_D0window_bjets;
-  double _D0mass;
-  double _genId;
-  double _CSVdisc;
-  double _Bmomentum;
-  double _R1;
-  double _R3;
-  double _Ntr;
-  double _sumpT;
-  double _averpT;
-  double _R1_nomu;
-  double _R3_nomu;
-  
-  TTree* _t_D0KVFwindow_bjets;
-  double _D0mass_KVF;
-  double _genId_KVF;
-  double _CSVdisc_KVF;
-  double _Bmomentum_KVF;
-  double _R1_KVF;
-  double _R3_KVF;
-  double _Ntr_KVF;
-  double _sumpT_KVF;
-  double _averpT_KVF;
-  double _R1_nomu_KVF;
-  double _R3_nomu_KVF;
+  public:
+    explicit D0ForRivet(const edm::ParameterSet&);
+    ~D0ForRivet();
+
+    static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
+
+
+  private:
+    virtual void beginJob() ;
+    virtual void analyze(const edm::Event&, const edm::EventSetup&);
+    virtual void endJob() ;
+
+    virtual void beginRun(edm::Run const&, edm::EventSetup const&);
+    virtual void endRun(edm::Run const&, edm::EventSetup const&);
+    virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
+    virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
+
+    // ----------member data ---------------------------
+    bool _isCSVbased;
+
+    // evts properties
+    unsigned int nEvts;
+    unsigned int nEvts2;
+    double nEvts3;
+    bool hasGoodMuons;
+    bool hasGoodElectrons;
+    bool hasGoodLeptons;
+    bool hasGoodJets;
+    bool isGoodEvt;
+
+    TH1D* _h_idPFel;
+    TH2D* _h_id_pT_PFel;
+    TH2D* _h_dR_dpT_PFel;
+    TH1D* _h_idPFmu;
+    TH2D* _h_id_pT_PFmu;
+    TH2D* _h_dR_dpT_PFmu;
+    TH1D* _h_id1stPFmu;
+    TH2D* _h_id_pT_1stPFmu;
+    TH2D* _h_dR_dpT_1stPFmu;
+
+    TH1D* _h_nVtx;
+    TH1D* _h_nJets;
+    TH1D* _h_pTJets;
+    TH1D* _h_etaJets;
+    TH1D* _h_nCSVJets;
+
+    TH1D* _h_CSVSelJets;
+    TH1D* _h_pTSelJets;
+    TH1D* _h_etaSelJets;
+    TH1D* _h_genIdSelJets;
+    TH1D* _h_etach[2];
+    TH1D* _h_pTch[2];
+
+    TH1D* _h_Nch[2];
+    TH1D* _h_sump[2];
+    TLorentzVector _sumpvec[2];
+    TH1D* _h_sumpvec[2];
+    TH1D* _h_sum1p[2];
+    TH1D* _h_sum3p[2];
+    TH1D* _h_R1[2];
+    TH2D* _h_R1_Nch[2];
+    TH1D* _h_R3[2];
+    TH2D* _h_R3_Nch[2];
+    TH1D* _h_sum1p_nomu[2];
+    TH1D* _h_sum3p_nomu[2];
+    TH1D* _h_R1_nomu[2];
+    TH2D* _h_R1_Nch_nomu[2];
+    TH1D* _h_R3_nomu[2];
+    TH2D* _h_R3_Nch_nomu[2];
+    TH1D* _h_D0Mass[2];
+    TH1D* _h_D0p[2];
+    TH1D* _h_D0pT[2];
+    TH1D* _h_D0eta[2];
+    TH1D* _h_BMomentum_unbiased[2];
+    TH1D* _h_D0MassClean[2];
+    TH1D* _h_D0pClean[2];
+    TH1D* _h_D0pTClean[2];
+    TH1D* _h_D0etaClean[2];
+    TH1D* _h_BMomentum[2];
+    TH1D* _h_mup[2];
+    TH1D* _h_BMomentumClean[2];
+
+    TTree* _t_bjet1;
+    TTree* _t_bjet2;
+    double weight;
+    double _CSV[2];
+    double _vecP[2][4];
+    int _Nch[2];
+    double _sump[2];
+    double _sumpt[2];
+    double _tr1[2][4];
+    double _tr2[2][4];
+    double _tr3[2][4];
+
+    TTree* _t_D0window_bjets;
+    double _D0mass;
+    double _genId;
+    double _CSVdisc;
+    double _Bmomentum;
+    double _R1;
+    double _R3;
+    double _Ntr;
+    double _sumpT;
+    double _averpT;
+    double _R1_nomu;
+    double _R3_nomu;
+
+    TTree* _t_D0KVFwindow_bjets;
+    double _D0mass_KVF;
+    double _genId_KVF;
+    double _CSVdisc_KVF;
+    double _Bmomentum_KVF;
+    double _R1_KVF;
+    double _R3_KVF;
+    double _Ntr_KVF;
+    double _sumpT_KVF;
+    double _averpT_KVF;
+    double _R1_nomu_KVF;
+    double _R3_nomu_KVF;
 };
 
 //
@@ -212,26 +210,26 @@ private:
 // constructors and destructor
 //
 D0ForRivet::D0ForRivet(const edm::ParameterSet& iConfig) :
-_isCSVbased(iConfig.getUntrackedParameter<bool>("isCSVbased", false))
+  _isCSVbased(iConfig.getUntrackedParameter<bool>("isCSVbased", false))
 {
   // now do what ever initialization is needed
   nEvts = 0;
   nEvts2 = 0;
   nEvts3 = 0.;
-  
+
 }
 
 
 D0ForRivet::~D0ForRivet()
 {
-  
+
   // do anything here that needs to be done at desctruction time
   // (e.g. close files, deallocate resources etc.)
   std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
   std::cout << "Initial number of events                    = " << nEvts << std::endl;
   std::cout << "Initial number of semileptonic ttbar events = " << nEvts2 << " (" << nEvts3 << ")" << std::endl;
   std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
-  
+
 }
 
 
@@ -240,23 +238,23 @@ D0ForRivet::~D0ForRivet()
 //
 
 // ------------ method called for each event  ------------
-void
+  void
 D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   using namespace edm;
   nEvts++;
-  
+
   hasGoodMuons = false;
   hasGoodElectrons = false;
   hasGoodLeptons = false;
   hasGoodJets = false;
   isGoodEvt = false;
   weight = 1.;
-  
+
   //-------------------------------------------
   // Apply the recommended ttbar semilept sel
   //-------------------------------------------
-  
+
   // Muon selection
   edm::Handle<std::vector<pat::Muon>>  muonHandle;
   edm::InputTag tagMuon("selectedPatMuonsPFlow");
@@ -265,10 +263,10 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   std::vector<const pat::Muon*> myMuons;  
   int ngoodmuon = 0;
   int nvetomuon = 0;
-  
+
   edm::Handle<std::vector<reco::Vertex>> pvHandle;
   iEvent.getByLabel("goodOfflinePrimaryVertices", pvHandle);
-  
+
   for (unsigned int iMuon = 0; iMuon < muon.size(); ++iMuon) {
     if (muon[iMuon].pt() < 26.) continue;
     if (fabs(muon[iMuon].eta()) > 2.1) continue;
@@ -282,13 +280,13 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     myMuons.push_back(&muon[iMuon]);
     ++ngoodmuon;
   }  
-  
+
   for (unsigned int iMuon = 0; iMuon < muon.size(); ++iMuon) {
     if (muon[iMuon].pt() < 10.) continue;
     if (fabs(muon[iMuon].eta()) > 2.5) continue;
     ++nvetomuon;
   }
-  
+
   // Electron selection
   edm::Handle<std::vector<pat::Electron>>  electronHandle;
   edm::InputTag tagElectron("selectedPatElectronsPFlow");
@@ -297,7 +295,7 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   std::vector<const pat::Electron*> myElectrons;  
   int ngoodelectron = 0;
   int nvetoelectron = 0;
-  
+
   edm::Handle<reco::ConversionCollection> hConversions;
   iEvent.getByLabel("allConversions", hConversions);
   edm::Handle<reco::BeamSpot> hBeamspot;
@@ -310,7 +308,7 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   double rhoIso = *hRhoIso;
   ElectronEffectiveArea::ElectronEffectiveAreaTarget EAtarget;
   EAtarget  =ElectronEffectiveArea::kEleEANoCorr; // for MC
-  
+
   for (unsigned int iElectron = 0; iElectron < electron.size(); ++iElectron) {
     if (electron[iElectron].pt() < 30.) continue;
     if (fabs(electron[iElectron].eta()) > 2.5) continue;
@@ -319,19 +317,19 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     myElectrons.push_back(&electron[iElectron]);    
     ++ngoodelectron;
   }
-  
+
   for (unsigned int iElectron = 0; iElectron < electron.size(); ++iElectron) {
     if (electron[iElectron].pt() < 20.) continue;
     if (fabs(electron[iElectron].eta()) > 2.5) continue;
     if (fabs(electron[iElectron].superCluster()->eta()) >= 1.4442 && fabs(electron[iElectron].superCluster()->eta()) < 1.5660) continue;
     ++nvetoelectron;
   }
-  
+
   // Lepton selection
   if (ngoodmuon == 1 && nvetoelectron == 0) hasGoodMuons = true;
   if (ngoodelectron == 1 && nvetomuon == 0) hasGoodElectrons = true;
   if (hasGoodMuons || hasGoodElectrons) hasGoodLeptons =true;
-  
+
   // Jets selection
   edm::Handle<std::vector<pat::Jet>> jetHandle;
   edm::InputTag tagJet("selectedPatJetsPFlow","","PAT");
@@ -342,7 +340,7 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   int n45jet = 0;
   int n35jet = 0;
   int n20jet = 0;
-  
+
   for (unsigned int iJet = 0; iJet < jet.size(); ++iJet) {
     if (jet[iJet].pt() < 20.) continue;
     if (fabs(jet[iJet].eta()) > 2.5) continue;
@@ -352,14 +350,14 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     myJets.push_back(&jet[iJet]);    
     ++n20jet;
   }
-  
+
   if (n55jet > 0 && n45jet > 1 && n35jet > 2 && n20jet > 3) hasGoodJets = true;
-  
+
   if (hasGoodLeptons && hasGoodJets) isGoodEvt = true;
-  
+
   if (isGoodEvt) {
     nEvts2++;
-    
+
     // Compute weight
     edm::InputTag vtxTag("offlinePrimaryVertices","","RECO");
     edm::Handle<std::vector<reco::Vertex> > Hvertex;
@@ -377,7 +375,7 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       weight *= weight_provider->get_weight(myMuons[0]->pt(), myMuons[0]->eta(), myJets[3]->pt(), myJets[3]->eta(), nvtx, n20jet,true, TopTriggerEfficiencyProvider::NOMINAL);
     if (hasGoodElectrons)
       weight = weight_provider->get_weight(myElectrons[0]->pt(), myElectrons[0]->eta(), myJets[3]->pt(), myJets[3]->eta(), nvtx, n20jet,false, TopTriggerEfficiencyProvider::NOMINAL);
-    
+
     double puWeight[41] = {0.343966,0.421778,0.436096,0.244907,0.159864,0.301344,0.241472,0.274829,0.44007,0.758224,1.17234,1.57047,1.65648,1.48344,1.25881,1.09602,1.02284,1.01614,1.05619,1.11854,1.17075,1.1998,1.20717,1.1982,1.17317,1.13123,1.0737,1.00772,0.928615,0.834017,0.723992,0.605741,0.485348,0.371787,0.270933,0.187491,0.124365,0.0791913,0.0484192,0.0288752,0.0127159};
     edm::Handle<std::vector< PileupSummaryInfo > >  PupInfo;
     iEvent.getByLabel(edm::InputTag("addPileupInfo"), PupInfo);
@@ -393,21 +391,21 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     int npu = (int)m_nTrueInteractions;
     if ( npu > 40) npu = 40;
     weight *= puWeight[npu];
-        
+
     //-------------------------------------------
     // Access the vertex
     //-------------------------------------------
-    
+
     edm::Handle<reco::VertexCollection>  vtxHandle;
     edm::InputTag tagVtx("offlinePrimaryVertices");
     iEvent.getByLabel(tagVtx, vtxHandle);
     const reco::VertexCollection vtx = *(vtxHandle.product());
-    
+
     if (vtx.size() == 0) {
       std::cout << " WARNING : no PV for this event ... " << std::endl;
       return;
     }
-    
+
     if (_isCSVbased) {
       double vtxWeight[45] = {23./16.24817, 157./96.10187, 608./389.7191, 1653./1092.023, 3518./2428.246, 6185./4495.628, 9848./7287.974, 13907./10632.4, 17801./14183.71, 21165./17578., 24344./20656.52, 26132./22919.96, 26440./24470.79, 26610./25254.18, 25605./25303.6, 23974./24804.25, 21937./23480.46, 19587./21797.11, 17451./19784.64, 14764./17591.69, 12440./15221.65, 10121./12837., 8188./10599.46, 6449./6746.303, 4873./8565.719, 3690./5220.74, 2741./3919.616, 1977./2855.812, 1451./2064.941, 990./1440.364, 656./1021.42, 479./686.967, 315./451.8202, 210./290.9677, 140./184.5276, 71./118.4836, 72./73.5648, 41./44.23643, 23./26.39862, 13./16.03296, 7./9.068202, 10./6.257565, 4./3.187427, 1./1.576181, 1./1.232338};
       if (vtx.size() < 46)
@@ -422,14 +420,14 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       else 
         weight *= vtxWeight[44];
     }
-    
+
     nEvts3 = nEvts3 + weight;
     _h_nVtx->Fill((double)vtx.size(), weight);
-    
+
     //--------------------------------------------------
     // Access the PF candidates for non-isolated mu/e
     //--------------------------------------------------
-    
+
     edm::Handle<reco::PFCandidateCollection>  pfHandle;
     edm::InputTag tagPF("particleFlow","","RECO");
     iEvent.getByLabel(tagPF, pfHandle);
@@ -438,15 +436,15 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       std::cout << "=> pfHandle is not valid..." << std::endl;
       return;
     }
-    
+
     // Select good PF muons and electrons :
-    
+
     std::vector<const reco::PFCandidate*> myPFmu;
     std::vector<const reco::PFCandidate*> myPFel;
     for (unsigned int i = 0; i < pfs.size(); ++i) {
-      
+
       if (pfs[i].pt() < 4.) continue;
-      
+
       if (abs(pfs[i].pdgId()) == 13) { 
         if (fabs(pfs[i].eta()) < 2.4) myPFmu.push_back(&pfs[i]);
       }
@@ -457,7 +455,7 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         else continue;
       }
     }
-    
+
     // Match PF e/mu to genParticles
     edm::Handle<std::vector<reco::GenParticle> > mcHandle;
     edm::InputTag tagGen("genParticles", "", "SIM");
@@ -511,48 +509,48 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         _h_dR_dpT_PFmu->Fill(minDeltaRPFmuGen, minDeltaPtPFmuGen, weight);
       }
     }
-    
+
     //-------------------------------------------
     // Access the jets 
     //-------------------------------------------
-    
+
     // double d0mass = 1.86484;
     // double bmass = 5.2796;
-    
+
     ParticleMass gMassD0 = 1.86483;
     // float        gSigmaD0 = 0.00014;
-    
+
     // ParticleMass gMassW = 80.399;
     // float        gSigmaW = 0.023;
     // float        gResoW = 10.;
-    
+
     ParticleMass gMassMu  = 0.105658367;
     // float        gSigmaMu = 0.000000004; 
-    
+
     ParticleMass gMassK  = 0.493677;
     float        gSigmaK = 0.000001;
-    
+
     ParticleMass gMassPi  = 0.13957018;
     float        gSigmaPi = 0.00000001;
-    
+
     // Track setup
-    
+
     edm::ESHandle<TransientTrackBuilder> theB;
     iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder",theB);  
-    
+
     edm::InputTag jetTag("selectedPatJetsPFlow","","PAT");
-    
+
     edm::Handle<pat::JetCollection> jetsHandle;
     iEvent.getByLabel(jetTag, jetsHandle);
     pat::JetCollection jets = *jetsHandle;
-    
+
     float maxcsv = -1.;
     int maxind = -1;
     float second_max = -1.0;
     int maxind2 = -1;
     int iSelJet = 0;
     int iCSVJet = 0;
-    
+
     for (pat::JetCollection::iterator it = jets.begin(); it != jets.end(); ++it)  {
       double disc = 0.;
       if (_isCSVbased) 
@@ -578,7 +576,7 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     }
     _h_nJets->Fill(iSelJet, weight);
     _h_nCSVJets->Fill(iCSVJet, weight);
-        
+
     _CSV[0] = -1; _CSV[1] = -1;
     _vecP[0][0] = -100.; _vecP[0][1] = -100.; _vecP[0][2] = -100.; _vecP[0][3] = -100.;
     _vecP[1][0] = -100.; _vecP[1][1] = -100.; _vecP[1][2] = -100.; _vecP[1][3] = -100.;
@@ -593,17 +591,17 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     _tr2[1][0] = -100.; _tr2[1][1] = -100.; _tr2[1][2] = -100.; _tr2[1][3] = -1000.;
     _tr3[0][0] = -100.; _tr3[0][1] = -100.; _tr3[0][2] = -100.; _tr3[0][3] = -1000.;
     _tr3[1][0] = -100.; _tr3[1][1] = -100.; _tr3[1][2] = -100.; _tr3[1][3] = -1000.;
-    
+
     iSelJet = -1;
 
     for (pat::JetCollection::iterator it = jets.begin(); it != jets.end(); ++it)  {
       iSelJet++;
-      
+
       if (iSelJet == maxind || iSelJet == maxind2){
         int indJet = -1;
         if (iSelJet == maxind) indJet = 0;
         if (iSelJet == maxind2) indJet = 1;
-        
+
         _CSV[indJet] = (*it).bDiscriminator("combinedSecondaryVertexBJetTags");
         _vecP[indJet][0] = (*it).pt();
         _vecP[indJet][1] = (*it).eta();
@@ -614,35 +612,35 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         _h_etaSelJets->Fill((*it).eta(), weight);
         if ((*it).genParticle())
           _h_genIdSelJets->Fill((double)abs(((*it).genParticle())->pdgId()), weight); 
-        
+
         TLorentzVector p_Jet;
         p_Jet.SetPtEtaPhiM((*it).pt(), (*it).eta(), (*it).phi(), (*it).mass());
-        
+
         double pt_trCand_nomu[3]  = {0., 0., 0.};
         double eta_trCand_nomu[3] = {0., 0., 0.};
         double phi_trCand_nomu[3] = {0., 0., 0.};
         double id_trCand_nomu[3] = {0., 0., 0.};
         TLorentzVector p_trCand_nomu[3];
-        
+
         double pt_trCand[3]  = {0., 0., 0.};
         double eta_trCand[3] = {0., 0., 0.};
         double phi_trCand[3] = {0., 0., 0.};
         double id_trCand[3] = {0., 0., 0.};
         TLorentzVector p_trCand[3];
-        
+
         reco::TrackRefVector jetTracks = (*it).associatedTracks();
-        
+
         _Nch[indJet] = 0; 
         _sump[indJet] = 0.; 
         _sumpt[indJet] = 0.; 
         std::vector<const reco::PFCandidate*> myPFmuInSelJet;
         for (reco::track_iterator iter1 = jetTracks.begin(); iter1 != jetTracks.end(); ++iter1) {
-          
+
           const reco::Track& Track1 = **iter1;
-          
+
           if ((**iter1).pt() < 4.) continue;
           if (!Track1.quality(reco::Track::highPurity)) continue;
-          
+
           // look for muons and electrons
           bool trCandIsMu = false;
           int iMuInSelJet = 0;
@@ -773,7 +771,7 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                 }
             }
           }
-          
+
           TLorentzVector p_tr1;
           p_tr1.SetPtEtaPhiM((**iter1).pt(), (**iter1).eta(), (**iter1).phi(), gMassPi);
           if (fabs(pt_trCand[0]) > 1e-10) {
@@ -800,7 +798,7 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             }
           }
           else p_trCand_nomu[0].SetPtEtaPhiM(0., 0., 0., 0.);
-          
+
           _Nch[indJet]++;
           _sump[indJet] = _sump[indJet] + p_tr1.P();
           _sumpt[indJet] = _sumpt[indJet] + p_tr1.Pt();
@@ -936,7 +934,7 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                         //~~~~~~~~~~~~~~~~~~~~~~~~~~~
                         // associate D^0 to a PF muon
                         //~~~~~~~~~~~~~~~~~~~~~~~~~~
-                        
+
                         int iMaxMuInSelJet = -1;
                         double maxMuInSelJet = -1;
                         for (unsigned int iMuCand = 0; iMuCand < myPFmuInSelJet.size(); iMuCand++) {
@@ -974,10 +972,10 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
               } // D0 tree vertex is valid
 
             } // exclude e/mu for D0 reco with KVF
-          
+
           } // 2nd jet's track loop
         } // 1st jet's track loop
-        
+
         _h_Nch[indJet]->Fill((double)_Nch[indJet], weight);
         _h_sump[indJet]->Fill(_sump[indJet], weight);
         _h_sumpvec[indJet]->Fill(_sumpvec[indJet].P(), weight);
@@ -1001,18 +999,18 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             _h_R3_Nch_nomu[indJet]->Fill((p_trCand_nomu[0].P() + p_trCand_nomu[1].P() + p_trCand_nomu[2].P()) / _sump[indJet], (double)_Nch[indJet], weight);
           }
         }
-        
+
         //=================================
         // simple invariant combination
         //=================================
-        
+
         int p1[6] = {0, 0, 1, 1, 2, 2};
         int p2[6] = {1, 2, 2, 0, 0, 1};
-        
+
         TLorentzVector p_track1_D0combi, p_track2_D0combi, p_D0combi, p_D0optcombi;
         p_D0optcombi.SetPtEtaPhiM(0., 0., 0., 200.);
         int tk2charge = 0;
-        
+
         if (fabs(pt_trCand_nomu[0]) > 1e-10 && fabs(pt_trCand_nomu[1]) > 1e-10 && fabs(pt_trCand_nomu[2]) > 1e-10) {
           _D0mass = 0.;
           _genId = 0.;
@@ -1026,20 +1024,20 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           _R1_nomu = 0.;
           _R3_nomu = 0.;                    
           for (unsigned int iD0combi = 0; iD0combi < 6; iD0combi++) {
-            
+
             //~~~~~~~~~~~~~~~~~~~~~~~~~~~
             // reconstruct D^0 to K Pi
             //~~~~~~~~~~~~~~~~~~~~~~~~~~
             int tk1 = p1[iD0combi];
             int tk2 = p2[iD0combi];
-            
+
             // Opposite sign
             if (id_trCand_nomu[tk1]*id_trCand_nomu[tk2] > 0) continue;
-            
+
             p_track1_D0combi.SetPtEtaPhiM(pt_trCand_nomu[tk1], eta_trCand_nomu[tk1], phi_trCand_nomu[tk1], gMassPi);
             p_track2_D0combi.SetPtEtaPhiM(pt_trCand_nomu[tk2], eta_trCand_nomu[tk2], phi_trCand_nomu[tk2], gMassK);
             p_D0combi = p_track1_D0combi + p_track2_D0combi;
-            
+
             int iMaxMuInSelJet = -1;
             double maxMuInSelJet = -1;
             for (unsigned int iMuCand = 0; iMuCand < myPFmuInSelJet.size(); iMuCand++) {
@@ -1049,52 +1047,51 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                 maxMuInSelJet = myPFmuInSelJet[iMaxMuInSelJet]->pt();
               }
             }
-            
+
             if (fabs(p_D0combi.M() - gMassD0) < fabs(p_D0optcombi.M() - gMassD0)) {
               p_D0optcombi.SetPtEtaPhiM(p_D0combi.Pt(), p_D0combi.Eta(), p_D0combi.Phi(), p_D0combi.M());
               // tk2charge = id_trCand_nomu[tk2];
               tk2charge = iMaxMuInSelJet;
             }
-            
+
             // cut on pT
             if (p_D0combi.Pt() < 15.) continue;
-            
+
             _h_D0Mass[indJet]->Fill(p_D0combi.M(), weight);
-            // _h_D0MassBlow[indJet]->Fill(p_D0combi.M(), weight);
             _h_D0p[indJet]->Fill(p_D0combi.P(), weight);
             _h_D0pT[indJet]->Fill(p_D0combi.Pt(), weight);
             _h_D0eta[indJet]->Fill(p_D0combi.Eta(), weight);
-            
+
             //~~~~~~~~~~~~~~~~~~~~~~~~~~~
             // associate D^0 to a PF muon
             //~~~~~~~~~~~~~~~~~~~~~~~~~~
             TLorentzVector p_Mu;
             /*
-             int iMu = -1;
-             double deltaRD0combiMu = 2000.;
-             
-             // find closest muon with opposite charged wrt the kaon
-             for (unsigned int iMuCand = 0; iMuCand < myPFmu.size(); iMuCand++) {
-             if (myPFmu[iMuCand]->pdgId()*id_trCand_nomu[tk2] > 0) continue;
-               TLorentzVector p_MuCand;
-               p_MuCand.SetPtEtaPhiM(myPFmu[iMuCand]->pt(), myPFmu[iMuCand]->eta(), myPFmu[iMuCand]->phi(), gMassMu);
-               double tmp_deltaRD0combiMu = p_D0combi.DeltaR(p_MuCand);
-               if (tmp_deltaRD0combiMu < deltaRD0combiMu) {
-                 deltaRD0combiMu = tmp_deltaRD0combiMu;
-                 iMu = iMuCand;
-               }
-             }
-             
-             if (iMu < 0) continue;
-             
-             // keep going if closest muon is close enough
-             if (deltaRD0combiMu > 0.4) continue;
-             
-             p_Mu.SetPtEtaPhiM(myPFmu[iMu]->pt(), myPFmu[iMu]->eta(), myPFmu[iMu]->phi(), gMassMu);
-             */
-            
+               int iMu = -1;
+               double deltaRD0combiMu = 2000.;
+
+            // find closest muon with opposite charged wrt the kaon
+            for (unsigned int iMuCand = 0; iMuCand < myPFmu.size(); iMuCand++) {
+            if (myPFmu[iMuCand]->pdgId()*id_trCand_nomu[tk2] > 0) continue;
+            TLorentzVector p_MuCand;
+            p_MuCand.SetPtEtaPhiM(myPFmu[iMuCand]->pt(), myPFmu[iMuCand]->eta(), myPFmu[iMuCand]->phi(), gMassMu);
+            double tmp_deltaRD0combiMu = p_D0combi.DeltaR(p_MuCand);
+            if (tmp_deltaRD0combiMu < deltaRD0combiMu) {
+            deltaRD0combiMu = tmp_deltaRD0combiMu;
+            iMu = iMuCand;
+            }
+            }
+
+            if (iMu < 0) continue;
+
+            // keep going if closest muon is close enough
+            if (deltaRD0combiMu > 0.4) continue;
+
+            p_Mu.SetPtEtaPhiM(myPFmu[iMu]->pt(), myPFmu[iMu]->eta(), myPFmu[iMu]->phi(), gMassMu);
+            */
+
             if (iMaxMuInSelJet < 0) continue;
-            
+
             p_Mu.SetPtEtaPhiM(myPFmuInSelJet[iMaxMuInSelJet]->pt(), myPFmuInSelJet[iMaxMuInSelJet]->eta(), myPFmuInSelJet[iMaxMuInSelJet]->phi(), gMassMu);
             // Just for MC : look at the genId of the selected PF mu
             double minDeltaRPFmuGen = 200.;
@@ -1137,57 +1134,56 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             }
           }
         }
-        
+
         //=================================
         // optimized invariant combination
         //=================================
-        
+
         if (fabs(p_D0optcombi.Pt()) > 1e-10) {
-          
+
           //~~~~~~~~~~~~~~~~~~~~~~~~~~~
           // reconstruct D^0 to K Pi
           //~~~~~~~~~~~~~~~~~~~~~~~~~~
-          
+
           // cut on pT
           if (p_D0optcombi.Pt() < 15.) continue;
-          
+
           _h_D0MassClean[indJet]->Fill(p_D0optcombi.M(), weight);
-          // _h_D0MassCleanBlow[indJet]->Fill(p_D0optcombi.M(), weight);
           _h_D0pClean[indJet]->Fill(p_D0optcombi.P(), weight);
           _h_D0pTClean[indJet]->Fill(p_D0optcombi.Pt(), weight);
           _h_D0etaClean[indJet]->Fill(p_D0optcombi.Eta(), weight);
-          
+
           //~~~~~~~~~~~~~~~~~~~~~~~~~~~
           // associate D^0 to a PF muon
           //~~~~~~~~~~~~~~~~~~~~~~~~~~
-          
+
           TLorentzVector p_Mu;
           /*
-           int iMu = -1;
-           double deltaRD0optcombiMu = 2000.;
-           
-           // find closest muon with opposite charged wrt the kaon
-           for (unsigned int iMuCand = 0; iMuCand < myPFmu.size(); iMuCand++) {
-           if (myPFmu[iMuCand]->pdgId()*tk2charge > 0) continue;  
-             TLorentzVector p_MuCand;
-             p_MuCand.SetPtEtaPhiM(myPFmu[iMuCand]->pt(), myPFmu[iMuCand]->eta(), myPFmu[iMuCand]->phi(), gMassMu);
-             double tmp_deltaRD0optcombiMu = p_D0optcombi.DeltaR(p_MuCand);
-             if (tmp_deltaRD0optcombiMu < deltaRD0optcombiMu) {
-               deltaRD0optcombiMu = tmp_deltaRD0optcombiMu;
-               iMu = iMuCand;
-             }
-           }
-           
-           if (iMu < 0) continue;
-           
-           // keep going if closest muon is close enough
-           if (deltaRD0optcombiMu > 0.4) continue;
-           
-           p_Mu.SetPtEtaPhiM(myPFmu[iMu]->pt(), myPFmu[iMu]->eta(), myPFmu[iMu]->phi(), gMassMu);
-           */
-          
+             int iMu = -1;
+             double deltaRD0optcombiMu = 2000.;
+
+          // find closest muon with opposite charged wrt the kaon
+          for (unsigned int iMuCand = 0; iMuCand < myPFmu.size(); iMuCand++) {
+          if (myPFmu[iMuCand]->pdgId()*tk2charge > 0) continue;  
+          TLorentzVector p_MuCand;
+          p_MuCand.SetPtEtaPhiM(myPFmu[iMuCand]->pt(), myPFmu[iMuCand]->eta(), myPFmu[iMuCand]->phi(), gMassMu);
+          double tmp_deltaRD0optcombiMu = p_D0optcombi.DeltaR(p_MuCand);
+          if (tmp_deltaRD0optcombiMu < deltaRD0optcombiMu) {
+          deltaRD0optcombiMu = tmp_deltaRD0optcombiMu;
+          iMu = iMuCand;
+          }
+          }
+
+          if (iMu < 0) continue;
+
+          // keep going if closest muon is close enough
+          if (deltaRD0optcombiMu > 0.4) continue;
+
+          p_Mu.SetPtEtaPhiM(myPFmu[iMu]->pt(), myPFmu[iMu]->eta(), myPFmu[iMu]->phi(), gMassMu);
+          */
+
           if (tk2charge < 0) continue;
-          
+
           p_Mu.SetPtEtaPhiM(myPFmuInSelJet[tk2charge]->pt(), myPFmuInSelJet[tk2charge]->eta(), myPFmuInSelJet[tk2charge]->phi(), gMassMu);
           TLorentzVector p_Boptcombi = p_Mu + p_D0optcombi;
           _h_BMomentum[indJet]->Fill(p_Boptcombi.P(), weight);
@@ -1205,12 +1201,12 @@ D0ForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 
 // ------------ method called once each job just before starting event loop  ------------
-void 
+  void 
 D0ForRivet::beginJob()
 {
-  
+
   // std::cout << "Creating histos..." << std::endl;
-  
+
   edm::Service<TFileService> fs;
   _h_idPFel = fs->make<TH1D>("pdgIdPFel", "pdgIdPFel", 500, 0., 500.);
   _h_id_pT_PFel = fs->make<TH2D>("pdgId-pT-PFel", "pdgId-pT-PFel", 500, 0., 500., 150, 0, 300);
@@ -1221,13 +1217,13 @@ D0ForRivet::beginJob()
   _h_id1stPFmu = fs->make<TH1D>("pdgId1stPFmu", "pdgId1stPFmu", 500, 0., 500.);
   _h_id_pT_1stPFmu = fs->make<TH2D>("pdgId-pT-1stPFmu", "pdgId-pT-1stPFmu", 500, 0., 500., 150, 0, 300);
   _h_dR_dpT_1stPFmu = fs->make<TH2D>("DeltaR-DeltapT-1stPFmu-Gen", "DeltaR-DeltapT-1stPFmu-Gen", 100, 0., 0.5, 100, 0., 5.);
-  
+
   _h_nVtx = fs->make<TH1D>("NPrimaryVtx", "NPrimaryVtx", 50, 0., 50.); 
   _h_nJets = fs->make<TH1D>("NJets", "NJets", 20, 0., 20.);
   _h_pTJets = fs->make<TH1D>("TransverseMomentumJets", "TransverseMomentumJets", 100, 0., 500.);
   _h_etaJets = fs->make<TH1D>("EtaJets", "EtaJets", 120, -6., 6.);
   _h_nCSVJets = fs->make<TH1D>("NCSVJets", "NCSVJets", 10, 0., 10.);
-  
+
   _h_CSVSelJets = fs->make<TH1D>("CSV-b-jets", "CSV-b-jets", 100, 0., 1.);
   _h_genIdSelJets = fs->make<TH1D>("GenID-b-jets", "GenID-b-jets", 22, 0., 22.);
   _h_pTSelJets = fs->make<TH1D>("TransverseMomentum-b-jets", "TransverseMomentum-b-jets", 100, 0., 500.);
@@ -1236,7 +1232,7 @@ D0ForRivet::beginJob()
   _h_etach[1] = fs->make<TH1D>("Etach-b-jet2", "Etach-b-jet2", 60, -3., 3.);
   _h_pTch[0] = fs->make<TH1D>("TransverseMomentumch-b-jet1", "TransverseMomentumch-b-jet1", 100, 0., 100.);
   _h_pTch[1] = fs->make<TH1D>("TransverseMomentumch-b-jet2", "TransvereMomentumch-b-jet2", 100, 0., 100.);
-  
+
   _h_Nch[0] = fs->make<TH1D>("Nch-b-jet1", "Nch-b-jet1", 45, 0, 45);
   _h_Nch[1] = fs->make<TH1D>("Nch-b-jet2", "Nch-b-jet2", 45, 0, 45);
   _h_sump[0] = fs->make<TH1D>("Sump-b-jet1", "Sump-b-jet1", 200, 0, 1000);
@@ -1291,11 +1287,7 @@ D0ForRivet::beginJob()
   _h_mup[1] = fs->make<TH1D>("Muonp-b-jet2", "Muonp-b-jet2", 150, 0, 300);
   _h_BMomentumClean[0] = fs->make<TH1D>("BMomentum-D0cut-b-jet1", "BMomentum-D0cut-b-jet1", 100, 0, 400);
   _h_BMomentumClean[1] = fs->make<TH1D>("BMomentum-D0cut-b-jet2", "BMomentum-D0cut-b-jet2", 100, 0, 400);
-  // _h_D0MassBlow[0] = fs->make<TH1D>("D0Mass-b-jet1-blow", "D0Mass-b-jet1-blow", 30, 1.7, 2.);
-  // _h_D0MassBlow[1] = fs->make<TH1D>("D0Mass-b-jet2-blow", "D0Mass-b-jet2-blow", 30, 1.7, 2.);
-  // _h_D0MassCleanBlow[0] = fs->make<TH1D>("D0MassClean-b-jet1-blow", "D0MassClean-b-jet1-blow", 30, 1.7, 2.);
-  // _h_D0MassCleanBlow[1] = fs->make<TH1D>("D0MassClean-b-jet2-blow", "D0MassClean-b-jet2-blow", 30, 1.7, 2.);
-  
+
   _t_bjet1 = fs->make<TTree>("b-jet1", "b-jet1", 1);
   _t_bjet1->Branch("Weight", &weight, "Weight/D");
   _t_bjet1->Branch("CSV", &_CSV[0], "CSV/D");
@@ -1314,7 +1306,7 @@ D0ForRivet::beginJob()
   _t_bjet2->Branch("Tr1", _tr1[1] , "Tr1[4]/D");
   _t_bjet2->Branch("Tr2", _tr2[1] , "Tr2[4]/D");
   _t_bjet2->Branch("Tr3", _tr3[1] , "Tr3[4]/D");
-  
+
   _t_D0window_bjets = fs->make<TTree>("D0window-b-jets", "D0window-b-jets", 1);
   _t_D0window_bjets->Branch("Weight", &weight, "Weight/D");
   _t_D0window_bjets->Branch("GenId", &_genId, "GenId/D");
@@ -1328,7 +1320,7 @@ D0ForRivet::beginJob()
   _t_D0window_bjets->Branch("AveragepT", &_averpT, "SumpT/D");
   _t_D0window_bjets->Branch("R1_nomu", &_R1_nomu, "R1_nomu/D");
   _t_D0window_bjets->Branch("R3_nomu", &_R3_nomu, "R3_nomu/D");
-  
+
   _t_D0KVFwindow_bjets = fs->make<TTree>("D0KVFwindow-b-jets", "D0KVFwindow-b-jets", 1);
   _t_D0KVFwindow_bjets->Branch("Weight", &weight, "Weight/D");
   _t_D0KVFwindow_bjets->Branch("GenId", &_genId_KVF, "GenId/D");
@@ -1345,33 +1337,33 @@ D0ForRivet::beginJob()
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
-void 
+  void 
 D0ForRivet::endJob() 
 {
-  
+
   // std::cout << "Closing histos..." << std::endl;
 }
 
 // ------------ method called when starting to processes a run  ------------
-void 
+  void 
 D0ForRivet::beginRun(edm::Run const&, edm::EventSetup const&)
 {
 }
 
 // ------------ method called when ending the processing of a run  ------------
-void 
+  void 
 D0ForRivet::endRun(edm::Run const&, edm::EventSetup const&)
 {
 }
 
 // ------------ method called when starting to processes a luminosity block  ------------
-void 
+  void 
 D0ForRivet::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
 {
 }
 
 // ------------ method called when ending the processing of a luminosity block  ------------
-void 
+  void 
 D0ForRivet::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
 {
 }
