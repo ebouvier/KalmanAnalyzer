@@ -474,7 +474,7 @@ void doRivetJob_file(bool inBatch, TString date, TString type, bool isKVF)
   xTitle.push_back("CSV discriminant"); xTitle.push_back("p(#kappa^{+}#pi^{-}+#mu^{-}) (GeV/c)"); xTitle.push_back("M(#kappa^{+}#pi^{-}+#mu^{-}) (GeV/c^{2})"); 
   xTitle.push_back("p(#mu^{#pm}) (GeV/c)"); xTitle.push_back("R1");  xTitle.push_back("R2");
   xTitle.push_back("R3");  xTitle.push_back("Tracks multiplicity"); xTitle.push_back("#sum p_{T} (GeV/c)"); 
-  xTitle.push_back("#LT p_{T} #GT = #frac{#sum p_{T}}{N_{tracks}} (GeV/c)"); xTitle.push_back("R1 (no #mu)"); xTitle.push_back("R22 (no #mu)");
+  xTitle.push_back("#LT p_{T} #GT = #frac{#sum p_{T}}{N_{tracks}} (GeV/c)"); xTitle.push_back("R1 (no #mu)"); xTitle.push_back("R2 (no #mu)");
   xTitle.push_back("R3 (no #mu)");
   vector<TString> varName; 
   varName.push_back("CSVdisc"); varName.push_back("Bmomentum");  varName.push_back("Bmass");
@@ -497,8 +497,8 @@ void doRivetJob_file(bool inBatch, TString date, TString type, bool isKVF)
   vector<double> varMax; 
   varMax.push_back(1.); varMax.push_back(400.); varMax.push_back(10.);
   varMax.push_back(300.); varMax.push_back(1.); varMax.push_back(1.); 
-  varMax.push_back(1.); varMax.push_back(30.); varMax.push_back(1000.); 
-  varMax.push_back(100.); varMax.push_back(1.); varMax.push_back(1.);
+  varMax.push_back(1.); varMax.push_back(30.); varMax.push_back(400.); 
+  varMax.push_back(80.); varMax.push_back(1.); varMax.push_back(1.);
   varMax.push_back(1.);
   vector<TString> varUnit; 
   varUnit.push_back(""); varUnit.push_back("GeV/c"); varUnit.push_back("GeV/c^{2}"); 
