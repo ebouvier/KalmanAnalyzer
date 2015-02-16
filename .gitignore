@@ -39,3 +39,6 @@
 *.pdf
 *.jpg
 *.png
+
+# Temporary files
+*.swp

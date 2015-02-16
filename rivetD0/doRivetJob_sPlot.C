@@ -222,7 +222,7 @@ void cms_style(bool isData = true){
 }
 
 //---------------------------------------------------------------
-TGraphAsymmErrors **treatHisto(bool inBatch, TStyle* my_style, TString date, bool isCSVbased, bool isKVF, const int NsPlots, vector<TString> varName, vector<TString> varTitle, vector<double> varMin, vector<double> varMax, vector<TString> varUnit, vector<bool> atRight, TFile* fi, TString name, TString channel)
+TGraphAsymmErrors **treatHisto(bool inBatch, TStyle* my_style, TString date, TString type, bool isKVF, const int NsPlots, vector<TString> varName, vector<TString> varTitle, vector<double> varMin, vector<double> varMax, vector<TString> varUnit, vector<bool> atRight, TFile* fi, TString name, TString channel)
 //---------------------------------------------------------------
 {
   my_style->cd();
@@ -240,13 +240,17 @@ TGraphAsymmErrors **treatHisto(bool inBatch, TStyle* my_style, TString date, boo
   
   TString dir_name = "basedSelection/";
   TString rep_name = date;
-  if (isCSVbased) {
+  if (type.Contains("csv", TString::kIgnoreCase)) {
     dir_name = "CSV" + dir_name;
     rep_name = rep_name + "/csv/sPlot/";
   }
-  else { 
+  else if (type.Contains("pT", TString::kIgnoreCase)) { 
     dir_name = "pT" + dir_name;
     rep_name = rep_name + "/pT/sPlot/";
+  }
+  else if (type.Contains("muTag", TString::kIgnoreCase)) { 
+    dir_name = "muTagBasedSelection/";
+    rep_name = rep_name + "/muTag/sPlot/";
   }
   if (isKVF)
     rep_name = rep_name + "KVF/";
@@ -425,7 +429,7 @@ TGraphAsymmErrors **treatHisto(bool inBatch, TStyle* my_style, TString date, boo
 }
 
 //---------------------------------------------------------------
-void doRivetJob_file(bool inBatch, TString date, bool isCSVbased, bool isKVF)
+void doRivetJob_file(bool inBatch, TString date, TString type, bool isKVF)
 //---------------------------------------------------------------
 {
   TStyle* my_style = createMyStyle();
@@ -436,17 +440,23 @@ void doRivetJob_file(bool inBatch, TString date, bool isCSVbased, bool isKVF)
   TString fi_data_name = "../test/crab_results/"+date;
   TString fi_sl_name = "../test/crab_results/"+date;
   TString fi_dl_name = "../test/crab_results/"+date;
-  if (isCSVbased) {
+  if (type.Contains("csv", TString::kIgnoreCase)) {
     rep_name = rep_name + "/csv/sPlot/";
     fi_data_name = fi_data_name + "/D0ForRivet_csv_Data_merged.root";
     fi_sl_name = fi_sl_name + "/D0ForRivet_csv_TTJets_SemiLeptMGDecays.root";
     fi_dl_name = fi_dl_name + "/D0ForRivet_csv_TTJets_FullLeptMGDecays.root";
   }
-  else {
+  else if (type.Contains("pT", TString::kIgnoreCase))  {
     rep_name = rep_name + "/pT/sPlot/";
     fi_data_name = fi_data_name + "/D0ForRivet_pT_Data_merged.root";
     fi_sl_name = fi_sl_name + "/D0ForRivet_pT_TTJets_SemiLeptMGDecays.root";
     fi_dl_name = fi_dl_name + "/D0ForRivet_pT_TTJets_FullLeptMGDecays.root";
+  }
+  else if (type.Contains("muTag", TString::kIgnoreCase))  {
+    rep_name = rep_name + "/muTag/sPlot/";
+    fi_data_name = fi_data_name + "/MuTagForRivet_Data_merged.root";
+    fi_sl_name = fi_sl_name + "/MuTagForRivet_TTJets_SemiLeptMGDecays.root";
+    fi_dl_name = fi_dl_name + "/MuTagForRivet_TTJets_FullLeptMGDecays.root";
   }
   if (isKVF)
     rep_name = rep_name + "KVF/";
@@ -459,35 +469,49 @@ void doRivetJob_file(bool inBatch, TString date, bool isCSVbased, bool isKVF)
   
   const double norm_sl = 2.*25.8031*19769./12031276.;
   const double norm_dl = 2.*107.6722*19769./25339818.;
-  const int NsPlots = 9;
+  const int NsPlots = 13;
   vector<TString> xTitle; 
-  xTitle.push_back("CSV discriminant"); xTitle.push_back("p(#kappa^{+}#pi^{-}+#mu^{-}) (GeV/c)"); xTitle.push_back("R1"); 
+  xTitle.push_back("CSV discriminant"); xTitle.push_back("p(#kappa^{+}#pi^{-}+#mu^{-}) (GeV/c)"); xTitle.push_back("M(#kappa^{+}#pi^{-}+#mu^{-}) (GeV/c^{2})"); 
+  xTitle.push_back("p(#mu^{#pm}) (GeV/c)"); xTitle.push_back("R1");  xTitle.push_back("R2");
   xTitle.push_back("R3");  xTitle.push_back("Tracks multiplicity"); xTitle.push_back("#sum p_{T} (GeV/c)"); 
-  xTitle.push_back("#LT p_{T} #GT = #frac{#sum p_{T}}{N_{tracks}} (GeV/c)"); xTitle.push_back("R1 (no #mu)"); xTitle.push_back("R3 (no #mu)");
+  xTitle.push_back("#LT p_{T} #GT = #frac{#sum p_{T}}{N_{tracks}} (GeV/c)"); xTitle.push_back("R1 (no #mu)"); xTitle.push_back("R22 (no #mu)");
+  xTitle.push_back("R3 (no #mu)");
   vector<TString> varName; 
-  varName.push_back("CSVdisc"); varName.push_back("Bmomentum"); varName.push_back("R1"); 
+  varName.push_back("CSVdisc"); varName.push_back("Bmomentum");  varName.push_back("Bmass");
+   varName.push_back("Mup"); varName.push_back("R1"); varName.push_back("R2"); 
   varName.push_back("R3");  varName.push_back("Nch"); varName.push_back("SumpT"); 
-  varName.push_back("AveragepT"); varName.push_back("R1_nomu"); varName.push_back("R3_nomu");
+  varName.push_back("AveragepT"); varName.push_back("R1_nomu"); varName.push_back("R2_nomu");
+  varName.push_back("R3_nomu");
   vector<TString> varTitle; 
-  varTitle.push_back("CSV discriminant"); varTitle.push_back("p(#kappa^{+}#pi^{-}+#mu^{-})"); varTitle.push_back("R1");
+  varTitle.push_back("CSV discriminant"); varTitle.push_back("p(#kappa^{+}#pi^{-}+#mu^{-})"); varTitle.push_back("M(#kappa^{+}#pi^{-}+#mu^{-})"); 
+  varTitle.push_back("p(#mu^{#pm})"); varTitle.push_back("R1"); varTitle.push_back("R2");
   varTitle.push_back("R3");  varTitle.push_back("Tracks multiplicity"); varTitle.push_back("#sum p_{T}"); 
-  varTitle.push_back("#LT p_{T} #GT"); varTitle.push_back("R1 (no #mu)"); varTitle.push_back("R3 (no #mu)");
+  varTitle.push_back("#LT p_{T} #GT"); varTitle.push_back("R1 (no #mu)"); varTitle.push_back("R2 (no #mu)");
+  varTitle.push_back("R3 (no #mu)");
   vector<double> varMin; 
   varMin.push_back(0.); varMin.push_back(0.); varMin.push_back(0.); 
   varMin.push_back(0.); varMin.push_back(0.); varMin.push_back(0.);
   varMin.push_back(0.); varMin.push_back(0.); varMin.push_back(0.);
+  varMin.push_back(0.); varMin.push_back(0.); varMin.push_back(0.);
+  varMin.push_back(0.);
   vector<double> varMax; 
-  varMax.push_back(1.); varMax.push_back(400.); varMax.push_back(1.); 
+  varMax.push_back(1.); varMax.push_back(400.); varMax.push_back(10.);
+  varMax.push_back(300.); varMax.push_back(1.); varMax.push_back(1.); 
   varMax.push_back(1.); varMax.push_back(30.); varMax.push_back(1000.); 
   varMax.push_back(100.); varMax.push_back(1.); varMax.push_back(1.);
+  varMax.push_back(1.);
   vector<TString> varUnit; 
-  varUnit.push_back(""); varUnit.push_back("GeV/c"); varUnit.push_back(""); 
+  varUnit.push_back(""); varUnit.push_back("GeV/c"); varUnit.push_back("GeV/c^{2}"); 
+  varUnit.push_back("GeV/c"); varUnit.push_back(""); varUnit.push_back(""); 
   varUnit.push_back(""); varUnit.push_back(""); varUnit.push_back("GeV/c"); 
   varUnit.push_back("GeV/c"); varUnit.push_back(""); varUnit.push_back("");
+  varUnit.push_back("");
   vector<bool> atRight; 
   atRight.push_back(false); atRight.push_back(true); atRight.push_back(true); 
+  atRight.push_back(true); atRight.push_back(true); atRight.push_back(false); 
   atRight.push_back(false); atRight.push_back(true); atRight.push_back(true); 
   atRight.push_back(true); atRight.push_back(true); atRight.push_back(false);
+  atRight.push_back(false);
   assert (xTitle.size() == NsPlots);
   assert (varName.size() == NsPlots);
   assert (varTitle.size() == NsPlots);
@@ -496,9 +520,9 @@ void doRivetJob_file(bool inBatch, TString date, bool isCSVbased, bool isKVF)
   assert (varUnit.size() == NsPlots);
   assert (atRight.size() == NsPlots);
   
-  TGraphAsymmErrors **gr_all_data = treatHisto(inBatch, my_style, date, isCSVbased, isKVF, NsPlots, varName, varTitle, varMin, varMax, varUnit, atRight, fi_data, "Data_merged", "Data - Run 2012 A,B,C,D");
-  TGraphAsymmErrors **gr_all_sl = treatHisto(inBatch, my_style, date, isCSVbased, isKVF, NsPlots, varName, varTitle, varMin, varMax, varUnit, atRight, fi_sl, "TTJets_SemiLeptMGDecays", "MG+PY6 Z2* Semilept. t#bar{t}");
-  TGraphAsymmErrors **gr_all_dl = treatHisto(inBatch, my_style, date, isCSVbased, isKVF, NsPlots, varName, varTitle, varMin, varMax, varUnit, atRight, fi_dl, "TTJets_FullLeptMGDecays", "MG+PY6 Z2* Dilept. t#bar{t}");
+  TGraphAsymmErrors **gr_all_data = treatHisto(inBatch, my_style, date, type, isKVF, NsPlots, varName, varTitle, varMin, varMax, varUnit, atRight, fi_data, "Data_merged", "Data - Run 2012 A,B,C,D");
+  TGraphAsymmErrors **gr_all_sl = treatHisto(inBatch, my_style, date, type, isKVF, NsPlots, varName, varTitle, varMin, varMax, varUnit, atRight, fi_sl, "TTJets_SemiLeptMGDecays", "MG+PY6 Z2* Semilept. t#bar{t}");
+  TGraphAsymmErrors **gr_all_dl = treatHisto(inBatch, my_style, date, type, isKVF, NsPlots, varName, varTitle, varMin, varMax, varUnit, atRight, fi_dl, "TTJets_FullLeptMGDecays", "MG+PY6 Z2* Dilept. t#bar{t}");
 
   for (int ig = 0; ig < NsPlots; ig++) {
     TGraphAsymmErrors *gr_alldata = (TGraphAsymmErrors*)gr_all_data[ig]->Clone(); 
@@ -597,24 +621,36 @@ void doRivetJob_file(bool inBatch, TString date, bool isCSVbased, bool isKVF)
 }
   
 //---------------------------------------------------------------
-int doRivetJob_sPlot(bool inBatch = true, TString date = "")
+int doRivetJob_sPlot(bool inBatch = true, TString date = "", TString type = "D0")
 //---------------------------------------------------------------
 {  
   if (date.Length() > 0)  {
     gROOT->ProcessLine(".! mkdir "+date);
-    gROOT->ProcessLine(".! mkdir "+date+"/csv");
-    gROOT->ProcessLine(".! mkdir "+date+"/csv/sPlot");
-    gROOT->ProcessLine(".! mkdir "+date+"/csv/sPlot/Combi");
-    gROOT->ProcessLine(".! mkdir "+date+"/csv/sPlot/KVF");
-    gROOT->ProcessLine(".! mkdir "+date+"/pT");
-    gROOT->ProcessLine(".! mkdir "+date+"/pT/sPlot");
-    gROOT->ProcessLine(".! mkdir "+date+"/pT/sPlot/Combi");
-    gROOT->ProcessLine(".! mkdir "+date+"/pT/sPlot/KVF");
 
-    doRivetJob_file(inBatch, date, true, true);
-    doRivetJob_file(inBatch, date, true, false);
-    doRivetJob_file(inBatch, date, false, true);
-    doRivetJob_file(inBatch, date, false, false);
+    if (type.Contains("D0", TString::kIgnoreCase)) {    
+      gROOT->ProcessLine(".! mkdir "+date+"/csv");
+      gROOT->ProcessLine(".! mkdir "+date+"/csv/sPlot");
+      gROOT->ProcessLine(".! mkdir "+date+"/csv/sPlot/Combi");
+      gROOT->ProcessLine(".! mkdir "+date+"/csv/sPlot/KVF");
+      gROOT->ProcessLine(".! mkdir "+date+"/pT");
+      gROOT->ProcessLine(".! mkdir "+date+"/pT/sPlot");
+      gROOT->ProcessLine(".! mkdir "+date+"/pT/sPlot/Combi");
+      gROOT->ProcessLine(".! mkdir "+date+"/pT/sPlot/KVF");
+
+      doRivetJob_file(inBatch, date, "csv", true);
+      doRivetJob_file(inBatch, date, "csv", false);
+      doRivetJob_file(inBatch, date, "pT", true);
+      doRivetJob_file(inBatch, date, "pT", false);
+    }
+    else if (type.Contains("MuTag", TString::kIgnoreCase)) {
+      gROOT->ProcessLine(".! mkdir "+date+"/muTag");
+      gROOT->ProcessLine(".! mkdir "+date+"/muTag/sPlot");
+      gROOT->ProcessLine(".! mkdir "+date+"/muTag/sPlot/Combi");
+      gROOT->ProcessLine(".! mkdir "+date+"/muTag/sPlot/KVF");
+
+      doRivetJob_file(inBatch, date, "muTag", true);
+      doRivetJob_file(inBatch, date, "muTag", false);
+    }
     return 0;
   }
   else 

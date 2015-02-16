@@ -183,6 +183,40 @@ class MuTagForRivet : public edm::EDAnalyzer {
     double _tr1[4];
     double _tr2[4];
     double _tr3[4];
+
+    TTree* _t_D0window_bjets;
+    double _D0mass;
+    double _genId;
+    double _CSVdisc;
+    double _Bmomentum;
+    double _Bmass;
+    double _Mup;
+    double _R1;
+    double _R2;
+    double _R3;
+    double _Ntr;
+    double _sumpT;
+    double _averpT;
+    double _R1_nomu;
+    double _R2_nomu;
+    double _R3_nomu;
+
+    TTree* _t_D0KVFwindow_bjets;
+    double _D0mass_KVF;
+    double _genId_KVF;
+    double _CSVdisc_KVF;
+    double _Bmomentum_KVF;
+    double _Bmass_KVF;
+    double _Mup_KVF;
+    double _R1_KVF;
+    double _R2_KVF;
+    double _R3_KVF;
+    double _Ntr_KVF;
+    double _sumpT_KVF;
+    double _averpT_KVF;
+    double _R1_nomu_KVF;
+    double _R2_nomu_KVF;
+    double _R3_nomu_KVF;
 };
 
 //
@@ -505,10 +539,10 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     // float        gSigmaMu = 0.000000004; 
 
     ParticleMass gMassK  = 0.493677;
-    // float        gSigmaK = 0.000001;
+    float        gSigmaK = 0.000001;
 
     ParticleMass gMassPi  = 0.13957018;
-    // float        gSigmaPi = 0.00000001;
+    float        gSigmaPi = 0.00000001;
 
     // Track setup
 
@@ -521,9 +555,6 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     iEvent.getByLabel(jetTag, jetsHandle);
     pat::JetCollection jets = *jetsHandle;
 
-    /*
-       if ( (*it).pt() >= 30. ) {
-       */    
     _CSV = -1; 
     _vecP[0] = -100.; _vecP[1] = -100.; _vecP[2] = -100.; _vecP[3] = -100.;
     _Nch = -1; 
@@ -598,7 +629,8 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         const reco::Track& Track1 = **iter1;
 
         if ((**iter1).pt() < 4.) continue;
-        if (!Track1.quality(reco::Track::highPurity)) continue;
+        // if (!Track1.quality(reco::Track::highPurity)) continue; FIXME
+        if (!Track1.quality(reco::Track::tight)) continue;
 
         // look for muons and electrons
         bool trCandIsMu = false;
@@ -769,6 +801,181 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         _h_etach->Fill(p_tr1.Eta(), weight);
         _h_pTch->Fill(p_tr1.Pt(), weight);
 
+        //============================
+        // simple Kalman Vertex Fitter
+        //============================
+
+        _D0mass_KVF = 0.;
+        _genId_KVF = 0.;
+        _CSVdisc_KVF = -1.;
+        _Bmomentum_KVF = 0.;
+        _Bmass_KVF = 0.;
+        _Mup_KVF = 0.;
+        _R1_KVF = 0.;
+        _R2_KVF = 0.;
+        _R3_KVF = 0.;                    
+        _Ntr_KVF = 0.;
+        _sumpT_KVF = 0.;
+        _averpT_KVF = 0.;
+        _R1_nomu_KVF = 0.;
+        _R2_nomu_KVF = 0.;
+        _R3_nomu_KVF = 0.;                    
+        for (reco::track_iterator iter2 = jetTracks.begin(); iter2 != jetTracks.end(); ++iter2) {
+          const reco::Track& Track2 = **iter2;
+
+          if (iter2 == iter1) continue;
+          if ((**iter2).pt() < 4.) continue;
+          // if (!Track2.quality(reco::Track::highPurity)) continue; FIXME
+          if (!Track2.quality(reco::Track::tight)) continue;
+
+          bool tr2CandIsMu = false;
+          for (unsigned int iMuCand = 0; iMuCand < myPFmu.size(); iMuCand++) {
+            TLorentzVector p_MuCand, p_trCand;
+            p_MuCand.SetPtEtaPhiM(myPFmu[iMuCand]->pt(), myPFmu[iMuCand]->eta(), myPFmu[iMuCand]->phi(), gMassMu);
+            p_trCand.SetPtEtaPhiM((**iter2).pt(), (**iter2).eta(), (**iter2).phi(), gMassPi);
+            if (p_trCand.DeltaR(p_MuCand) < 0.0005) {
+              tr2CandIsMu = true;
+              break;
+            }
+          }
+          bool tr2CandIsEl = false;
+          for (unsigned int iElCand = 0; iElCand < myPFel.size(); iElCand++) {
+            TLorentzVector p_ElCand, p_trCand;
+            p_ElCand.SetPtEtaPhiM(myPFel[iElCand]->pt(), myPFel[iElCand]->eta(), myPFel[iElCand]->phi(), 0.);
+            p_trCand.SetPtEtaPhiM((**iter2).pt(), (**iter2).eta(), (**iter2).phi(), gMassPi);
+            if (p_trCand.DeltaR(p_ElCand) < 0.005) {
+              tr2CandIsEl = true;
+              break;
+            }
+          }
+
+          if (!trCandIsEl && !trCandIsMu && !tr2CandIsMu && !tr2CandIsEl) {
+            reco::TransientTrack tr1 = (*theB).build((**iter1));
+            reco::TransientTrack tr2 = (*theB).build((**iter2));
+
+            //~~~~~~~~~~~~~~~~~~~~~~~~~~
+            // reconstruct D^0 -> K Pi
+            //~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+            // Select OS tracks
+            if ((**iter1).charge()*(**iter2).charge() > 0) continue;
+
+            // Compute the mass
+            TLorentzVector p_tr1_D0, p_tr2_D0, p_D0;
+            p_tr1_D0.SetPtEtaPhiM((**iter1).pt(), (**iter1).eta(), (**iter1).phi(), gMassK);
+            p_tr2_D0.SetPtEtaPhiM((**iter2).pt(), (**iter2).eta(), (**iter2).phi(), gMassPi);
+            p_D0 = p_tr1_D0 + p_tr2_D0;
+
+            //Creating a KinematicParticleFactory
+            KinematicParticleFactoryFromTransientTrack pFactory;
+
+            //initial chi2 and ndf before kinematic fits. The chi2 of the reconstruction is not considered
+            float chi_D0 = 0.;
+            float ndf_D0 = 0.;
+
+            //making particles
+            std::vector<RefCountedKinematicParticle> D0Particles;
+            D0Particles.push_back(pFactory.particle (tr1,gMassK,chi_D0,ndf_D0,gSigmaK));
+            D0Particles.push_back(pFactory.particle (tr2,gMassPi,chi_D0,ndf_D0,gSigmaPi));
+
+            /* Example of a simple vertex fit, without other constraints
+             * The reconstructed decay tree is a result of the kinematic fit
+             * The KinematicParticleVertexFitter fits the final state particles to their vertex and
+             * reconstructs the decayed state
+             */
+
+            // creating the vertex fitter
+            KinematicParticleVertexFitter D0fitter;
+            RefCountedKinematicTree D0vertexFitTree = D0fitter.fit(D0Particles);
+
+            if (D0vertexFitTree->isValid()) {
+
+              //accessing the tree components, move pointer to top
+              D0vertexFitTree->movePointerToTheTop();
+
+              //We are now at the top of the decay tree getting the d0 reconstructed KinematicPartlcle
+              RefCountedKinematicParticle D0 = D0vertexFitTree->currentParticle();
+              RefCountedKinematicVertex D0_vertex = D0vertexFitTree->currentDecayVertex();
+
+              // cut on chi2/NDOF
+              if (D0_vertex->vertexIsValid() && D0_vertex->chiSquared()/(double)D0_vertex->degreesOfFreedom() < 4.) {
+
+                // Distance to PV :
+                GlobalPoint D0_svPos    = D0_vertex->position();
+                GlobalError D0_svPosErr = D0_vertex->error();
+
+                double sigmax_vtx_D0vtx = sqrt(pow(vtx[0].xError(), 2.) + pow(D0_svPosErr.cxx(), 2.));
+                double sigmay_vtx_D0vtx = sqrt(pow(vtx[0].yError(), 2.) + pow(D0_svPosErr.cyy(), 2.));
+                double sigmaz_vtx_D0vtx = sqrt(pow(vtx[0].zError(), 2.) + pow(D0_svPosErr.czz(), 2.));
+
+                double D0_interx = pow((p_D0.Px()/p_D0.M())/sigmax_vtx_D0vtx, 2.);
+                double D0_intery = pow((p_D0.Py()/p_D0.M())/sigmay_vtx_D0vtx, 2.);
+                double D0_interz = pow((p_D0.Pz()/p_D0.M())/sigmaz_vtx_D0vtx, 2.);
+
+                double D0_sigmaL3D = pow(D0_interx + D0_intery + D0_interz, -0.5);
+
+                double D0_part1 = (p_D0.Px()/p_D0.M())*pow(D0_sigmaL3D/sigmax_vtx_D0vtx,2.)*( D0_svPos.x() - vtx[0].x());
+                double D0_part2 = (p_D0.Py()/p_D0.M())*pow(D0_sigmaL3D/sigmay_vtx_D0vtx,2.)*( D0_svPos.y() - vtx[0].y());
+                double D0_part3 = (p_D0.Pz()/p_D0.M())*pow(D0_sigmaL3D/sigmaz_vtx_D0vtx,2.)*( D0_svPos.z() - vtx[0].z());
+
+                double D0_L3D = fabs(D0_part1 + D0_part2 + D0_part3);
+
+                double D0_L3DoverSigmaL3D = D0_L3D/D0_sigmaL3D;
+
+                // cut on L/SigmaL
+                if (D0_L3DoverSigmaL3D > 100.) {
+
+                  // cut on pT
+                  if (p_D0.Pt() > 12.) {
+
+                    // cut D0 mass window
+                    if (p_D0.M() > 1.7 && p_D0.M() < 2.) {
+
+                      //~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                      // associate D^0 to a PF muon
+                      //~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+                      int iMaxMuInSelJet = -1;
+                      double maxMuInSelJet = -1;
+                      for (unsigned int iMuCand = 0; iMuCand < myPFmuInSelJet.size(); iMuCand++) {
+                        if (myPFmuInSelJet[iMuCand]->pdgId()*(**iter1).charge() > 0) continue;
+                        if (myPFmuInSelJet[iMuCand]->pt() > maxMuInSelJet) {
+                          iMaxMuInSelJet = iMuCand;
+                          maxMuInSelJet = myPFmuInSelJet[iMaxMuInSelJet]->pt();
+                        }
+                      }
+
+                      if (iMaxMuInSelJet >= 0) {
+
+                        TLorentzVector p_Mu;
+                        p_Mu.SetPtEtaPhiM(myPFmuInSelJet[iMaxMuInSelJet]->pt(), myPFmuInSelJet[iMaxMuInSelJet]->eta(), myPFmuInSelJet[iMaxMuInSelJet]->phi(), gMassMu);
+                        TLorentzVector p_B = p_Mu + p_D0;
+                        _D0mass_KVF = p_D0.M();
+                        if ((*it).genParticle())
+                          _genId_KVF = (double)abs(((*it).genParticle())->pdgId());
+                        _CSVdisc_KVF = (*it).bDiscriminator("combinedSecondaryVertexBJetTags");
+                        _Bmomentum_KVF = p_B.P();
+                        _Bmass_KVF = p_B.M();
+                        _Mup_KVF = p_Mu.P();
+                        _R1_KVF = p_trCand[0].P() / _sump;
+                        _R2_KVF = (p_trCand[0].P() + p_trCand[1].P()) / _sump;
+                        _R3_KVF = (p_trCand[0].P() + p_trCand[1].P() + p_trCand[2].P()) / _sump;
+                        _Ntr_KVF = (double)_Nch;
+                        _sumpT_KVF = _sumpt;
+                        _averpT_KVF = _sumpT_KVF/_Ntr_KVF;
+                        _R1_nomu_KVF = p_trCand_nomu[0].P() / _sump;
+                        _R2_nomu_KVF = (p_trCand_nomu[0].P() + p_trCand_nomu[1].P()) / _sump;
+                        _R3_nomu_KVF = (p_trCand_nomu[0].P() + p_trCand_nomu[1].P() + p_trCand_nomu[2].P()) / _sump;
+                        _t_D0KVFwindow_bjets->Fill();
+
+                      } // there is a mu in the jet
+                    } // D0 mass window
+                  } // DO pT cut
+                } // D0 L3D/SigmaL3D cut
+              } // D0 chi2 cut
+            } // D0 tree vertex is valid
+          } // exclude e/mu for D0 reco with KVF
+        } // 2nd jet's track loop
       } // 1st jet's track loop
 
       _h_Nch->Fill((double)_Nch, weight);
@@ -819,6 +1026,21 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       int tk2charge = 0;
 
       if (fabs(pt_trCand_nomu[0]) > 1e-10 && fabs(pt_trCand_nomu[1]) > 1e-10 && fabs(pt_trCand_nomu[2]) > 1e-10) {
+        _D0mass = 0.;
+        _genId = 0.;
+        _CSVdisc = -1.;
+        _Bmomentum = 0.;
+        _Bmass = 0.;
+        _Mup = 0.;
+        _R1 = 0.;
+        _R2 = 0.;
+        _R3 = 0.;                    
+        _Ntr = 0.;
+        _sumpT = 0.;
+        _averpT = 0.;
+        _R1_nomu = 0.;
+        _R2_nomu = 0.;
+        _R3_nomu = 0.;                    
         for (unsigned int iD0combi = 0; iD0combi < 6; iD0combi++) {
 
           //~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -938,6 +1160,25 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           _h_BMomentum_unbiased->Fill(p_Bcombi.P(), weight);
           _h_BMass_unbiased->Fill(p_Bcombi.M(), weight);
           _h_mup_unbiased->Fill(p_Mu.P(), weight);
+          if (p_D0combi.M() > 1.7 && p_D0combi.M() < 2.) {
+            _D0mass = p_D0combi.M();
+            if ((*it).genParticle())
+              _genId = (double)abs(((*it).genParticle())->pdgId());
+            _CSVdisc = (*it).bDiscriminator("combinedSecondaryVertexBJetTags");
+            _Bmomentum = p_Bcombi.P();
+            _Bmass = p_Bcombi.M();
+            _Mup = p_Mu.P();
+            _R1 = p_trCand[0].P() / _sump;
+            _R2 = (p_trCand[0].P() + p_trCand[1].P()) / _sump;
+            _R3 = (p_trCand[0].P() + p_trCand[1].P() + p_trCand[2].P()) / _sump;
+            _Ntr = (double)_Nch;
+            _sumpT = _sumpt;
+            _averpT = _sumpT/_Ntr;
+            _R1_nomu = p_trCand_nomu[0].P() / _sump;
+            _R2_nomu = (p_trCand_nomu[0].P() + p_trCand_nomu[1].P()) / _sump;
+            _R3_nomu = (p_trCand_nomu[0].P() + p_trCand_nomu[1].P() + p_trCand_nomu[2].P()) / _sump;
+            _t_D0window_bjets->Fill();
+          }
         }
       }
 
@@ -979,136 +1220,172 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     } // jet loop
     _t_bjets->Fill();
   }
-  }
+}
 
 
-  // ------------ method called once each job just before starting event loop  ------------
+// ------------ method called once each job just before starting event loop  ------------
   void 
-    MuTagForRivet::beginJob()
-    {
+MuTagForRivet::beginJob()
+{
 
-      // std::cout << "Creating histos..." << std::endl;
+  // std::cout << "Creating histos..." << std::endl;
 
-      edm::Service<TFileService> fs;
-      _h_idPFel = fs->make<TH1D>("pdgIdPFel", "pdgIdPFel", 500, 0., 500.);
-      _h_id_pT_PFel = fs->make<TH2D>("pdgId-pT-PFel", "pdgId-pT-PFel", 500, 0., 500., 150, 0, 300);
-      _h_dR_dpT_PFel = fs->make<TH2D>("DeltaR-DeltapT-PFel-Gen", "DeltaR-DeltapT-PFel-Gen", 100, 0., 0.5, 100, 0., 5.);
-      _h_idPFmu = fs->make<TH1D>("pdgIdPFmu", "pdgIdPFmu", 500, 0., 500.);
-      _h_id_pT_PFmu = fs->make<TH2D>("pdgId-pT-PFmu", "pdgId-pT-PFmu", 500, 0., 500., 150, 0, 300);
-      _h_dR_dpT_PFmu = fs->make<TH2D>("DeltaR-DeltapT-PFmu-Gen", "DeltaR-DeltapT-PFmu-Gen", 100, 0., 0.5, 100, 0., 5.);
-      _h_id1stPFmu = fs->make<TH1D>("pdgId1stPFmu", "pdgId1stPFmu", 500, 0., 500.);
-      _h_id_pT_1stPFmu = fs->make<TH2D>("pdgId-pT-1stPFmu", "pdgId-pT-1stPFmu", 500, 0., 500., 150, 0, 300);
-      _h_dR_dpT_1stPFmu = fs->make<TH2D>("DeltaR-DeltapT-1stPFmu-Gen", "DeltaR-DeltapT-1stPFmu-Gen", 100, 0., 0.5, 100, 0., 5.);
-      _h_origin_id_1stPFmu_Inf100 = fs->make<TH2D>("Origin-pdgId-1stPFmu-Under100GeV", "Origin-pdgId-1stPFmu-Under100GeV", 2, 0., 2., 500, 0., 500.); 
-      _h_idOrigin_pT_1stPFmu_Inf100 = fs->make<TH2D>("PdgIdOrigin-pT-1stPFmu-Under100GeV", "PdgIdOrigin-pT-1stPFmu-Under100GeV", 5000, 0., 5000., 150, 0., 300.); 
-      _h_eta_dpz_1stPFmu_Inf100 = fs->make<TH2D>("Eta-RelDeltaPz-1stPFmu-Under100GeV", "Eta-RelDeltaPz-1stPFmu-Under100GeV", 60, -3., 3., 100, 0., 1.); 
-      _h_origin_id_1stPFmu_Sup100 = fs->make<TH2D>("Origin-pdgId-1stPFmu-Above100GeV", "Origin-pdgId-1stPFmu-Above100GeV", 2, 0., 2., 500, 0., 500.); 
-      _h_idOrigin_pT_1stPFmu_Sup100 = fs->make<TH2D>("PdgIdOrigin-pT-1stPFmu-Above100GeV", "PdgIdOrigin-pT-1stPFmu-Above100GeV", 5000, 0., 5000., 150, 0., 300.); 
-      _h_eta_dpz_1stPFmu_Sup100 = fs->make<TH2D>("Eta-RelDeltaPz-1stPFmu-Above100GeV", "Eta-RelDeltaPz-1stPFmu-Above100GeV", 60, -3., 3., 100, 0., 1.); 
-      _h_genId_pT_NonSelJets = fs->make<TH2D>("GenID-pT-below30GeVjets", "GenID-pT-below30GeVjets", 22, 0., 22., 30, 0., 30.);
+  edm::Service<TFileService> fs;
+  _h_idPFel = fs->make<TH1D>("pdgIdPFel", "pdgIdPFel", 500, 0., 500.);
+  _h_id_pT_PFel = fs->make<TH2D>("pdgId-pT-PFel", "pdgId-pT-PFel", 500, 0., 500., 150, 0, 300);
+  _h_dR_dpT_PFel = fs->make<TH2D>("DeltaR-DeltapT-PFel-Gen", "DeltaR-DeltapT-PFel-Gen", 100, 0., 0.5, 100, 0., 5.);
+  _h_idPFmu = fs->make<TH1D>("pdgIdPFmu", "pdgIdPFmu", 500, 0., 500.);
+  _h_id_pT_PFmu = fs->make<TH2D>("pdgId-pT-PFmu", "pdgId-pT-PFmu", 500, 0., 500., 150, 0, 300);
+  _h_dR_dpT_PFmu = fs->make<TH2D>("DeltaR-DeltapT-PFmu-Gen", "DeltaR-DeltapT-PFmu-Gen", 100, 0., 0.5, 100, 0., 5.);
+  _h_id1stPFmu = fs->make<TH1D>("pdgId1stPFmu", "pdgId1stPFmu", 500, 0., 500.);
+  _h_id_pT_1stPFmu = fs->make<TH2D>("pdgId-pT-1stPFmu", "pdgId-pT-1stPFmu", 500, 0., 500., 150, 0, 300);
+  _h_dR_dpT_1stPFmu = fs->make<TH2D>("DeltaR-DeltapT-1stPFmu-Gen", "DeltaR-DeltapT-1stPFmu-Gen", 100, 0., 0.5, 100, 0., 5.);
+  _h_origin_id_1stPFmu_Inf100 = fs->make<TH2D>("Origin-pdgId-1stPFmu-Under100GeV", "Origin-pdgId-1stPFmu-Under100GeV", 2, 0., 2., 500, 0., 500.); 
+  _h_idOrigin_pT_1stPFmu_Inf100 = fs->make<TH2D>("PdgIdOrigin-pT-1stPFmu-Under100GeV", "PdgIdOrigin-pT-1stPFmu-Under100GeV", 5000, 0., 5000., 150, 0., 300.); 
+  _h_eta_dpz_1stPFmu_Inf100 = fs->make<TH2D>("Eta-RelDeltaPz-1stPFmu-Under100GeV", "Eta-RelDeltaPz-1stPFmu-Under100GeV", 60, -3., 3., 100, 0., 1.); 
+  _h_origin_id_1stPFmu_Sup100 = fs->make<TH2D>("Origin-pdgId-1stPFmu-Above100GeV", "Origin-pdgId-1stPFmu-Above100GeV", 2, 0., 2., 500, 0., 500.); 
+  _h_idOrigin_pT_1stPFmu_Sup100 = fs->make<TH2D>("PdgIdOrigin-pT-1stPFmu-Above100GeV", "PdgIdOrigin-pT-1stPFmu-Above100GeV", 5000, 0., 5000., 150, 0., 300.); 
+  _h_eta_dpz_1stPFmu_Sup100 = fs->make<TH2D>("Eta-RelDeltaPz-1stPFmu-Above100GeV", "Eta-RelDeltaPz-1stPFmu-Above100GeV", 60, -3., 3., 100, 0., 1.); 
+  _h_genId_pT_NonSelJets = fs->make<TH2D>("GenID-pT-below30GeVjets", "GenID-pT-below30GeVjets", 22, 0., 22., 30, 0., 30.);
 
-      _h_nVtx = fs->make<TH1D>("NPrimaryVtx", "NPrimaryVtx", 50, 0., 50.); 
+  _h_nVtx = fs->make<TH1D>("NPrimaryVtx", "NPrimaryVtx", 50, 0., 50.); 
 
-      _h_CSVSelJets = fs->make<TH1D>("CSV-b-jets", "CSV-b-jets", 100, 0., 1.);
-      _h_genIdSelJets = fs->make<TH1D>("GenID-b-jets", "GenID-b-jets", 22, 0., 22.);
-      _h_pTSelJets = fs->make<TH1D>("TransverseMomentum-b-jets", "TransverseMomentum-b-jets", 100, 0., 500.);
-      _h_etaSelJets = fs->make<TH1D>("Eta-b-jets", "Eta-b-jets", 60, -3., 3.);
-      _h_etach = fs->make<TH1D>("Etach-b-jets", "Etach-b-jets", 60, -3., 3.);
-      _h_pTch = fs->make<TH1D>("TransverseMomentumch-b-jets", "TransverseMomentumch-b-jets", 100, 0., 100.);
+  _h_CSVSelJets = fs->make<TH1D>("CSV-b-jets", "CSV-b-jets", 100, 0., 1.);
+  _h_genIdSelJets = fs->make<TH1D>("GenID-b-jets", "GenID-b-jets", 22, 0., 22.);
+  _h_pTSelJets = fs->make<TH1D>("TransverseMomentum-b-jets", "TransverseMomentum-b-jets", 100, 0., 500.);
+  _h_etaSelJets = fs->make<TH1D>("Eta-b-jets", "Eta-b-jets", 60, -3., 3.);
+  _h_etach = fs->make<TH1D>("Etach-b-jets", "Etach-b-jets", 60, -3., 3.);
+  _h_pTch = fs->make<TH1D>("TransverseMomentumch-b-jets", "TransverseMomentumch-b-jets", 100, 0., 100.);
 
-      _h_Nch = fs->make<TH1D>("Nch-b-jets", "Nch-b-jets", 45, 0, 45);
-      _h_sump = fs->make<TH1D>("Sump-b-jets", "Sump-b-jets", 200, 0, 1000);
-      _h_sumpvec = fs->make<TH1D>("VectorialSump-b-jets", "VectorialSump-b-jets", 300, 0, 1500);
-      _h_sum1p = fs->make<TH1D>("Highestp-b-jets", "Highestp-b-jets", 150, 0, 300);
-      _h_sum2p = fs->make<TH1D>("Sum2p-b-jets", "Sum2p-b-jets", 150, 0, 300);
-      _h_sum3p = fs->make<TH1D>("Sum3p-b-jets", "Sum3p-b-jets", 150, 0, 300);
-      _h_mass3 = fs->make<TH1D>("Mass3-b-jets", "Mass3-b-jets", 400, 0., 10.);
-      _h_R1 = fs->make<TH1D>("R1-b-jets", "R1-b-jets", 51, 0, 1.02);
-      _h_R1_Nch = fs->make<TH2D>("R1-Nch-b-jets", "R1-Nch-b-jets", 51, 0, 1.02, 45, 0, 45);
-      _h_R2 = fs->make<TH1D>("R2-b-jets", "R2-b-jets", 51, 0, 1.02);
-      _h_R2_Nch = fs->make<TH2D>("R2-Nch-b-jets", "R2-Nch-b-jets", 51, 0, 1.02, 45, 0, 45);
-      _h_R3 = fs->make<TH1D>("R3-b-jets", "R3-b-jets", 51, 0, 1.02);
-      _h_R3_Nch = fs->make<TH2D>("R3-Nch-b-jets", "R3-Nch-b-jets", 51, 0, 1.02, 45, 0, 45);
-      _h_sum1p_nomu = fs->make<TH1D>("Highestp-nomu-b-jets", "Highestp-nomu-b-jets", 150, 0, 300);
-      _h_sum2p_nomu = fs->make<TH1D>("Sum2p-nomu-b-jets", "Sum2p-nomu-b-jets", 150, 0, 300);
-      _h_sum3p_nomu = fs->make<TH1D>("Sum3p-nomu-b-jets", "Sum3p-nomu-b-jets", 150, 0, 300);
-      _h_mass3_nomu = fs->make<TH1D>("Mass3-nomu-b-jets", "Mass3-nomu-b-jets", 400, 0., 10.);
-      _h_R1_nomu = fs->make<TH1D>("R1-nomu-b-jets", "R1-nomu-b-jets", 51, 0, 1.02);
-      _h_R1_Nch_nomu = fs->make<TH2D>("R1-Nch-nomu-b-jets", "R1-Nch-nomu-b-jets", 51, 0, 1.02, 45, 0, 45);
-      _h_R2_nomu = fs->make<TH1D>("R2-nomu-b-jets", "R2-nomu-b-jets", 51, 0, 1.02);
-      _h_R2_Nch_nomu = fs->make<TH2D>("R2-Nch-nomu-b-jets", "R2-Nch-nomu-b-jets", 51, 0, 1.02, 45, 0, 45);
-      _h_R3_nomu = fs->make<TH1D>("R3-nomu-b-jets", "R3-nomu-b-jets", 51, 0, 1.02);
-      _h_R3_Nch_nomu = fs->make<TH2D>("R3-Nch-nomu-b-jets", "R3-Nch-nomu-b-jets", 51, 0, 1.02, 45, 0, 45);
-      _h_D0Mass = fs->make<TH1D>("D0Mass-b-jets", "D0Mass-b-jets", 400, 0, 8);
-      _h_D0p = fs->make<TH1D>("D0p-b-jets", "D0p-b-jets", 150, 0, 300);
-      _h_D0pT = fs->make<TH1D>("D0pT-b-jets", "D0pT-b-jets", 100, 0, 400);
-      _h_D0eta = fs->make<TH1D>("D0eta-b-jets", "D0eta-b-jets", 60, -3, 3);
-      _h_BMomentum_unbiased = fs->make<TH1D>("BMomentum-nobias-b-jets", "BMomentum-nobias-b-jets", 100, 0, 400);
-      _h_BMass_unbiased = fs->make<TH1D>("BMass-nobias-b-jets", "BMass-nobias-b-jets", 100, 0., 10.);
-      _h_mup_unbiased = fs->make<TH1D>("Muonp-nobias-b-jets", "Muonp-nobias-b-jets", 150, 0, 300);
-      _h_D0MassClean = fs->make<TH1D>("D0MassClean-b-jets", "D0MassClean-b-jets", 400, 0, 8);
-      _h_D0pClean = fs->make<TH1D>("D0pClean-b-jets", "D0pClean-b-jets", 150, 0, 300);
-      _h_D0pTClean = fs->make<TH1D>("D0pTClean-b-jets", "D0pTClean-b-jets", 100, 0, 400);
-      _h_D0etaClean = fs->make<TH1D>("D0etaClean-b-jets", "D0etaClean-b-jets", 60, -3, 3);
-      _h_BMomentum = fs->make<TH1D>("BMomentum-b-jets", "BMomentum-b-jets", 100, 0, 400);
-      _h_BMass = fs->make<TH1D>("BMass-b-jets", "BMass-b-jets", 100, 0, 10.);
-      _h_mup = fs->make<TH1D>("Muonp-b-jets", "Muonp-b-jets", 150, 0, 300);
-      _h_BMomentumClean = fs->make<TH1D>("BMomentum-D0cut-b-jets", "BMomentum-D0cut-b-jets", 100, 0, 400);
-      _h_BMassClean = fs->make<TH1D>("BMass-D0cut-b-jets", "BMass-D0cut-b-jets", 100, 0., 10.);
+  _h_Nch = fs->make<TH1D>("Nch-b-jets", "Nch-b-jets", 45, 0, 45);
+  _h_sump = fs->make<TH1D>("Sump-b-jets", "Sump-b-jets", 200, 0, 1000);
+  _h_sumpvec = fs->make<TH1D>("VectorialSump-b-jets", "VectorialSump-b-jets", 300, 0, 1500);
+  _h_sum1p = fs->make<TH1D>("Highestp-b-jets", "Highestp-b-jets", 150, 0, 300);
+  _h_sum2p = fs->make<TH1D>("Sum2p-b-jets", "Sum2p-b-jets", 150, 0, 300);
+  _h_sum3p = fs->make<TH1D>("Sum3p-b-jets", "Sum3p-b-jets", 150, 0, 300);
+  _h_mass3 = fs->make<TH1D>("Mass3-b-jets", "Mass3-b-jets", 400, 0., 10.);
+  _h_R1 = fs->make<TH1D>("R1-b-jets", "R1-b-jets", 51, 0, 1.02);
+  _h_R1_Nch = fs->make<TH2D>("R1-Nch-b-jets", "R1-Nch-b-jets", 51, 0, 1.02, 45, 0, 45);
+  _h_R2 = fs->make<TH1D>("R2-b-jets", "R2-b-jets", 51, 0, 1.02);
+  _h_R2_Nch = fs->make<TH2D>("R2-Nch-b-jets", "R2-Nch-b-jets", 51, 0, 1.02, 45, 0, 45);
+  _h_R3 = fs->make<TH1D>("R3-b-jets", "R3-b-jets", 51, 0, 1.02);
+  _h_R3_Nch = fs->make<TH2D>("R3-Nch-b-jets", "R3-Nch-b-jets", 51, 0, 1.02, 45, 0, 45);
+  _h_sum1p_nomu = fs->make<TH1D>("Highestp-nomu-b-jets", "Highestp-nomu-b-jets", 150, 0, 300);
+  _h_sum2p_nomu = fs->make<TH1D>("Sum2p-nomu-b-jets", "Sum2p-nomu-b-jets", 150, 0, 300);
+  _h_sum3p_nomu = fs->make<TH1D>("Sum3p-nomu-b-jets", "Sum3p-nomu-b-jets", 150, 0, 300);
+  _h_mass3_nomu = fs->make<TH1D>("Mass3-nomu-b-jets", "Mass3-nomu-b-jets", 400, 0., 10.);
+  _h_R1_nomu = fs->make<TH1D>("R1-nomu-b-jets", "R1-nomu-b-jets", 51, 0, 1.02);
+  _h_R1_Nch_nomu = fs->make<TH2D>("R1-Nch-nomu-b-jets", "R1-Nch-nomu-b-jets", 51, 0, 1.02, 45, 0, 45);
+  _h_R2_nomu = fs->make<TH1D>("R2-nomu-b-jets", "R2-nomu-b-jets", 51, 0, 1.02);
+  _h_R2_Nch_nomu = fs->make<TH2D>("R2-Nch-nomu-b-jets", "R2-Nch-nomu-b-jets", 51, 0, 1.02, 45, 0, 45);
+  _h_R3_nomu = fs->make<TH1D>("R3-nomu-b-jets", "R3-nomu-b-jets", 51, 0, 1.02);
+  _h_R3_Nch_nomu = fs->make<TH2D>("R3-Nch-nomu-b-jets", "R3-Nch-nomu-b-jets", 51, 0, 1.02, 45, 0, 45);
+  _h_D0Mass = fs->make<TH1D>("D0Mass-b-jets", "D0Mass-b-jets", 400, 0, 8);
+  _h_D0p = fs->make<TH1D>("D0p-b-jets", "D0p-b-jets", 150, 0, 300);
+  _h_D0pT = fs->make<TH1D>("D0pT-b-jets", "D0pT-b-jets", 100, 0, 400);
+  _h_D0eta = fs->make<TH1D>("D0eta-b-jets", "D0eta-b-jets", 60, -3, 3);
+  _h_BMomentum_unbiased = fs->make<TH1D>("BMomentum-nobias-b-jets", "BMomentum-nobias-b-jets", 100, 0, 400);
+  _h_BMass_unbiased = fs->make<TH1D>("BMass-nobias-b-jets", "BMass-nobias-b-jets", 100, 0., 10.);
+  _h_mup_unbiased = fs->make<TH1D>("Muonp-nobias-b-jets", "Muonp-nobias-b-jets", 150, 0, 300);
+  _h_D0MassClean = fs->make<TH1D>("D0MassClean-b-jets", "D0MassClean-b-jets", 400, 0, 8);
+  _h_D0pClean = fs->make<TH1D>("D0pClean-b-jets", "D0pClean-b-jets", 150, 0, 300);
+  _h_D0pTClean = fs->make<TH1D>("D0pTClean-b-jets", "D0pTClean-b-jets", 100, 0, 400);
+  _h_D0etaClean = fs->make<TH1D>("D0etaClean-b-jets", "D0etaClean-b-jets", 60, -3, 3);
+  _h_BMomentum = fs->make<TH1D>("BMomentum-b-jets", "BMomentum-b-jets", 100, 0, 400);
+  _h_BMass = fs->make<TH1D>("BMass-b-jets", "BMass-b-jets", 100, 0, 10.);
+  _h_mup = fs->make<TH1D>("Muonp-b-jets", "Muonp-b-jets", 150, 0, 300);
+  _h_BMomentumClean = fs->make<TH1D>("BMomentum-D0cut-b-jets", "BMomentum-D0cut-b-jets", 100, 0, 400);
+  _h_BMassClean = fs->make<TH1D>("BMass-D0cut-b-jets", "BMass-D0cut-b-jets", 100, 0., 10.);
 
-      _t_bjets = fs->make<TTree>("b-jets", "b-jets", 1);
-      _t_bjets->Branch("Weight", &weight, "Weight/D");
-      _t_bjets->Branch("CSV", &_CSV, "CSV/D");
-      _t_bjets->Branch("vecP", _vecP, "vecP[4]/D");
-      _t_bjets->Branch("Nch", &_Nch, "Nch/I");
-      _t_bjets->Branch("Sump", &_sump, "Sump/D");
-      _t_bjets->Branch("Tr1", _tr1, "Tr1[4]/D");
-      _t_bjets->Branch("Tr2", _tr2, "Tr2[4]/D");
-      _t_bjets->Branch("Tr3", _tr3, "Tr3[4]/D");
-    }
+  _t_bjets = fs->make<TTree>("b-jets", "b-jets", 1);
+  _t_bjets->Branch("Weight", &weight, "Weight/D");
+  _t_bjets->Branch("CSV", &_CSV, "CSV/D");
+  _t_bjets->Branch("vecP", _vecP, "vecP[4]/D");
+  _t_bjets->Branch("Nch", &_Nch, "Nch/I");
+  _t_bjets->Branch("Sump", &_sump, "Sump/D");
+  _t_bjets->Branch("Tr1", _tr1, "Tr1[4]/D");
+  _t_bjets->Branch("Tr2", _tr2, "Tr2[4]/D");
+  _t_bjets->Branch("Tr3", _tr3, "Tr3[4]/D");
 
-  // ------------ method called once each job just after ending the event loop  ------------
+  _t_D0window_bjets = fs->make<TTree>("D0window-b-jets", "D0window-b-jets", 1);
+  _t_D0window_bjets->Branch("Weight", &weight, "Weight/D");
+  _t_D0window_bjets->Branch("GenId", &_genId, "GenId/D");
+  _t_D0window_bjets->Branch("CSVdisc", &_CSVdisc, "CSVdisc/D");
+  _t_D0window_bjets->Branch("D0mass", &_D0mass, "D0mass/D");
+  _t_D0window_bjets->Branch("Bmomentum", &_Bmomentum, "Bmomentum/D");
+  _t_D0window_bjets->Branch("Bmass", &_Bmass, "Bmass/D");
+  _t_D0window_bjets->Branch("Mup", &_Mup, "Mup/D");
+  _t_D0window_bjets->Branch("R1", &_R1, "R1/D");
+  _t_D0window_bjets->Branch("R2", &_R2, "R2/D");
+  _t_D0window_bjets->Branch("R3", &_R3, "R3/D");
+  _t_D0window_bjets->Branch("Nch", &_Ntr, "Nch/D");
+  _t_D0window_bjets->Branch("SumpT", &_sumpT, "SumpT/D");
+  _t_D0window_bjets->Branch("AveragepT", &_averpT, "SumpT/D");
+  _t_D0window_bjets->Branch("R1_nomu", &_R1_nomu, "R1_nomu/D");
+  _t_D0window_bjets->Branch("R2_nomu", &_R2_nomu, "R2_nomu/D");
+  _t_D0window_bjets->Branch("R3_nomu", &_R3_nomu, "R3_nomu/D");
+
+  _t_D0KVFwindow_bjets = fs->make<TTree>("D0KVFwindow-b-jets", "D0KVFwindow-b-jets", 1);
+  _t_D0KVFwindow_bjets->Branch("Weight", &weight, "Weight/D");
+  _t_D0KVFwindow_bjets->Branch("GenId", &_genId_KVF, "GenId/D");
+  _t_D0KVFwindow_bjets->Branch("CSVdisc", &_CSVdisc_KVF, "CSVdisc/D");
+  _t_D0KVFwindow_bjets->Branch("D0mass", &_D0mass_KVF, "D0mass/D");
+  _t_D0KVFwindow_bjets->Branch("Bmomentum", &_Bmomentum_KVF, "Bmomentum/D");
+  _t_D0KVFwindow_bjets->Branch("Bmass", &_Bmass_KVF, "Bmass/D");
+  _t_D0KVFwindow_bjets->Branch("Mup", &_Mup_KVF, "Mup/D");
+  _t_D0KVFwindow_bjets->Branch("R1", &_R1_KVF, "R1/D");
+  _t_D0KVFwindow_bjets->Branch("R2", &_R2_KVF, "R2/D");
+  _t_D0KVFwindow_bjets->Branch("R3", &_R3_KVF, "R3/D");
+  _t_D0KVFwindow_bjets->Branch("Nch", &_Ntr_KVF, "Nch/D");
+  _t_D0KVFwindow_bjets->Branch("SumpT", &_sumpT_KVF, "SumpT/D");
+  _t_D0KVFwindow_bjets->Branch("AveragepT", &_averpT_KVF, "SumpT/D");
+  _t_D0KVFwindow_bjets->Branch("R1_nomu", &_R1_nomu_KVF, "R1_nomu/D");
+  _t_D0KVFwindow_bjets->Branch("R2_nomu", &_R2_nomu_KVF, "R2_nomu/D");
+  _t_D0KVFwindow_bjets->Branch("R3_nomu", &_R3_nomu_KVF, "R3_nomu/D");
+}
+
+// ------------ method called once each job just after ending the event loop  ------------
   void 
-    MuTagForRivet::endJob() 
-    {
+MuTagForRivet::endJob() 
+{
 
-      // std::cout << "Closing histos..." << std::endl;
-    }
+  // std::cout << "Closing histos..." << std::endl;
+}
 
-  // ------------ method called when starting to processes a run  ------------
+// ------------ method called when starting to processes a run  ------------
   void 
-    MuTagForRivet::beginRun(edm::Run const&, edm::EventSetup const&)
-    {
-    }
+MuTagForRivet::beginRun(edm::Run const&, edm::EventSetup const&)
+{
+}
 
-  // ------------ method called when ending the processing of a run  ------------
+// ------------ method called when ending the processing of a run  ------------
   void 
-    MuTagForRivet::endRun(edm::Run const&, edm::EventSetup const&)
-    {
-    }
+MuTagForRivet::endRun(edm::Run const&, edm::EventSetup const&)
+{
+}
 
-  // ------------ method called when starting to processes a luminosity block  ------------
+// ------------ method called when starting to processes a luminosity block  ------------
   void 
-    MuTagForRivet::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
-    {
-    }
+MuTagForRivet::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
+{
+}
 
-  // ------------ method called when ending the processing of a luminosity block  ------------
+// ------------ method called when ending the processing of a luminosity block  ------------
   void 
-    MuTagForRivet::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
-    {
-    }
+MuTagForRivet::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
+{
+}
 
-  // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
-  void
-    MuTagForRivet::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
-      // The following says we do not know what parameters are allowed so do no validation
-      // Please change this to state exactly what you do use, even if it is no parameters
-      edm::ParameterSetDescription desc;
-      desc.setUnknown();
-      descriptions.addDefault(desc);
-    }
+// ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
+void
+MuTagForRivet::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+  // The following says we do not know what parameters are allowed so do no validation
+  // Please change this to state exactly what you do use, even if it is no parameters
+  edm::ParameterSetDescription desc;
+  desc.setUnknown();
+  descriptions.addDefault(desc);
+}
 
-  // define this as a plug-in
-  DEFINE_FWK_MODULE(MuTagForRivet);
+// define this as a plug-in
+DEFINE_FWK_MODULE(MuTagForRivet);
 
