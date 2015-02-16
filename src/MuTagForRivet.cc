@@ -576,7 +576,8 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         const reco::Track& Track1 = **iter1;
 
         if ((**iter1).pt() < 4.) continue;
-        if (!Track1.quality(reco::Track::highPurity)) continue;
+        // if (!Track1.quality(reco::Track::highPurity)) continue; FIXME
+        if (!Track1.quality(reco::Track::tight)) continue;
 
         // look for muons 
         for (unsigned int iMuCand = 0; iMuCand < myPFmu.size(); iMuCand++) {
