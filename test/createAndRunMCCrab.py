@@ -14,6 +14,24 @@ if not options.type or not options.type.lower() == "d0" and not options.type.low
 datasets = [
     ["\'/TTJets_FullLeptMGDecays_8TeV-madgraph/verdier-TTbar-dilept_05Oct13-v3-80a352c723b543c465f0aa98c4bbef52/USER\'", "TTJets_FullLeptMGDecays_05Oct13"],
     ["\'/TTJets_SemiLeptMGDecays_8TeV-madgraph/verdier-TTbar-semilept_05Oct13-v3-80a352c723b543c465f0aa98c4bbef52/USER\'", "TTJets_SemiLeptMGDecays_05Oct13"],
+    ["\'/W1JetsToLNu_TuneZ2Star_8TeV-madgraph/verdier-W1JetsToLNu_10Oct13-v3-80a352c723b543c465f0aa98c4bbef52/USER\'", "W1JetsToLNu_10Oct13"],
+    ["\'/W2JetsToLNu_TuneZ2Star_8TeV-madgraph/verdier-W2JetsToLNu_10Oct13-v3-80a352c723b543c465f0aa98c4bbef52/USER\'", "W2JetsToLNu_10Oct13"],
+    ["\'/W3JetsToLNu_TuneZ2Star_8TeV-madgraph/verdier-W3JetsToLNu_10Oct13-v3-80a352c723b543c465f0aa98c4bbef52/USER\'", "W3JetsToLNu_10Oct13"],
+    ["\'/W4JetsToLNu_TuneZ2Star_8TeV-madgraph/verdier-W4JetsToLNu_10Oct13-v3-80a352c723b543c465f0aa98c4bbef52/USER\'", "W4JetsToLNu_10Oct13"],
+    ["\'/WW_TuneZ2star_8TeV_pythia6_tauola/verdier-WW-incl_08Oct13-v3-80a352c723b543c465f0aa98c4bbef52/USER\'", "WW-incl_08Oct13"],
+    ["\'/WZ_TuneZ2star_8TeV_pythia6_tauola/verdier-WZ-incl_08Oct13-v3-80a352c723b543c465f0aa98c4bbef52/USER\'", "WZ-incl_08Oct13"],
+    ["\'/ZZ_TuneZ2star_8TeV_pythia6_tauola/verdier-ZZ-incl_08Oct13-v3-80a352c723b543c465f0aa98c4bbef52/USER\'", "ZZ-incl_08Oct13"],
+    ["\'/T_s-channel_TuneZ2star_8TeV-powheg-tauola/verdier-T_s-channel_09Oct13-v3-80a352c723b543c465f0aa98c4bbef52/USER\'", "T_s-channel_09Oct13"],
+    ["\'/T_t-channel_TuneZ2star_8TeV-powheg-tauola/verdier-T_t-channel_09Oct13-v3-80a352c723b543c465f0aa98c4bbef52/USER\'", "T_t-channel_09Oct13"],
+    ["\'/T_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola/verdier-T_tW-channel_09Oct13-v3-80a352c723b543c465f0aa98c4bbef52/USER\'", "T_tW-channel_09Oct13"],
+    ["\'/Tbar_s-channel_TuneZ2star_8TeV-powheg-tauola/verdier-Tbar_s-channel_09Oct13-v3-80a352c723b543c465f0aa98c4bbef52/USER\'", "Tbar_s-channel_09Oct13"],
+    ["\'/Tbar_t-channel_TuneZ2star_8TeV-powheg-tauola/verdier-Tbar_t-channel_09Oct13-v3-80a352c723b543c465f0aa98c4bbef52/USER\'", "Tbar_t-channel_09Oct13"],
+    ["\'/Tbar_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola/verdier-Tbar_tW-channel_09Oct13-v3-80a352c723b543c465f0aa98c4bbef52/USER\'", "Tbar_tW-channel_09Oct13"],
+    ["\'/DY1JetsToLL_M-50_TuneZ2Star_8TeV-madgraph/verdier-DY1JetsToLL_M-50_09Oct13-v3-80a352c723b543c465f0aa98c4bbef52/USER\'", "DY1JetsToLL_M-50_09Oct13"],
+    ["\'/DY2JetsToLL_M-50_TuneZ2Star_8TeV-madgraph/verdier-DY2JetsToLL_M-50_09Oct13-v3-80a352c723b543c465f0aa98c4bbef52/USER\'", "DY2JetsToLL_M-50_09Oct13"],
+    ["\'/DY3JetsToLL_M-50_TuneZ2Star_8TeV-madgraph/verdier-DY3JetsToLL_M-50_09Oct13-v3-80a352c723b543c465f0aa98c4bbef52/USER\'", "DY3JetsToLL_M-50_09Oct13"],
+    ["\'/DY4JetsToLL_M-50_TuneZ2Star_8TeV-madgraph/verdier-DY4JetsToLL_M-50_09Oct13-v3-80a352c723b543c465f0aa98c4bbef52/USER\'", "DY4JetsToLL_M-50_09Oct13"],
+
     ]
 
 # Get username address

@@ -111,10 +111,14 @@ class MuTagForRivet_Mu : public edm::EDAnalyzer {
     TH1D* _h_CSVSelJets;
     TH1D* _h_pTSelJets;
     TH1D* _h_etaSelJets;
+    TH2D* _h_eta_pt_tr;
+    TH2D* _h_d0_pt_tr;
+    TH2D* _h_dz_pt_tr;
     TH1D* _h_etach;
     TH1D* _h_pTch;
 
     TH1D* _h_Nch;
+    TH2D* _h_Nch_nVtx;
     TH1D* _h_sump;
     TLorentzVector _sumpvec;
     TH1D* _h_sumpvec;
@@ -335,6 +339,7 @@ MuTagForRivet_Mu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   int n45jet = 0;
   int n35jet = 0;
   int n20jet = 0;
+  int n30jet = 0;
 
   for (unsigned int iJet = 0; iJet < jet.size(); ++iJet) {
     if (jet[iJet].pt() < 20.) continue;
@@ -342,10 +347,12 @@ MuTagForRivet_Mu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
     if (jet[iJet].pt() > 55.) ++n55jet;
     if (jet[iJet].pt() > 45.) ++n45jet;
     if (jet[iJet].pt() > 35.) ++n35jet;
+    if (jet[iJet].pt() > 30.) ++n30jet;
     ++n20jet;
   }
 
-  if (n55jet > 0 && n45jet > 1 && n35jet > 2 && n20jet > 3) hasGoodJets = true;
+  // if (n55jet > 0 && n45jet > 1 && n35jet > 2 && n20jet > 3) hasGoodJets = true; FIXME
+  if (n30jet > 3) hasGoodJets = true;
 
   if (hasGoodLeptons && hasGoodJets) isGoodEvt = true;
 
@@ -480,8 +487,9 @@ MuTagForRivet_Mu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
         const reco::Track& Track1 = **iter1;
 
         if ((**iter1).pt() < 4.) continue;
-        // if (!Track1.quality(reco::Track::highPurity)) continue; FIXME
+        // if (!Track1.quality(reco::Track::highPurity)) continue; // FIXME
         if (!Track1.quality(reco::Track::tight)) continue;
+        if (fabs((**iter1).dxy()) > 0.5) continue; //FIXME
 
         // look for muons 
         for (unsigned int iMuCand = 0; iMuCand < myPFmu.size(); iMuCand++) {
@@ -528,9 +536,14 @@ MuTagForRivet_Mu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
         const reco::Track& Track1 = **iter1;
 
-        if ((**iter1).pt() < 4.) continue;
-        // if (!Track1.quality(reco::Track::highPurity)) continue; FIXME
+        // if ((**iter1).pt() < 4.) continue; FIXME
+        if ((**iter1).pt() < 0.5) continue;
+        // if (!Track1.quality(reco::Track::highPurity)) continue; // FIXME
         if (!Track1.quality(reco::Track::tight)) continue;
+        if (fabs((**iter1).dxy()) > 0.5) continue; //FIXME
+        _h_eta_pt_tr->Fill((**iter1).eta(), (**iter1).pt());
+        _h_d0_pt_tr->Fill((**iter1).dxy(), (**iter1).pt());
+        _h_dz_pt_tr->Fill((**iter1).dz(), (**iter1).pt());
 
         // look for muons and electrons
         bool trCandIsMu = false;
@@ -721,9 +734,11 @@ MuTagForRivet_Mu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
           const reco::Track& Track2 = **iter2;
 
           if (iter2 == iter1) continue;
-          if ((**iter2).pt() < 4.) continue;
-          // if (!Track2.quality(reco::Track::highPurity)) continue; FIXME
+          // if ((**iter2).pt() < 4.) continue; FIXME
+          if ((**iter2).pt() < 0.5) continue;
+          // if (!Track2.quality(reco::Track::highPurity)) continue; // FIXME
           if (!Track2.quality(reco::Track::tight)) continue;
+          if (fabs((**iter2).dxy()) > 0.5) continue; //FIXME
 
           bool tr2CandIsMu = false;
           for (unsigned int iMuCand = 0; iMuCand < myPFmu.size(); iMuCand++) {
@@ -735,6 +750,7 @@ MuTagForRivet_Mu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
               break;
             }
           }
+          /*
           bool tr2CandIsEl = false;
           for (unsigned int iElCand = 0; iElCand < myPFel.size(); iElCand++) {
             TLorentzVector p_ElCand, p_trCand;
@@ -745,8 +761,9 @@ MuTagForRivet_Mu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
               break;
             }
           }
+          */
 
-          if (!trCandIsEl && !trCandIsMu && !tr2CandIsMu && !tr2CandIsEl) {
+          if (!trCandIsMu && !tr2CandIsMu) {
             reco::TransientTrack tr1 = (*theB).build((**iter1));
             reco::TransientTrack tr2 = (*theB).build((**iter2));
 
@@ -869,11 +886,12 @@ MuTagForRivet_Mu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
                 } // D0 L3D/SigmaL3D cut
               } // D0 chi2 cut
             } // D0 tree vertex is valid
-          } // exclude e/mu for D0 reco with KVF
+          } // exclude mu for D0 reco with KVF
         } // 2nd jet's track loop
      } // 1st jet's track loop
 
       _h_Nch->Fill((double)_Nch);
+      _h_Nch_nVtx->Fill((double)_Nch, (double)vtx.size());
       _h_sump->Fill(_sump);
       _h_sumpvec->Fill(_sumpvec.P());
       if (p_trCand[0].M() > 1e-10) {
@@ -1061,31 +1079,35 @@ MuTagForRivet_Mu::beginJob()
   _h_CSVSelJets = fs->make<TH1D>("CSV-b-jets", "CSV-b-jets", 100, 0., 1.);
   _h_pTSelJets = fs->make<TH1D>("TransverseMomentum-b-jets", "TransverseMomentum-b-jets", 100, 0., 500.);
   _h_etaSelJets = fs->make<TH1D>("Eta-b-jets", "Eta-b-jets", 60, -3., 3.);
+  _h_eta_pt_tr = fs->make<TH2D>("Eta-pT-AllTracks-b-jets","Eta-pT-AllTracks-b-jets", 60, -3, 3, 100, 0, 100);
+  _h_d0_pt_tr = fs->make<TH2D>("d0-pT-AllTracks-b-jets","d0-pT-AllTracks-b-jets", 100, -0.5, 0.5, 100, 0, 100);
+  _h_dz_pt_tr = fs->make<TH2D>("dz-pT-AllTracks-b-jets","dz-pT-AllTracks-b-jets", 100, -20., 20., 100, 0, 100);
   _h_etach = fs->make<TH1D>("Etach-b-jets", "Etach-b-jets", 60, -3., 3.);
   _h_pTch = fs->make<TH1D>("TransverseMomentumch-b-jets", "TransverseMomentumch-b-jets", 100, 0., 100.);
 
   _h_Nch = fs->make<TH1D>("Nch-b-jets", "Nch-b-jets", 45, 0, 45);
+  _h_Nch_nVtx = fs->make<TH2D>("Nch-NPrimaryVtx-b-jets", "Nch-NPrimaryVtx-b-jets", 45, 0., 45., 50, 0., 50.);
   _h_sump = fs->make<TH1D>("Sump-b-jets", "Sump-b-jets", 200, 0, 1000);
   _h_sumpvec = fs->make<TH1D>("VectorialSump-b-jets", "VectorialSump-b-jets", 300, 0, 1500);
   _h_sum1p = fs->make<TH1D>("Highestp-b-jets", "Highestp-b-jets", 150, 0, 300);
   _h_sum2p = fs->make<TH1D>("Sum2p-b-jets", "Sum2p-b-jets", 150, 0, 300);
   _h_sum3p = fs->make<TH1D>("Sum3p-b-jets", "Sum3p-b-jets", 150, 0, 300);
   _h_mass3 = fs->make<TH1D>("Mass3-b-jets", "Mass3-b-jets", 400, 0., 10.);  
-  _h_R1 = fs->make<TH1D>("R1-b-jets", "R1-b-jets", 51, 0, 1.02);
+  _h_R1 = fs->make<TH1D>("R1-b-jets", "R1-b-jets", 102, 0, 1.02);
   _h_R1_Nch = fs->make<TH2D>("R1-Nch-b-jets", "R1-Nch-b-jets", 51, 0, 1.02, 45, 0, 45);
-  _h_R2 = fs->make<TH1D>("R2-b-jets", "R2-b-jets", 51, 0, 1.02);
+  _h_R2 = fs->make<TH1D>("R2-b-jets", "R2-b-jets", 102, 0, 1.02);
   _h_R2_Nch = fs->make<TH2D>("R2-Nch-b-jets", "R2-Nch-b-jets", 51, 0, 1.02, 45, 0, 45);
-  _h_R3 = fs->make<TH1D>("R3-b-jets", "R3-b-jets", 51, 0, 1.02);
+  _h_R3 = fs->make<TH1D>("R3-b-jets", "R3-b-jets", 102, 0, 1.02);
   _h_R3_Nch = fs->make<TH2D>("R3-Nch-b-jets", "R3-Nch-b-jets", 51, 0, 1.02, 45, 0, 45);
   _h_sum1p_nomu = fs->make<TH1D>("Highestp-nomu-b-jets", "Highestp-nomu-b-jets", 150, 0, 300);
   _h_sum2p_nomu = fs->make<TH1D>("Sum2p-nomu-b-jets", "Sum2p-nomu-b-jets", 150, 0, 300);
   _h_sum3p_nomu = fs->make<TH1D>("Sum3p-nomu-b-jets", "Sum3p-nomu-b-jets", 150, 0, 300);
   _h_mass3_nomu = fs->make<TH1D>("Mass3-nomu-b-jets", "Mass3-nomu-b-jets", 400, 0., 10.);  
-  _h_R1_nomu = fs->make<TH1D>("R1-nomu-b-jets", "R1-nomu-b-jets", 51, 0, 1.02);
+  _h_R1_nomu = fs->make<TH1D>("R1-nomu-b-jets", "R1-nomu-b-jets", 102, 0, 1.02);
   _h_R1_Nch_nomu = fs->make<TH2D>("R1-Nch-nomu-b-jets", "R1-Nch-nomu-b-jets", 51, 0, 1.02, 45, 0, 45);
-  _h_R2_nomu = fs->make<TH1D>("R2-nomu-b-jets", "R2-nomu-b-jets", 51, 0, 1.02);
+  _h_R2_nomu = fs->make<TH1D>("R2-nomu-b-jets", "R2-nomu-b-jets", 102, 0, 1.02);
   _h_R2_Nch_nomu = fs->make<TH2D>("R2-Nch-nomu-b-jets", "R2-Nch-nomu-b-jets", 51, 0, 1.02, 45, 0, 45);
-  _h_R3_nomu = fs->make<TH1D>("R3-nomu-b-jets", "R3-nomu-b-jets", 51, 0, 1.02);
+  _h_R3_nomu = fs->make<TH1D>("R3-nomu-b-jets", "R3-nomu-b-jets", 102, 0, 1.02);
   _h_R3_Nch_nomu = fs->make<TH2D>("R3-Nch-nomu-b-jets", "R3-Nch-nomu-b-jets", 51, 0, 1.02, 45, 0, 45);
   _h_D0Mass = fs->make<TH1D>("D0Mass-b-jets", "D0Mass-b-jets", 400, 0, 8);
   _h_D0p = fs->make<TH1D>("D0p-b-jets", "D0p-b-jets", 150, 0, 300);

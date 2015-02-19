@@ -736,6 +736,7 @@ D0ForRivet_Mu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                 break;
               }
             }
+            /*
             bool tr2CandIsEl = false;
             for (unsigned int iElCand = 0; iElCand < myPFel.size(); iElCand++) {
               TLorentzVector p_ElCand, p_trCand;
@@ -746,8 +747,9 @@ D0ForRivet_Mu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                 break;
               }
             }
+            */
 
-            if (!trCandIsEl && !trCandIsMu && !tr2CandIsMu && !tr2CandIsEl) {
+            if (!trCandIsMu && !tr2CandIsMu) {
               reco::TransientTrack tr1 = (*theB).build((**iter1));
               reco::TransientTrack tr2 = (*theB).build((**iter2));
 
@@ -867,7 +869,7 @@ D0ForRivet_Mu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                 } // D0 chi2 cut
               } // D0 tree vertex is valid
 
-            } // exclude e/mu for D0 reco with KVF
+            } // exclude mu for D0 reco with KVF
 
           } // 2nd jet's track loop
         } // 1st jet's track loop
