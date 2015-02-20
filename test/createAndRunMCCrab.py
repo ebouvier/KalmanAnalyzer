@@ -31,7 +31,9 @@ datasets = [
     ["\'/DY2JetsToLL_M-50_TuneZ2Star_8TeV-madgraph/verdier-DY2JetsToLL_M-50_09Oct13-v3-80a352c723b543c465f0aa98c4bbef52/USER\'", "DY2JetsToLL_M-50_09Oct13"],
     ["\'/DY3JetsToLL_M-50_TuneZ2Star_8TeV-madgraph/verdier-DY3JetsToLL_M-50_09Oct13-v3-80a352c723b543c465f0aa98c4bbef52/USER\'", "DY3JetsToLL_M-50_09Oct13"],
     ["\'/DY4JetsToLL_M-50_TuneZ2Star_8TeV-madgraph/verdier-DY4JetsToLL_M-50_09Oct13-v3-80a352c723b543c465f0aa98c4bbef52/USER\'", "DY4JetsToLL_M-50_09Oct13"],
-
+    ["\'/TTWJets_8TeV-madgraph/verdier-TTWJets_08Oct13-v3-80a352c723b543c465f0aa98c4bbef52/USER\'", "TTWJets_08Oct13"],
+    ["\'/TTWWJets_8TeV-madgraph/verdier-TTWWJets_08Oct13-v3-80a352c723b543c465f0aa98c4bbef52/USER\'", "TTWWJets_08Oct13"],
+    ["\'/TTZJets_8TeV-madgraph_v2/verdier-TTZJets_08Oct13-v3-80a352c723b543c465f0aa98c4bbef52/USER\'", "TTZJets_08Oct13"],
     ]
 
 # Get username address

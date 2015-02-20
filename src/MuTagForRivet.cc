@@ -132,6 +132,8 @@ class MuTagForRivet : public edm::EDAnalyzer {
     TH2D* _h_eta_pt_tr;
     TH2D* _h_d0_pt_tr;
     TH2D* _h_dz_pt_tr;
+    TH2D* _h_dPV_pT_tr;
+    TH2D* _h_L3D_pT_tr;
     TH1D* _h_etach;
     TH1D* _h_pTch;
 
@@ -432,6 +434,12 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       std::cout << " WARNING : no PV for this event ... " << std::endl;
       return;
     }
+    /* check the order in the collection
+    if (vtx.size() > 1) {
+      std::cout << "nTracks for 1st vertex = " << vtx[0].nTracks() << std::endl; 
+      std::cout << "nTracks for 2nd vertex = " << vtx[1].nTracks() << std::endl; 
+    }
+    */
 
     double vtxWeight[45] = {23./16.24817, 157./96.10187, 608./389.7191, 1653./1092.023, 3518./2428.246, 6185./4495.628, 9848./7287.974, 13907./10632.4, 17801./14183.71, 21165./17578., 24344./20656.52, 26132./22919.96, 26440./24470.79, 26610./25254.18, 25605./25303.6, 23974./24804.25, 21937./23480.46, 19587./21797.11, 17451./19784.64, 14764./17591.69, 12440./15221.65, 10121./12837., 8188./10599.46, 6449./8565.719, 4873./6746.303, 3690./5220.74, 2741./3919.616, 1977./2855.812, 1451./2064.941, 990./1440.364, 656./1021.42, 479./686.967, 315./451.8202, 210./290.9677, 140./184.5276, 71./118.4836, 72./73.5648, 41./44.23643, 23./26.39862, 13./16.03296, 7./9.068202, 10./6.257565, 4./3.187427, 1./1.576181, 1./1.232338};
     if (vtx.size() < 46)
@@ -585,7 +593,6 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         if ((**iter1).pt() < 4.) continue;
         // if (!Track1.quality(reco::Track::highPurity)) continue; // FIXME
         if (!Track1.quality(reco::Track::tight)) continue;
-        if (fabs((**iter1).dxy()) > 0.5) continue; //FIXME
 
         // look for muons 
         for (unsigned int iMuCand = 0; iMuCand < myPFmu.size(); iMuCand++) {
@@ -641,7 +648,23 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         if ((**iter1).pt() < 0.5) continue;
         // if (!Track1.quality(reco::Track::highPurity)) continue; // FIXME
         if (!Track1.quality(reco::Track::tight)) continue;
-        if (fabs((**iter1).dxy()) > 0.5) continue; //FIXME
+        double sigmax_vtx_tr = sqrt(pow(vtx[0].xError(), 2.));
+        double sigmay_vtx_tr = sqrt(pow(vtx[0].yError(), 2.));
+        double sigmaz_vtx_tr = sqrt(pow(vtx[0].zError(), 2.));
+        double tr_interx = pow(((**iter1).px()/gSigmaPi)/sigmax_vtx_tr, 2.);
+        double tr_intery = pow(((**iter1).py()/gSigmaPi)/sigmay_vtx_tr, 2.);
+        double tr_interz = pow(((**iter1).pz()/gSigmaPi)/sigmaz_vtx_tr, 2.);
+        double tr_sigmaL3D = pow(tr_interx + tr_intery + tr_interz, -0.5);
+        double tr_part1 = ((**iter1).px()/gSigmaPi)*pow(tr_sigmaL3D/sigmax_vtx_tr,2.)*((**iter1).vx() - vtx[0].x());
+        double tr_part2 = ((**iter1).py()/gSigmaPi)*pow(tr_sigmaL3D/sigmay_vtx_tr,2.)*((**iter1).vy() - vtx[0].y());
+        double tr_part3 = ((**iter1).pz()/gSigmaPi)*pow(tr_sigmaL3D/sigmaz_vtx_tr,2.)*((**iter1).vz() - vtx[0].z());
+        double tr_L3D = fabs(tr_part1 + tr_part2 + tr_part3);
+        double d_v0_tr = pow(vtx[0].x()-(**iter1).vx(), 2.) + pow(vtx[0].y()-(**iter1).vy(), 2.) + pow(vtx[0].z()-(**iter1).vz(), 2.);
+        if (d_v0_tr > 0) d_v0_tr = sqrt(d_v0_tr);
+        else             d_v0_tr = 0.;
+        if (d_v0_tr > 0.25) continue; //FIXME
+        _h_dPV_pT_tr->Fill(d_v0_tr, (**iter1).pt(), weight);
+        _h_L3D_pT_tr->Fill(tr_L3D, (**iter1).pt(), weight);
         _h_eta_pt_tr->Fill((**iter1).eta(), (**iter1).pt(), weight);
         _h_d0_pt_tr->Fill((**iter1).dxy(), (**iter1).pt(), weight);
         _h_dz_pt_tr->Fill((**iter1).dz(), (**iter1).pt(), weight);
@@ -842,7 +865,11 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           if ((**iter2).pt() < 0.5) continue;
           // if (!Track2.quality(reco::Track::highPurity)) continue; // FIXME
           if (!Track2.quality(reco::Track::tight)) continue;
-          if (fabs((**iter2).dxy()) > 0.5) continue; //FIXME
+          double d_v0_tr2 = pow(vtx[0].x()-(**iter2).vx(), 2.) + pow(vtx[0].y()-(**iter2).vy(), 2.) + pow(vtx[0].z()-(**iter2).vz(), 2.);
+          if (d_v0_tr2 > 0) d_v0_tr2 = sqrt(d_v0_tr2);
+          else             d_v0_tr2 = 0.;
+          if (d_v0_tr2 > 0.25) continue; //FIXME
+
 
           bool tr2CandIsMu = false;
           for (unsigned int iMuCand = 0; iMuCand < myPFmu.size(); iMuCand++) {
@@ -1276,6 +1303,9 @@ MuTagForRivet::beginJob()
   _h_eta_pt_tr = fs->make<TH2D>("Eta-pT-AllTracks-b-jets","Eta-pT-AllTracks-b-jets", 60, -3, 3, 100, 0, 100);
   _h_d0_pt_tr = fs->make<TH2D>("d0-pT-AllTracks-b-jets","d0-pT-AllTracks-b-jets", 100, -0.5, 0.5, 100, 0, 100);
   _h_dz_pt_tr = fs->make<TH2D>("dz-pT-AllTracks-b-jets","dz-pT-AllTracks-b-jets", 100, -20., 20., 100, 0, 100);
+  _h_dPV_pT_tr =  fs->make<TH2D>("DistanceToPV-pT-Tracks-b-jets","DistanceToPV-pT-Tracks-b-jets", 1000, 0., 1., 100, 0, 100);
+  _h_L3D_pT_tr =  fs->make<TH2D>("L3D-pT-Tracks-b-jets","L3D-pT-Tracks-b-jets", 1000, 0., 1e-7, 100, 0, 100);
+
   _h_etach = fs->make<TH1D>("Etach-b-jets", "Etach-b-jets", 60, -3., 3.);
   _h_pTch = fs->make<TH1D>("TransverseMomentumch-b-jets", "TransverseMomentumch-b-jets", 100, 0., 100.);
 

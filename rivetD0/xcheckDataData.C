@@ -212,7 +212,7 @@ void cms_style(bool isData = true){
 }
 
 //---------------------------------------------------------------
-void plotHisto(TString dateOld, TString dateNew, bool inBatch, TFile* fi_old, TFile* fi_new, TString h_name, TString xtitle, double xmin, double xmax)
+void plotHisto(TString dateOld, TString dateNew, bool inBatch, TFile* fi_old, TFile* fi_new, TString h_name, TString xtitle, double xmin, double xmax, bool right)
 //---------------------------------------------------------------
 {
   TStyle* my_style = createMyStyle();
@@ -226,6 +226,7 @@ void plotHisto(TString dateOld, TString dateNew, bool inBatch, TFile* fi_old, TF
   
   TH1D* h_old = (TH1D*)fi_old->Get("muTagBasedSelection/"+h_name+"-b-jets");
   TH1D* h_new = (TH1D*)fi_new->Get("muTagBasedSelection/"+h_name+"-b-jets");
+  if (h_name.Contains("R1") || h_name.Contains("R2") || h_name.Contains("R3")) h_new->Rebin(2.); //FIXME 
   h_old->Scale(h_new->Integral()/h_old->Integral());
   h_style(h_old, kBlue, kBlue, 4000, -1111., -1111., 510, 510, 24, kBlue, 1.2, 0, xtitle);
   h_style(h_new, kRed, kRed, 4000, -1111., -1111., 510, 510, 20, kRed, 1.2, 0, xtitle);
@@ -235,20 +236,29 @@ void plotHisto(TString dateOld, TString dateNew, bool inBatch, TFile* fi_old, TF
   if (h_new->GetMaximum() < h_old->GetMaximum()) {
     h_old->Draw("ep");
     if (xmin < xmax) h_old->GetXaxis()->SetRangeUser(xmin, xmax);
-    h_new->Draw("epsame");
   }
   else {
     h_new->Draw("ep");
     if (xmin < xmax) h_new->GetXaxis()->SetRangeUser(xmin, xmax);
-    h_old->Draw("epsame");
-    h_new->Draw("epsame");
   }
-  TLegend *leg = new TLegend(0.64,0.7,0.93,0.88);
-  leg_style(leg, 12);
-  leg->AddEntry(h_old, dateOld, "LP");
-  leg->AddEntry(h_new, dateNew, "LP");
-  leg->SetHeader("Data - Run 2012 A,B,C,D");
-  leg->Draw();
+  if (right) {
+    TLegend *leg = new TLegend(0.64,0.75,0.93,0.88);
+    leg_style(leg, 12);
+    leg->AddEntry(h_old, dateOld, "LP");
+    leg->AddEntry(h_new, dateNew, "LP");
+    leg->SetHeader("Data - Run 2012 A,B,C,D");
+    leg->Draw();
+  }
+  else {
+    TLegend *leg = new TLegend(0.2,0.75,0.49,0.88);
+    leg_style(leg, 12);
+    leg->AddEntry(h_old, dateOld, "LP");
+    leg->AddEntry(h_new, dateNew, "LP");
+    leg->SetHeader("Data - Run 2012 A,B,C,D");
+    leg->Draw();
+  }
+  h_old->Draw("epsame");
+  h_new->Draw("epsame");
   
   channel_tex->Draw("same");  
   cms_style();
@@ -272,22 +282,22 @@ void xcheckDataData_step(TString dateOld, TString dateNew, bool inBatch)
   TFile* fi_old = TFile::Open("../test/crab_results/"+dateOld+"/MuTagForRivet_Data_merged.root");
   TFile* fi_new = TFile::Open("../test/crab_results/"+dateNew+"/MuTagForRivet_Data_merged.root");
   
-  plotHisto(dateOld, dateNew, inBatch, fi_old, fi_new, "CSV", "CSV discriminant", 0., 0.);
-  plotHisto(dateOld, dateNew, inBatch, fi_old, fi_new, "TransverseMomentum", "p(jets) (GeV/c)", 0., 300.);
-  plotHisto(dateOld, dateNew, inBatch, fi_old, fi_new, "Nch", "Tracks multiplicity", 0., 50.);
-  plotHisto(dateOld, dateNew, inBatch, fi_old, fi_new, "Sump", "Scalar sum of tracks momenta (GeV/c)", 0., 400.);
-  plotHisto(dateOld, dateNew, inBatch, fi_old, fi_new, "VectorialSump", "Vectorial sum of tracks momenta (GeV/c)", 0., 400.);
-  plotHisto(dateOld, dateNew, inBatch, fi_old, fi_new, "Highestp", "Highest track momentum (GeV/c)", 0., 200.);
-  plotHisto(dateOld, dateNew, inBatch, fi_old, fi_new, "Sum2p", "Scalar sum of the 2 highest tracks momenta (GeV/c)", 0., 0.);
-  plotHisto(dateOld, dateNew, inBatch, fi_old, fi_new, "Sum3p", "Scalar sum of the 3 highest tracks momenta (GeV/c)", 0., 0.);
-  plotHisto(dateOld, dateNew, inBatch, fi_old, fi_new, "R1", "R_{1}", 0., 0.);
-  plotHisto(dateOld, dateNew, inBatch, fi_old, fi_new, "R2", "R_{2}", 0., 0.);
-  plotHisto(dateOld, dateNew, inBatch, fi_old, fi_new, "R3", "R_{3}", 0., 0.);
-  plotHisto(dateOld, dateNew, inBatch, fi_old, fi_new, "D0Mass", "m(D^{0}#rightarrow#kappa^{+}#pi^{-}) (GeV/c^{2})", 0., 0.);
-  plotHisto(dateOld, dateNew, inBatch, fi_old, fi_new, "D0p", "p(D^{0}#rightarrow#kappa^{+}#pi^{-}) (GeV/c)", 0., 0.);
-  plotHisto(dateOld, dateNew, inBatch, fi_old, fi_new, "BMomentum-nobias", "p(#kappa^{+}#pi^{-}+#mu^{-}) (GeV/c)", 0., 350.);
-  plotHisto(dateOld, dateNew, inBatch, fi_old, fi_new, "BMass-nobias", "M(#kappa^{+}#pi^{-}+#mu^{-}) (GeV/c^{2})", 0., 0.);
-  plotHisto(dateOld, dateNew, inBatch, fi_old, fi_new, "Muonp-nobias", "p(#mu^{#pm}) (GeV/c^)", 0., 0.);
+  plotHisto(dateOld, dateNew, inBatch, fi_old, fi_new, "CSV", "CSV discriminant", 0., 0., true);
+  plotHisto(dateOld, dateNew, inBatch, fi_old, fi_new, "TransverseMomentum", "p(jets) (GeV/c)", 0., 300., true);
+  plotHisto(dateOld, dateNew, inBatch, fi_old, fi_new, "Nch", "Tracks multiplicity", 0., 50., true);
+  plotHisto(dateOld, dateNew, inBatch, fi_old, fi_new, "Sump", "Scalar sum of tracks momenta (GeV/c)", 0., 400., true);
+  plotHisto(dateOld, dateNew, inBatch, fi_old, fi_new, "VectorialSump", "Vectorial sum of tracks momenta (GeV/c)", 0., 400., true);
+  plotHisto(dateOld, dateNew, inBatch, fi_old, fi_new, "Highestp", "Highest track momentum (GeV/c)", 0., 200., true);
+  plotHisto(dateOld, dateNew, inBatch, fi_old, fi_new, "Sum2p", "Scalar sum of the 2 highest tracks momenta (GeV/c)", 0., 0., true);
+  plotHisto(dateOld, dateNew, inBatch, fi_old, fi_new, "Sum3p", "Scalar sum of the 3 highest tracks momenta (GeV/c)", 0., 0., true);
+  plotHisto(dateOld, dateNew, inBatch, fi_old, fi_new, "R1", "R_{1}", 0., 0., true);
+  plotHisto(dateOld, dateNew, inBatch, fi_old, fi_new, "R2", "R_{2}", 0., 0., false);
+  plotHisto(dateOld, dateNew, inBatch, fi_old, fi_new, "R3", "R_{3}", 0., 0., false);
+  plotHisto(dateOld, dateNew, inBatch, fi_old, fi_new, "D0Mass", "m(D^{0}#rightarrow#kappa^{+}#pi^{-}) (GeV/c^{2})", 0., 0., true);
+  plotHisto(dateOld, dateNew, inBatch, fi_old, fi_new, "D0p", "p(D^{0}#rightarrow#kappa^{+}#pi^{-}) (GeV/c)", 0., 0., true);
+  plotHisto(dateOld, dateNew, inBatch, fi_old, fi_new, "BMomentum-nobias", "p(#kappa^{+}#pi^{-}+#mu^{-}) (GeV/c)", 0., 350., true);
+  plotHisto(dateOld, dateNew, inBatch, fi_old, fi_new, "BMass-nobias", "M(#kappa^{+}#pi^{-}+#mu^{-}) (GeV/c^{2})", 0., 0., true);
+  plotHisto(dateOld, dateNew, inBatch, fi_old, fi_new, "Muonp-nobias", "p(#mu^{#pm}) (GeV/c^)", 0., 0., true);
   
   fi_old->Close();
   fi_new->Close();
@@ -300,6 +310,7 @@ int xcheckDataData(TString dateOld = "", TString dateNew = "", bool inBatch = tr
 //---------------------------------------------------------------
 {  
   if (dateOld.Length() > 0 && dateNew.Length() > 0) {
+    gROOT->ProcessLine(".! mkdir "+dateNew);
     gROOT->ProcessLine(".! mkdir "+dateNew+"/ComparisonWith"+dateOld);
     xcheckDataData_step(dateOld, dateNew, inBatch);
     return 0;

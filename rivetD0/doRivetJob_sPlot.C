@@ -510,7 +510,7 @@ void doRivetJob_file(bool inBatch, TString date, TString type, bool isKVF)
   atRight.push_back(false); atRight.push_back(true); atRight.push_back(true); 
   atRight.push_back(true); atRight.push_back(true); atRight.push_back(false); 
   atRight.push_back(false); atRight.push_back(true); atRight.push_back(true); 
-  atRight.push_back(true); atRight.push_back(true); atRight.push_back(false);
+  atRight.push_back(true); atRight.push_back(true); atRight.push_back(true);
   atRight.push_back(false);
   assert (xTitle.size() == NsPlots);
   assert (varName.size() == NsPlots);
@@ -564,10 +564,10 @@ void doRivetJob_file(bool inBatch, TString date, TString type, bool isKVF)
       if (Y_mc > 0) {
         gr_allmc->SetPoint(ip, x_sl, (y_sl*norm_sl+y_dl*norm_dl)*Y_data/Y_mc);
         gr_allmc->SetPointError(ip, gr_all_sl[ig]->GetErrorXlow(ip), 
-                                      gr_all_sl[ig]->GetErrorXhigh(ip), 
-                                     (gr_all_sl[ig]->GetErrorYlow(ip)*norm_sl+gr_all_dl[ig]->GetErrorYlow(ip)*norm_dl)*Y_data/Y_mc, 
-                                     (gr_all_sl[ig]->GetErrorYhigh(ip)*norm_sl+gr_all_dl[ig]->GetErrorYhigh(ip)*norm_dl)*Y_data/Y_mc
-                                 );
+                                    gr_all_sl[ig]->GetErrorXhigh(ip), 
+                                   (gr_all_sl[ig]->GetErrorYlow(ip)*norm_sl+gr_all_dl[ig]->GetErrorYlow(ip)*norm_dl)*Y_data/Y_mc, 
+                                   (gr_all_sl[ig]->GetErrorYhigh(ip)*norm_sl+gr_all_dl[ig]->GetErrorYhigh(ip)*norm_dl)*Y_data/Y_mc
+                               );
       }
       else {
         gr_allmc->SetPoint(ip, x_sl, 0.);
@@ -621,7 +621,7 @@ void doRivetJob_file(bool inBatch, TString date, TString type, bool isKVF)
 }
   
 //---------------------------------------------------------------
-int doRivetJob_sPlot(bool inBatch = true, TString date = "", TString type = "D0")
+int doRivetJob_sPlot(TString date = "", TString type = "muTag", bool inBatch = true)
 //---------------------------------------------------------------
 {  
   if (date.Length() > 0)  {
