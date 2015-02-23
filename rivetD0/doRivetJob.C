@@ -212,7 +212,7 @@ void cms_style(bool isData = true){
 }
 
 //---------------------------------------------------------------
-void plotHisto(bool inBatch, TString date, TString type, TFile* fi_data, TFile* fi_sl, TFile* fi_dl, TFile* fi_ts, TFile* fi_tt, TFile* fi_tw, TFile* fi_Ts, TFile* fi_Tt, TFile* fi_Tw, TFile* fi_w1, TFile* fi_w2, TFile* fi_w3, TFile* fi_w4, TFile* fi_ww, TFile* fi_wz, TFile* fi_zz, TFile* fi_z1, TFile* fi_z2, TFile* fi_z3, TFile* fi_z4, TString channel, TString h_name, TString xtitle, double xmin, double xmax, TString position)
+void plotHisto(bool inBatch, TString date, TString type, TFile* fi_data, TFile* fi_sl, TFile* fi_dl, TFile* fi_ts, TFile* fi_tt, TFile* fi_tw, TFile* fi_Ts, TFile* fi_Tt, TFile* fi_Tw, TFile* fi_w1, TFile* fi_w2, TFile* fi_w3, TFile* fi_w4, TFile* fi_ww, TFile* fi_wz, TFile* fi_zz, TFile* fi_z1, TFile* fi_z2, TFile* fi_z3, TFile* fi_z4, TFile* fi_ttw, TFile* fi_ttww, TFile* fi_ttz, TString channel, TString h_name, TString xtitle, double xmin, double xmax, TString position)
 //---------------------------------------------------------------
 {
   TStyle* my_style = createMyStyle();
@@ -260,11 +260,9 @@ void plotHisto(bool inBatch, TString date, TString type, TFile* fi_data, TFile* 
   TH1D* h_z2 = (TH1D*)fi_z2->Get(dir_name+h_name);
   TH1D* h_z3 = (TH1D*)fi_z3->Get(dir_name+h_name);
   TH1D* h_z4 = (TH1D*)fi_z4->Get(dir_name+h_name);
-  /*
   TH1D* h_ttw = (TH1D*)fi_ttw->Get(dir_name+h_name);
   TH1D* h_ttww = (TH1D*)fi_ttww->Get(dir_name+h_name);
   TH1D* h_ttz = (TH1D*)fi_ttz->Get(dir_name+h_name);
-  */
   if (h_name.Contains("R1") || h_name.Contains("R2") || h_name.Contains("R3")) {
     h_data->Rebin(3.);
     h_sl->Rebin(3.);
@@ -286,11 +284,9 @@ void plotHisto(bool inBatch, TString date, TString type, TFile* fi_data, TFile* 
     h_z2->Rebin(3.);
     h_z3->Rebin(3.);
     h_z4->Rebin(3.);
-    /*
     h_ttw->Rebin(3.);
     h_ttww->Rebin(3.);
     h_ttz->Rebin(3.);
-     */
   }
   h_sl->Scale(25.8031*19769./12031276.);
   h_dl->Scale(107.6722*19769./25339818.);
@@ -311,11 +307,9 @@ void plotHisto(bool inBatch, TString date, TString type, TFile* fi_data, TFile* 
   h_z2->Scale(181.0*19769./2352304.); 
   h_z3->Scale(51.1*19769./11015445.);
   h_z4->Scale(23.04*19769./6402827.);
-  /*
   h_ttw->Scale(0.2149*19769./196046.);
   h_ttww->Scale(0.002037*19769./217820.);
   h_ttz->Scale(0.172*19769./210160.);
-   */
   TH1D* h_mc = (TH1D*)h_sl->Clone();
   h_mc->Add(h_dl);
   h_mc->Add(h_ts);
@@ -324,11 +318,9 @@ void plotHisto(bool inBatch, TString date, TString type, TFile* fi_data, TFile* 
   h_mc->Add(h_Ts);
   h_mc->Add(h_Tt);
   h_mc->Add(h_Tw);
-  /*
   h_mc->Add(h_ttw);
   h_mc->Add(h_ttww);
   h_mc->Add(h_ttz);
-   */
   h_mc->Add(h_ww);
   h_mc->Add(h_wz);
   h_mc->Add(h_zz);
@@ -352,11 +344,9 @@ void plotHisto(bool inBatch, TString date, TString type, TFile* fi_data, TFile* 
   h_Ts->Scale(h_data->Integral()/h_mc->Integral());
   h_Tt->Scale(h_data->Integral()/h_mc->Integral());
   h_Tw->Scale(h_data->Integral()/h_mc->Integral());
-  /*
   h_ttw->Scale(h_data->Integral()/h_mc->Integral());
   h_ttww->Scale(h_data->Integral()/h_mc->Integral());
   h_ttz->Scale(h_data->Integral()/h_mc->Integral());
-   */
   h_w1->Scale(h_data->Integral()/h_mc->Integral());
   h_w2->Scale(h_data->Integral()/h_mc->Integral());
   h_w3->Scale(h_data->Integral()/h_mc->Integral());
@@ -379,11 +369,9 @@ void plotHisto(bool inBatch, TString date, TString type, TFile* fi_data, TFile* 
   h_style(h_Ts, 28, 28, 1001, -1111., -1111., 510, 510, 21, 28, 1.2, 0, xtitle);
   h_style(h_Tt, 28, 28, 1001, -1111., -1111., 510, 510, 21, 28, 1.2, 0, xtitle);
   h_style(h_Tw, 28, 28, 1001, -1111., -1111., 510, 510, 21, 28, 1.2, 0, xtitle);
-  /*
   h_style(h_ttw, 625, 625, 1001, -1111., -1111., 510, 510, 21, 625, 1.2, 0, xtitle);
   h_style(h_ttww, 625, 625, 1001, -1111., -1111., 510, 510, 21, 625, 1.2, 0, xtitle);
   h_style(h_ttz, 625, 625, 1001, -1111., -1111., 510, 510, 21, 625, 1.2, 0, xtitle);
-   */
   h_style(h_w1, 33, 33, 1001, -1111., -1111., 510, 510, 21, 33, 1.2, 0, xtitle);
   h_style(h_w2, 33, 33, 1001, -1111., -1111., 510, 510, 21, 33, 1.2, 0, xtitle);
   h_style(h_w3, 33, 33, 1001, -1111., -1111., 510, 510, 21, 33, 1.2, 0, xtitle);
@@ -409,11 +397,9 @@ void plotHisto(bool inBatch, TString date, TString type, TFile* fi_data, TFile* 
   hs_mc->Add(h_ww);
   hs_mc->Add(h_wz);
   hs_mc->Add(h_zz);
-  /*
   hs_mc->Add(h_ttw);
   hs_mc->Add(h_ttww);
   hs_mc->Add(h_ttz);
-   */
   hs_mc->Add(h_ts);
   hs_mc->Add(h_tt);
   hs_mc->Add(h_tw);
@@ -440,7 +426,7 @@ void plotHisto(bool inBatch, TString date, TString type, TFile* fi_data, TFile* 
     leg->AddEntry(h_sl,"MG+PY6 Z2* Semilept. t#bar{t}","F");
     leg->AddEntry(h_dl,"MG+PY6 Z2* Dilept. t#bar{t}","F");
     leg->AddEntry(h_ts,"Single-top","F");
-    // leg->AddEntry(h_ttw,"t#bar{t} other","F");
+    leg->AddEntry(h_ttw,"t#bar{t} other","F");
     leg->AddEntry(h_ww,"WW,WZ,ZZ","F");
     leg->AddEntry(h_z1,"Z + jets","F");
     leg->AddEntry(h_w1,"W#rightarrow l#nu + jets","F");
@@ -454,7 +440,7 @@ void plotHisto(bool inBatch, TString date, TString type, TFile* fi_data, TFile* 
     leg->AddEntry(h_sl,"Semilept. t#bar{t}","F");
     leg->AddEntry(h_dl,"Dilept. t#bar{t}","F");
     leg->AddEntry(h_ts,"Single-top","F");
-    // leg->AddEntry(h_ttw,"t#bar{t} other","F");
+    leg->AddEntry(h_ttw,"t#bar{t} other","F");
     leg->AddEntry(h_ww,"WW,WZ,ZZ","F");
     leg->AddEntry(h_z1,"Z + jets","F");
     leg->AddEntry(h_w1,"W#rightarrow l#nu + jets","F");
@@ -468,7 +454,7 @@ void plotHisto(bool inBatch, TString date, TString type, TFile* fi_data, TFile* 
     leg->AddEntry(h_sl,"MG+PY6 Z2* Semilept. t#bar{t}","F");
     leg->AddEntry(h_dl,"MG+PY6 Z2* Dilept. t#bar{t}","F");
     leg->AddEntry(h_ts,"Single-top","F");
-    // leg->AddEntry(h_ttw,"t#bar{t} other","F");
+    leg->AddEntry(h_ttw,"t#bar{t} other","F");
     leg->AddEntry(h_ww,"WW,WZ,ZZ","F");
     leg->AddEntry(h_z1,"Z + jets","F");
     leg->AddEntry(h_w1,"W#rightarrow l#nu + jets","F");
@@ -509,11 +495,9 @@ void plotHisto(bool inBatch, TString date, TString type, TFile* fi_data, TFile* 
   delete h_z2;
   delete h_z3;
   delete h_z4;
-  /*
   delete h_ttw;
   delete h_ttww;
   delete h_ttz;
-  */
   delete channel_tex;
   delete my_style;
 }
@@ -542,11 +526,9 @@ void doRivetJob_d0(bool inBatch, TString date, bool isCSVbased)
   TString fi_z2_name = "../test/crab_results/"+date;
   TString fi_z3_name = "../test/crab_results/"+date;
   TString fi_z4_name = "../test/crab_results/"+date;
-  /*
   TString fi_ttw_name = "../test/crab_results/"+date;
   TString fi_ttww_name = "../test/crab_results/"+date;
   TString fi_ttz_name = "../test/crab_results/"+date;
-  */
   TString type;
   /*
   std::cout << "\t\t /!\\ Don't forget in " << fi_data_name << " /!\\ " << std::endl;
@@ -577,11 +559,9 @@ void doRivetJob_d0(bool inBatch, TString date, bool isCSVbased)
     fi_z2_name = fi_z2_name + "/D0ForRivet_csv_DY2JetsToLL_M-50.root";
     fi_z3_name = fi_z3_name + "/D0ForRivet_csv_DY3JetsToLL_M-50.root";
     fi_z4_name = fi_z4_name + "/D0ForRivet_csv_DY4JetsToLL_M-50.root";
-    /*
     fi_ttw_name = fi_tt_name + "/D0ForRivet_csv_TTWJets.root";
     fi_ttww_name = fi_tt_name + "/D0ForRivet_csv_TTWWJets.root";
     fi_ttz_name = fi_tt_name + "/D0ForRivet_csv_TTZJets.root";
-     */
     type = "csv";
   }
   else {
@@ -605,11 +585,9 @@ void doRivetJob_d0(bool inBatch, TString date, bool isCSVbased)
     fi_z2_name = fi_z2_name + "/D0ForRivet_pT_DY2JetsToLL_M-50.root";
     fi_z3_name = fi_z3_name + "/D0ForRivet_pT_DY3JetsToLL_M-50.root";
     fi_z4_name = fi_z4_name + "/D0ForRivet_pT_DY4JetsToLL_M-50.root";
-    /*
     fi_ttw_name = fi_tt_name + "/D0ForRivet_pT_TTWJets.root";
     fi_ttww_name = fi_tt_name + "/D0ForRivet_pT_TTWWJets.root";
     fi_ttz_name = fi_tt_name + "/D0ForRivet_pT_TTZJets.root";
-     */
     type = "pT";
   }
   
@@ -633,49 +611,47 @@ void doRivetJob_d0(bool inBatch, TString date, bool isCSVbased)
   TFile* fi_z2 = TFile::Open(fi_z2_name);
   TFile* fi_z3 = TFile::Open(fi_z3_name);
   TFile* fi_z4 = TFile::Open(fi_z4_name);
-  /*
   TFile* fi_ttw = TFile::Open(fi_ttw_name);
   TFile* fi_ttww = TFile::Open(fi_ttww_name);
   TFile* fi_ttz = TFile::Open(fi_ttz_name);
-   */
 
-  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "All", "NPrimaryVtx", "Primary vertices multiplicity", 0., 0., "right");
-  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "All", "NJets", "Jets multiplicity", 0., 0., "right");
-  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "All", "TransverseMomentumJets", "p(jets) (GeV/c)", 0., 250., "right");
-  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "All", "NCSVJets", "b-tagged jets multiplicity", 0., 0., "right");
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "All", "NPrimaryVtx", "Primary vertices multiplicity", 0., 0., "right");
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "All", "NJets", "Jets multiplicity", 0., 0., "right");
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "All", "TransverseMomentumJets", "p(jets) (GeV/c)", 0., 250., "right");
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "All", "NCSVJets", "b-tagged jets multiplicity", 0., 0., "right");
 
-  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "Both jets", "CSV-b-jets", "CSV discriminant", 0., 0., "right");
-  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "Both jets", "TransverseMomentum-b-jets", "p(jets) (GeV/c)", 0., 300., "right");
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "Both jets", "CSV-b-jets", "CSV discriminant", 0., 0., "right");
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "Both jets", "TransverseMomentum-b-jets", "p(jets) (GeV/c)", 0., 300., "right");
 
-  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "1^{st} jet", "Nch-b-jet1", "Tracks multiplicity", 0., 20., "right");
-  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "2^{nd} jet", "Nch-b-jet2", "Tracks multiplicity", 0., 20., "right");
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "1^{st} jet", "Nch-b-jet1", "Tracks multiplicity", 0., 20., "right");
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "2^{nd} jet", "Nch-b-jet2", "Tracks multiplicity", 0., 20., "right");
 
-  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "1^{st} jet", "Sump-b-jet1", "Scalar sum of tracks momenta (GeV/c)", 0., 400., "right");
-  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "2^{nd} jet", "Sump-b-jet2", "Scalar sum of tracks momenta (GeV/c)", 0., 400., "right");
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "1^{st} jet", "Sump-b-jet1", "Scalar sum of tracks momenta (GeV/c)", 0., 400., "right");
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "2^{nd} jet", "Sump-b-jet2", "Scalar sum of tracks momenta (GeV/c)", 0., 400., "right");
   
-  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "1^{st} jet", "VectorialSump-b-jet1", "Vectorial sum of tracks momenta (GeV/c)", 0., 400., "right");
-  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "2^{nd} jet", "VectorialSump-b-jet2", "Vectorial sum of tracks momenta (GeV/c)", 0., 400., "right");
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "1^{st} jet", "VectorialSump-b-jet1", "Vectorial sum of tracks momenta (GeV/c)", 0., 400., "right");
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "2^{nd} jet", "VectorialSump-b-jet2", "Vectorial sum of tracks momenta (GeV/c)", 0., 400., "right");
   
-  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "1^{st} jet", "Highestp-b-jet1", "Highest track momentum (GeV/c)", 0., 200., "right");
-  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "2^{nd} jet", "Highestp-b-jet2", "Highest track momentum (GeV/c)", 0., 200., "right");
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "1^{st} jet", "Highestp-b-jet1", "Highest track momentum (GeV/c)", 0., 200., "right");
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "2^{nd} jet", "Highestp-b-jet2", "Highest track momentum (GeV/c)", 0., 200., "right");
   
-  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "1^{st} jet", "Sum3p-b-jet1", "Scalar sum of the 3 highest tracks momenta (GeV/c)", 0., 0., "right");
-  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "2^{nd} jet", "Sum3p-b-jet2", "Scalar sum of the 3 highest tracks momenta (GeV/c)", 0., 0., "right");
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "1^{st} jet", "Sum3p-b-jet1", "Scalar sum of the 3 highest tracks momenta (GeV/c)", 0., 0., "right");
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "2^{nd} jet", "Sum3p-b-jet2", "Scalar sum of the 3 highest tracks momenta (GeV/c)", 0., 0., "right");
   
-  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "1^{st} jet", "R1-b-jet1", "R_{1}", 0., 0., "right");
-  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "2^{nd} jet", "R1-b-jet2", "R_{1}", 0., 0., "right");
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "1^{st} jet", "R1-b-jet1", "R_{1}", 0., 0., "right");
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "2^{nd} jet", "R1-b-jet2", "R_{1}", 0., 0., "right");
   
-  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "1^{st} jet", "R3-b-jet1", "R_{3}", 0., 0., "right");
-  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "2^{nd} jet", "R3-b-jet2", "R_{3}", 0., 0., "right");
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "1^{st} jet", "R3-b-jet1", "R_{3}", 0., 0., "right");
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "2^{nd} jet", "R3-b-jet2", "R_{3}", 0., 0., "right");
   
-  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "1^{st} jet", "D0Mass-b-jet1", "m(D^{0}#rightarrow#kappa^{+}#pi^{-}) (GeV/c^{2})", 0., 0., "right");
-  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "2^{nd} jet", "D0Mass-b-jet2", "m(D^{0}#rightarrow#kappa^{+}#pi^{-}) (GeV/c^{2})", 0., 0., "right");
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "1^{st} jet", "D0Mass-b-jet1", "m(D^{0}#rightarrow#kappa^{+}#pi^{-}) (GeV/c^{2})", 0., 0., "right");
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "2^{nd} jet", "D0Mass-b-jet2", "m(D^{0}#rightarrow#kappa^{+}#pi^{-}) (GeV/c^{2})", 0., 0., "right");
   
-  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "1^{st} jet", "D0p-b-jet1", "p(D^{0}#rightarrow#kappa^{+}#pi^{-}) (GeV/c)", 0., 0., "right");
-  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "2^{nd} jet", "D0p-b-jet2", "p(D^{0}#rightarrow#kappa^{+}#pi^{-}) (GeV/c)", 0., 0., "right");
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "1^{st} jet", "D0p-b-jet1", "p(D^{0}#rightarrow#kappa^{+}#pi^{-}) (GeV/c)", 0., 0., "right");
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "2^{nd} jet", "D0p-b-jet2", "p(D^{0}#rightarrow#kappa^{+}#pi^{-}) (GeV/c)", 0., 0., "right");
 
-  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "1^{st} jet", "BMomentum-nobias-b-jet1", "p(#kappa^{+}#pi^{-}+#mu^{-}) (GeV/c)", 0., 350., "right");
-  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "2^{nd} jet", "BMomentum-nobias-b-jet2", "p(#kappa^{+}#pi^{-}+#mu^{-}) (GeV/c)", 0., 350., "right");
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "1^{st} jet", "BMomentum-nobias-b-jet1", "p(#kappa^{+}#pi^{-}+#mu^{-}) (GeV/c)", 0., 350., "right");
+  plotHisto(inBatch, date, type, fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "2^{nd} jet", "BMomentum-nobias-b-jet2", "p(#kappa^{+}#pi^{-}+#mu^{-}) (GeV/c)", 0., 350., "right");
 
   fi_data->Close();
   fi_sl->Close();
@@ -697,11 +673,9 @@ void doRivetJob_d0(bool inBatch, TString date, bool isCSVbased)
   fi_z2->Close();
   fi_z3->Close();
   fi_z4->Close();
-  /*
   fi_ttw->Close();
   fi_ttww->Close();
   fi_ttz->Close();
-   */
   delete fi_data;
   delete fi_sl;
   delete fi_dl;
@@ -722,11 +696,9 @@ void doRivetJob_d0(bool inBatch, TString date, bool isCSVbased)
   delete fi_z2;
   delete fi_z3;
   delete fi_z4;
-  /*
   delete fi_ttw;
   delete fi_ttww;
   delete fi_ttz;
-   */
 }
 
 //---------------------------------------------------------------
@@ -753,11 +725,9 @@ void doRivetJob_mutag(bool inBatch, TString date)
   TString fi_z2_name = "../test/crab_results/"+date+"/MuTagForRivet_DY2JetsToLL_M-50.root";
   TString fi_z3_name = "../test/crab_results/"+date+"/MuTagForRivet_DY3JetsToLL_M-50.root";
   TString fi_z4_name = "../test/crab_results/"+date+"/MuTagForRivet_DY4JetsToLL_M-50.root";
-/*
   TString fi_ttw_name = "../test/crab_results/"+date+"/MuTagForRivet_TTWJets.root";
   TString fi_ttww_name = "../test/crab_results/"+date+"/MuTagForRivet_TTWWJets.root";
   TString fi_ttz_name = "../test/crab_results/"+date+"/MuTagForRivet_TTZJets.root";
-  */
 
   TFile* fi_data = TFile::Open(fi_data_name);
   TFile* fi_sl = TFile::Open(fi_sl_name);
@@ -779,29 +749,28 @@ void doRivetJob_mutag(bool inBatch, TString date)
   TFile* fi_z2 = TFile::Open(fi_z2_name);
   TFile* fi_z3 = TFile::Open(fi_z3_name);
   TFile* fi_z4 = TFile::Open(fi_z4_name);
-  /*
   TFile* fi_ttw = TFile::Open(fi_ttw_name);
   TFile* fi_ttww = TFile::Open(fi_ttww_name);
   TFile* fi_ttz = TFile::Open(fi_ttz_name);
-*/
-  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "All", "NPrimaryVtx", "Primary vertices multiplicity", 0., 0., "right");
 
-  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "Tagged jets", "CSV-b-jets", "CSV discriminant", 0., 0., "right");
-  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "Tagged jets", "TransverseMomentum-b-jets", "p(jets) (GeV/c)", 0., 300., "right");
-  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "Tagged jets", "Nch-b-jets", "Tracks multiplicity", 0., 0., "right");
-  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "Tagged jets", "Sump-b-jets", "Scalar sum of tracks momenta (GeV/c)", 0., 400., "right");
-  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "Tagged jets", "VectorialSump-b-jets", "Vectorial sum of tracks momenta (GeV/c)", 0., 400., "right");
-  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "Tagged jets", "Highestp-b-jets", "Highest track momentum (GeV/c)", 0., 200., "right");
-  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "Tagged jets", "Sum2p-b-jets", "Scalar sum of the 2 highest tracks momenta (GeV/c)", 0., 0., "right");
-  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "Tagged jets", "Sum3p-b-jets", "Scalar sum of the 3 highest tracks momenta (GeV/c)", 0., 0., "right");
-  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "Tagged jets", "R1-b-jets", "R_{1}", 0., 0., "right");
-  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "Tagged jets", "R2-b-jets", "R_{2}", 1.5, 1.5, "left");
-  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "Tagged jets", "R3-b-jets", "R_{3}", 1.5, 1.5, "left");
-  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "Tagged jets", "D0Mass-b-jets", "m(D^{0}#rightarrow#kappa^{+}#pi^{-}) (GeV/c^{2})", 0., 0., "right");
-  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "Tagged jets", "D0p-b-jets", "p(D^{0}#rightarrow#kappa^{+}#pi^{-}) (GeV/c)", 0., 0., "right");
-  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "Tagged jets", "BMomentum-nobias-b-jets", "p(#kappa^{+}#pi^{-}+#mu^{-}) (GeV/c)", 0., 350., "right");
-  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "Tagged jets", "BMass-nobias-b-jets", "M(#kappa^{+}#pi^{-}+#mu^{-}) (GeV/c^{2})", 0., 0, "right");
-  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, "Tagged jets", "Muonp-nobias-b-jets", "p(#mu) (GeV/c)", 0., 0, "right");
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "All", "NPrimaryVtx", "Primary vertices multiplicity", 0., 0., "right");
+
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "Tagged jets", "CSV-b-jets", "CSV discriminant", 0., 0., "right");
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "Tagged jets", "TransverseMomentum-b-jets", "p(jets) (GeV/c)", 0., 300., "right");
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "Tagged jets", "Nch-b-jets", "Tracks multiplicity", 0., 0., "right");
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "Tagged jets", "Sump-b-jets", "Scalar sum of tracks momenta (GeV/c)", 0., 400., "right");
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "Tagged jets", "VectorialSump-b-jets", "Vectorial sum of tracks momenta (GeV/c)", 0., 400., "right");
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "Tagged jets", "Highestp-b-jets", "Highest track momentum (GeV/c)", 0., 200., "right");
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "Tagged jets", "Sum2p-b-jets", "Scalar sum of the 2 highest tracks momenta (GeV/c)", 0., 0., "right");
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "Tagged jets", "Sum3p-b-jets", "Scalar sum of the 3 highest tracks momenta (GeV/c)", 0., 0., "right");
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "Tagged jets", "R1-b-jets", "R_{1}", 0., 0., "right");
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "Tagged jets", "R2-b-jets", "R_{2}", 1.5, 1.5, "left");
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "Tagged jets", "R3-b-jets", "R_{3}", 1.5, 1.5, "left");
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "Tagged jets", "D0Mass-b-jets", "m(D^{0}#rightarrow#kappa^{+}#pi^{-}) (GeV/c^{2})", 0., 0., "right");
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "Tagged jets", "D0p-b-jets", "p(D^{0}#rightarrow#kappa^{+}#pi^{-}) (GeV/c)", 0., 0., "right");
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "Tagged jets", "BMomentum-nobias-b-jets", "p(#kappa^{+}#pi^{-}+#mu^{-}) (GeV/c)", 0., 350., "right");
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "Tagged jets", "BMass-nobias-b-jets", "M(#kappa^{+}#pi^{-}+#mu^{-}) (GeV/c^{2})", 0., 0, "right");
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "Tagged jets", "Muonp-nobias-b-jets", "p(#mu) (GeV/c)", 0., 0, "right");
 
   fi_data->Close();
   fi_sl->Close();
@@ -823,11 +792,9 @@ void doRivetJob_mutag(bool inBatch, TString date)
   fi_z2->Close();
   fi_z3->Close();
   fi_z4->Close();
-  /*
   fi_ttw->Close();
   fi_ttww->Close();
   fi_ttz->Close();
-  */
   delete fi_data;
   delete fi_sl;
   delete fi_dl;
@@ -848,11 +815,9 @@ void doRivetJob_mutag(bool inBatch, TString date)
   delete fi_z2;
   delete fi_z3;
   delete fi_z4;
-  /*
   delete fi_ttw;
   delete fi_ttww;
   delete fi_ttz;
-  */
 }
   
 //---------------------------------------------------------------

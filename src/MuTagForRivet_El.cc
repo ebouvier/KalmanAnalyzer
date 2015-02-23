@@ -353,8 +353,8 @@ MuTagForRivet_El::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
     ++n20jet;
   }
 
-  // if (n55jet > 0 && n45jet > 1 && n35jet > 2 && n20jet > 3) hasGoodJets = true; FIXME
-  if (n30jet > 3) hasGoodJets = true;
+  if (n55jet > 0 && n45jet > 1 && n35jet > 2 && n20jet > 3) hasGoodJets = true; // FIXME
+  // if (n30jet > 3) hasGoodJets = true;
 
   if (hasGoodLeptons && hasGoodJets) isGoodEvt = true;
 
@@ -537,8 +537,8 @@ MuTagForRivet_El::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
         const reco::Track& Track1 = **iter1;
 
-        // if ((**iter1).pt() < 4.) continue; FIXME
-        if ((**iter1).pt() < 0.5) continue;
+        if ((**iter1).pt() < 4.) continue; // FIXME
+        // if ((**iter1).pt() < 0.5) continue;
         // if (!Track1.quality(reco::Track::highPurity)) continue; // FIXME
         if (!Track1.quality(reco::Track::tight)) continue;
         double sigmax_vtx_tr = sqrt(pow(vtx[0].xError(), 2.));
@@ -754,8 +754,8 @@ MuTagForRivet_El::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
           const reco::Track& Track2 = **iter2;
 
           if (iter2 == iter1) continue;
-          // if ((**iter2).pt() < 4.) continue; FIXME
-          if ((**iter2).pt() < 0.5) continue;
+          if ((**iter2).pt() < 4.) continue; // FIXME
+          // if ((**iter2).pt() < 0.5) continue;
           // if (!Track2.quality(reco::Track::highPurity)) continue; // FIXME
           if (!Track2.quality(reco::Track::tight)) continue;
           double d_v0_tr2 = pow(vtx[0].x()-(**iter2).vx(), 2.) + pow(vtx[0].y()-(**iter2).vy(), 2.) + pow(vtx[0].z()-(**iter2).vz(), 2.);

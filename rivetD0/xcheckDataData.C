@@ -226,7 +226,10 @@ void plotHisto(TString dateOld, TString dateNew, bool inBatch, TFile* fi_old, TF
   
   TH1D* h_old = (TH1D*)fi_old->Get("muTagBasedSelection/"+h_name+"-b-jets");
   TH1D* h_new = (TH1D*)fi_new->Get("muTagBasedSelection/"+h_name+"-b-jets");
-  if (h_name.Contains("R1") || h_name.Contains("R2") || h_name.Contains("R3")) h_new->Rebin(2.); //FIXME 
+  if (h_name.Contains("R1") || h_name.Contains("R2") || h_name.Contains("R3")) {
+    h_old->Rebin(3.); 
+    h_new->Rebin(3.); 
+  }
   h_old->Scale(h_new->Integral()/h_old->Integral());
   h_style(h_old, kBlue, kBlue, 4000, -1111., -1111., 510, 510, 24, kBlue, 1.2, 0, xtitle);
   h_style(h_new, kRed, kRed, 4000, -1111., -1111., 510, 510, 20, kRed, 1.2, 0, xtitle);

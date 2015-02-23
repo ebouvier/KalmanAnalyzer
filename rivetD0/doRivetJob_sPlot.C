@@ -466,6 +466,7 @@ void doRivetJob_file(bool inBatch, TString date, TString type, bool isKVF)
   TFile* fi_data = TFile::Open(fi_data_name);
   TFile* fi_sl = TFile::Open(fi_sl_name);
   TFile* fi_dl = TFile::Open(fi_dl_name);
+  TFile* fi_out = TFile::Open(rep_name+"/MuTagForRivet_Data_sPlot.root", "recreate");
   
   const double norm_sl = 2.*25.8031*19769./12031276.;
   const double norm_dl = 2.*107.6722*19769./25339818.;
@@ -519,12 +520,15 @@ void doRivetJob_file(bool inBatch, TString date, TString type, bool isKVF)
   assert (varMax.size() == NsPlots);
   assert (varUnit.size() == NsPlots);
   assert (atRight.size() == NsPlots);
+
+  TH1F **graph_data_sig = new TH1F*[NsPlots]; 
   
   TGraphAsymmErrors **gr_all_data = treatHisto(inBatch, my_style, date, type, isKVF, NsPlots, varName, varTitle, varMin, varMax, varUnit, atRight, fi_data, "Data_merged", "Data - Run 2012 A,B,C,D");
   TGraphAsymmErrors **gr_all_sl = treatHisto(inBatch, my_style, date, type, isKVF, NsPlots, varName, varTitle, varMin, varMax, varUnit, atRight, fi_sl, "TTJets_SemiLeptMGDecays", "MG+PY6 Z2* Semilept. t#bar{t}");
   TGraphAsymmErrors **gr_all_dl = treatHisto(inBatch, my_style, date, type, isKVF, NsPlots, varName, varTitle, varMin, varMax, varUnit, atRight, fi_dl, "TTJets_FullLeptMGDecays", "MG+PY6 Z2* Dilept. t#bar{t}");
 
   for (int ig = 0; ig < NsPlots; ig++) {
+    graph_data_sig[ig] = new TH1F(varName[ig], varTitle[ig], gr_all_data[ig]->GetN(), varMin[ig], varMax[ig]);
     TGraphAsymmErrors *gr_alldata = (TGraphAsymmErrors*)gr_all_data[ig]->Clone(); 
     TGraphAsymmErrors *gr_allmc = (TGraphAsymmErrors*)gr_all_sl[ig]->Clone(); 
     double x_data = 0.;
@@ -550,10 +554,14 @@ void doRivetJob_file(bool inBatch, TString date, TString type, bool isKVF)
     for (int ip = 0; ip < gr_alldata->GetN(); ip++) {
       gr_all_data[ig]->GetPoint(ip, x_data, y_data);
       if (Y_data > 0) {
+        graph_data_sig[ig]->SetBinContent(1+ip, y_data);
+        graph_data_sig[ig]->SetBinError(1+ip, 0.5*(gr_all_data[ig]->GetErrorYlow(ip)+gr_all_data[ig]->GetErrorYhigh(ip)));
         gr_alldata->SetPoint(ip, x_data, y_data);
         gr_alldata->SetPointError(ip, gr_all_data[ig]->GetErrorXlow(ip), gr_all_data[ig]->GetErrorXhigh(ip), gr_all_data[ig]->GetErrorYlow(ip), gr_all_data[ig]->GetErrorYhigh(ip));
       }
       else {
+        graph_data_sig[ig]->SetBinContent(1+ip, 0.);
+        graph_data_sig[ig]->SetBinError(1+ip, 0.);
         gr_alldata->SetPoint(ip, x_data, 0.);
         gr_alldata->SetPointError(ip, gr_all_data[ig]->GetErrorXlow(ip), gr_all_data[ig]->GetErrorXhigh(ip), 0., 0.);
       }
@@ -578,11 +586,16 @@ void doRivetJob_file(bool inBatch, TString date, TString type, bool isKVF)
     double y1_data; double y2_data;
     gr_all_data[ig]->GetPoint(0, x1_data, y1_data);
     gr_all_data[ig]->GetPoint(1, x2_data, y2_data);
+    graph_data_sig[ig]->GetXaxis()->SetTitle(xTitle[ig]);
     gr_alldata->GetXaxis()->SetTitle(xTitle[ig]);
-    if (xTitle[ig].Contains("GeV/c"))
+    if (xTitle[ig].Contains("GeV/c")) {
+      graph_data_sig[ig]->GetYaxis()->SetTitle(TString::Format("Events / (%.2f GeV/c)", x2_data-x1_data));
       gr_alldata->GetYaxis()->SetTitle(TString::Format("Events / (%.2f GeV/c)", x2_data-x1_data));
-    else
+    }
+    else {
+      graph_data_sig[ig]->GetYaxis()->SetTitle(TString::Format("Events / %.2f", x2_data-x1_data));
       gr_alldata->GetYaxis()->SetTitle(TString::Format("Events / %.2f", x2_data-x1_data));
+    }
         
     TCanvas* cn_all = new TCanvas("cn_all","cn_all",800,800);
     cn_all->cd();
@@ -600,11 +613,18 @@ void doRivetJob_file(bool inBatch, TString date, TString type, bool isKVF)
     cn_all->SaveAs(rep_name+varName[ig]+"_Sig_Data2MC.pdf"); 
     if (!inBatch) getchar();
 
+    fi_out->cd();
+    graph_data_sig[ig]->Write();
+
     delete cn_all;
     delete leg_all;
     delete gr_alldata;
     delete gr_allmc;
   }
+
+  fi_out->Close();
+  delete fi_out;
+  delete graph_data_sig;
   
   delete gr_all_data;
   delete gr_all_sl;
