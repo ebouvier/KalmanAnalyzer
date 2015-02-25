@@ -38,6 +38,8 @@ process.TFileService = cms.Service("TFileService",
 )
 
 process.muTagBasedSelection = cms.EDAnalyzer('MuTagForRivet_El',
+        # selection = cms.untracked.int32(1) # Top PAG jets selection and pT(tr) > 4 GeV/c
+        selection = cms.untracked.int32(2) # 4 jets with pT > 30 GeV/c and pT(tr) > 0.5 GeV/c
 )
 
 

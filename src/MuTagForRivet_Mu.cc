@@ -95,6 +95,8 @@ class MuTagForRivet_Mu : public edm::EDAnalyzer {
     virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
 
     // ----------member data ---------------------------
+    int _sel;
+    double _pTtrTreshold;
 
     // evts properties
     unsigned int nEvts;
@@ -217,12 +219,17 @@ class MuTagForRivet_Mu : public edm::EDAnalyzer {
 //
 // constructors and destructor
 //
-MuTagForRivet_Mu::MuTagForRivet_Mu(const edm::ParameterSet& iConfig)
+MuTagForRivet_Mu::MuTagForRivet_Mu(const edm::ParameterSet& iConfig) :
+  _sel(iConfig.getUntrackedParameter<int>("selection", 1))
 {
   // now do what ever initialization is needed
   nEvts = 0;
   nEvts2 = 0;
-  weight = 1.;
+  weight = 2.*19607./(19607.+10800.);
+  if (_sel == 1)
+    _pTtrTreshold = 4.;
+  if (_sel == 2)
+    _pTtrTreshold = 0.5;
 }
 
 
@@ -353,8 +360,8 @@ MuTagForRivet_Mu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
     ++n20jet;
   }
 
-  if (n55jet > 0 && n45jet > 1 && n35jet > 2 && n20jet > 3) hasGoodJets = true; // FIXME
-  // if (n30jet > 3) hasGoodJets = true;
+  if (_sel == 1 && n55jet > 0 && n45jet > 1 && n35jet > 2 && n20jet > 3) hasGoodJets = true;
+  if (_sel == 2 && n30jet > 3) hasGoodJets = true;
 
   if (hasGoodLeptons && hasGoodJets) isGoodEvt = true;
 
@@ -392,7 +399,7 @@ MuTagForRivet_Mu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
     //-------------------------------------------
 
     edm::Handle<reco::VertexCollection>  vtxHandle;
-    edm::InputTag tagVtx("offlinePrimaryVertices");
+    edm::InputTag tagVtx("goodOfflinePrimaryVertices");
     iEvent.getByLabel(tagVtx, vtxHandle);
     const reco::VertexCollection vtx = *(vtxHandle.product());
 
@@ -400,7 +407,7 @@ MuTagForRivet_Mu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
       std::cout << " WARNING : no PV for this event ... " << std::endl;
       return;
     }
-    _h_nVtx->Fill((double)vtx.size());
+    _h_nVtx->Fill((double)vtx.size(), weight);
 
     //--------------------------------------------------
     // Access the PF candidates for non-isolated mu/e
@@ -493,10 +500,13 @@ MuTagForRivet_Mu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
         if (!Track1.quality(reco::Track::tight)) continue;
 
         // look for muons 
+        TLorentzVector p_isoMu;
+        p_isoMu.SetPtEtaPhiM(muon[0].pt(), muon[0].eta(), muon[0].phi(), gMassMu);
         for (unsigned int iMuCand = 0; iMuCand < myPFmu.size(); iMuCand++) {
           TLorentzVector p_MuCand, p_trCand;
           p_MuCand.SetPtEtaPhiM(myPFmu[iMuCand]->pt(), myPFmu[iMuCand]->eta(), myPFmu[iMuCand]->phi(), gMassMu);
           p_trCand.SetPtEtaPhiM((**iter1).pt(), (**iter1).eta(), (**iter1).phi(), gMassPi);
+          if (myPFmu[iMuCand]->charge()*muon[0].charge() < 0 && (p_MuCand+p_isoMu).M() < 106. && (p_MuCand+p_isoMu).M() > 76) continue;
           if (p_trCand.DeltaR(p_MuCand) < 0.0005) {
             hasMuInside = true;
             break;
@@ -510,9 +520,9 @@ MuTagForRivet_Mu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
       _vecP[1] = (*it).eta();
       _vecP[2] = (*it).phi();
       _vecP[3] = (*it).mass();
-      _h_CSVSelJets->Fill((*it).bDiscriminator("combinedSecondaryVertexBJetTags"));
-      _h_pTSelJets->Fill((*it).pt());
-      _h_etaSelJets->Fill((*it).eta());
+      _h_CSVSelJets->Fill((*it).bDiscriminator("combinedSecondaryVertexBJetTags"), weight);
+      _h_pTSelJets->Fill((*it).pt(), weight);
+      _h_etaSelJets->Fill((*it).eta(), weight);
 
       TLorentzVector p_Jet;
       p_Jet.SetPtEtaPhiM((*it).pt(), (*it).eta(), (*it).phi(), (*it).mass());
@@ -537,8 +547,7 @@ MuTagForRivet_Mu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
         const reco::Track& Track1 = **iter1;
 
-        if ((**iter1).pt() < 4.) continue; // FIXME
-        // if ((**iter1).pt() < 0.5) continue;
+        if ((**iter1).pt() < _pTtrTreshold) continue; 
         // if (!Track1.quality(reco::Track::highPurity)) continue; // FIXME
         if (!Track1.quality(reco::Track::tight)) continue;
         double sigmax_vtx_tr = sqrt(pow(vtx[0].xError(), 2.));
@@ -556,11 +565,11 @@ MuTagForRivet_Mu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
         if (d_v0_tr > 0) d_v0_tr = sqrt(d_v0_tr);
         else             d_v0_tr = 0.;
         if (d_v0_tr > 0.25) continue; //FIXME
-        _h_dPV_pT_tr->Fill(d_v0_tr, (**iter1).pt());
-        _h_L3D_pT_tr->Fill(tr_L3D, (**iter1).pt());
-        _h_eta_pt_tr->Fill((**iter1).eta(), (**iter1).pt());
-        _h_d0_pt_tr->Fill((**iter1).dxy(), (**iter1).pt());
-        _h_dz_pt_tr->Fill((**iter1).dz(), (**iter1).pt());
+        _h_dPV_pT_tr->Fill(d_v0_tr, (**iter1).pt(), weight);
+        _h_L3D_pT_tr->Fill(tr_L3D, (**iter1).pt(), weight);
+        _h_eta_pt_tr->Fill((**iter1).eta(), (**iter1).pt(), weight);
+        _h_d0_pt_tr->Fill((**iter1).dxy(), (**iter1).pt(), weight);
+        _h_dz_pt_tr->Fill((**iter1).dz(), (**iter1).pt(), weight);
 
         // look for muons and electrons
         bool trCandIsMu = false;
@@ -726,8 +735,8 @@ MuTagForRivet_Mu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
         _sump = _sump + p_tr1.P();
         _sumpt = _sumpt + p_tr1.Pt();
         _sumpvec = _sumpvec + p_tr1;
-        _h_etach->Fill(p_tr1.Eta());
-        _h_pTch->Fill(p_tr1.Pt());
+        _h_etach->Fill(p_tr1.Eta(), weight);
+        _h_pTch->Fill(p_tr1.Pt(), weight);
 
         //============================
         // simple Kalman Vertex Fitter
@@ -751,8 +760,7 @@ MuTagForRivet_Mu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
           const reco::Track& Track2 = **iter2;
 
           if (iter2 == iter1) continue;
-          if ((**iter2).pt() < 4.) continue; // FIXME
-          // if ((**iter2).pt() < 0.5) continue;
+          if ((**iter2).pt() < _pTtrTreshold) continue; 
           // if (!Track2.quality(reco::Track::highPurity)) continue; // FIXME
           if (!Track2.quality(reco::Track::tight)) continue;
           double d_v0_tr2 = pow(vtx[0].x()-(**iter2).vx(), 2.) + pow(vtx[0].y()-(**iter2).vy(), 2.) + pow(vtx[0].z()-(**iter2).vz(), 2.);
@@ -910,39 +918,39 @@ MuTagForRivet_Mu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
         } // 2nd jet's track loop
      } // 1st jet's track loop
 
-      _h_Nch->Fill((double)_Nch);
-      _h_Nch_nVtx->Fill((double)_Nch, (double)vtx.size());
-      _h_sump->Fill(_sump);
-      _h_sumpvec->Fill(_sumpvec.P());
+      _h_Nch->Fill((double)_Nch, weight);
+      _h_Nch_nVtx->Fill((double)_Nch, (double)vtx.size(), weight);
+      _h_sump->Fill(_sump, weight);
+      _h_sumpvec->Fill(_sumpvec.P(), weight);
       if (p_trCand[0].M() > 1e-10) {
-        _h_sum1p->Fill(p_trCand[0].P());
-        _h_R1->Fill(p_trCand[0].P() / _sump);
-        _h_R1_Nch->Fill(p_trCand[0].P() / _sump, (double)_Nch);
+        _h_sum1p->Fill(p_trCand[0].P(), weight);
+        _h_R1->Fill(p_trCand[0].P() / _sump, weight);
+        _h_R1_Nch->Fill(p_trCand[0].P() / _sump, (double)_Nch, weight);
         if (p_trCand[1].M() > 1e-10) {
-          _h_sum2p->Fill(p_trCand[0].P() + p_trCand[1].P());
-          _h_R2->Fill((p_trCand[0].P() + p_trCand[1].P()) / _sump);
-          _h_R2_Nch->Fill((p_trCand[0].P() + p_trCand[1].P()) / _sump, (double)_Nch);
+          _h_sum2p->Fill(p_trCand[0].P() + p_trCand[1].P(), weight);
+          _h_R2->Fill((p_trCand[0].P() + p_trCand[1].P()) / _sump, weight);
+          _h_R2_Nch->Fill((p_trCand[0].P() + p_trCand[1].P()) / _sump, (double)_Nch, weight);
           if (p_trCand[2].M() > 1e-10) {
-            _h_sum3p->Fill(p_trCand[0].P() + p_trCand[1].P() + p_trCand[2].P());
-            _h_mass3->Fill((p_trCand[0] + p_trCand[1] + p_trCand[2]).M());
-            _h_R3->Fill((p_trCand[0].P() + p_trCand[1].P() + p_trCand[2].P()) / _sump);
-            _h_R3_Nch->Fill((p_trCand[0].P() + p_trCand[1].P() + p_trCand[2].P()) / _sump, (double)_Nch);
+            _h_sum3p->Fill(p_trCand[0].P() + p_trCand[1].P() + p_trCand[2].P(), weight);
+            _h_mass3->Fill((p_trCand[0] + p_trCand[1] + p_trCand[2]).M(), weight);
+            _h_R3->Fill((p_trCand[0].P() + p_trCand[1].P() + p_trCand[2].P()) / _sump, weight);
+            _h_R3_Nch->Fill((p_trCand[0].P() + p_trCand[1].P() + p_trCand[2].P()) / _sump, (double)_Nch, weight);
           }
         }
       }
       if (p_trCand_nomu[0].M() > 1e-10) {
-        _h_sum1p_nomu->Fill(p_trCand_nomu[0].P());
-        _h_R1_nomu->Fill(p_trCand_nomu[0].P() / _sump);
-        _h_R1_Nch_nomu->Fill(p_trCand_nomu[0].P() / _sump, (double)_Nch);
+        _h_sum1p_nomu->Fill(p_trCand_nomu[0].P(), weight);
+        _h_R1_nomu->Fill(p_trCand_nomu[0].P() / _sump, weight);
+        _h_R1_Nch_nomu->Fill(p_trCand_nomu[0].P() / _sump, (double)_Nch, weight);
         if (p_trCand_nomu[1].M() > 1e-10) {
-          _h_sum2p_nomu->Fill(p_trCand_nomu[0].P() + p_trCand_nomu[1].P());
-          _h_R2_nomu->Fill((p_trCand_nomu[0].P() + p_trCand_nomu[1].P()) / _sump);
-          _h_R2_Nch_nomu->Fill((p_trCand_nomu[0].P() + p_trCand_nomu[1].P()) / _sump, (double)_Nch);
+          _h_sum2p_nomu->Fill(p_trCand_nomu[0].P() + p_trCand_nomu[1].P(), weight);
+          _h_R2_nomu->Fill((p_trCand_nomu[0].P() + p_trCand_nomu[1].P()) / _sump, weight);
+          _h_R2_Nch_nomu->Fill((p_trCand_nomu[0].P() + p_trCand_nomu[1].P()) / _sump, (double)_Nch, weight);
           if (p_trCand_nomu[2].M() > 1e-10) {
-            _h_sum3p_nomu->Fill(p_trCand_nomu[0].P() + p_trCand_nomu[1].P() + p_trCand_nomu[2].P());
-            _h_mass3_nomu->Fill((p_trCand_nomu[0] + p_trCand_nomu[1] + p_trCand_nomu[2]).M());
-            _h_R3_nomu->Fill((p_trCand_nomu[0].P() + p_trCand_nomu[1].P() + p_trCand_nomu[2].P()) / _sump);
-            _h_R3_Nch_nomu->Fill((p_trCand_nomu[0].P() + p_trCand_nomu[1].P() + p_trCand_nomu[2].P()) / _sump, (double)_Nch);
+            _h_sum3p_nomu->Fill(p_trCand_nomu[0].P() + p_trCand_nomu[1].P() + p_trCand_nomu[2].P(), weight);
+            _h_mass3_nomu->Fill((p_trCand_nomu[0] + p_trCand_nomu[1] + p_trCand_nomu[2]).M(), weight);
+            _h_R3_nomu->Fill((p_trCand_nomu[0].P() + p_trCand_nomu[1].P() + p_trCand_nomu[2].P()) / _sump, weight);
+            _h_R3_Nch_nomu->Fill((p_trCand_nomu[0].P() + p_trCand_nomu[1].P() + p_trCand_nomu[2].P()) / _sump, (double)_Nch, weight);
           }
         }
       }
@@ -1008,10 +1016,10 @@ MuTagForRivet_Mu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
           // cut on pT
           if (p_D0combi.Pt() < 15.) continue;
 
-          _h_D0Mass->Fill(p_D0combi.M());
-          _h_D0p->Fill(p_D0combi.P());
-          _h_D0pT->Fill(p_D0combi.Pt());
-          _h_D0eta->Fill(p_D0combi.Eta());
+          _h_D0Mass->Fill(p_D0combi.M(), weight);
+          _h_D0p->Fill(p_D0combi.P(), weight);
+          _h_D0pT->Fill(p_D0combi.Pt(), weight);
+          _h_D0eta->Fill(p_D0combi.Eta(), weight);
 
           //~~~~~~~~~~~~~~~~~~~~~~~~~~~
           // associate D^0 to a PF muon
@@ -1022,9 +1030,9 @@ MuTagForRivet_Mu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
           p_Mu.SetPtEtaPhiM(myPFmuInSelJet[iMaxMuInSelJet]->pt(), myPFmuInSelJet[iMaxMuInSelJet]->eta(), myPFmuInSelJet[iMaxMuInSelJet]->phi(), gMassMu);
           TLorentzVector p_Bcombi = p_Mu + p_D0combi;
-          _h_BMomentum_unbiased->Fill(p_Bcombi.P());            
-          _h_BMass_unbiased->Fill(p_Bcombi.M());    
-          _h_mup_unbiased->Fill(p_Mu.P());
+          _h_BMomentum_unbiased->Fill(p_Bcombi.P(), weight);            
+          _h_BMass_unbiased->Fill(p_Bcombi.M(), weight);    
+          _h_mup_unbiased->Fill(p_Mu.P(), weight);
           if (p_D0combi.M() > 1.7 && p_D0combi.M() < 2.) {
             _D0mass = p_D0combi.M();
             _CSVdisc = (*it).bDiscriminator("combinedSecondaryVertexBJetTags");
@@ -1058,10 +1066,10 @@ MuTagForRivet_Mu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
         // cut on pT
         if (p_D0optcombi.Pt() < 15.) continue;
 
-        _h_D0MassClean->Fill(p_D0optcombi.M());
-        _h_D0pClean->Fill(p_D0optcombi.P());
-        _h_D0pTClean->Fill(p_D0optcombi.Pt());
-        _h_D0etaClean->Fill(p_D0optcombi.Eta());
+        _h_D0MassClean->Fill(p_D0optcombi.M(), weight);
+        _h_D0pClean->Fill(p_D0optcombi.P(), weight);
+        _h_D0pTClean->Fill(p_D0optcombi.Pt(), weight);
+        _h_D0etaClean->Fill(p_D0optcombi.Eta(), weight);
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~~
         // associate D^0 to a PF muon
@@ -1073,12 +1081,12 @@ MuTagForRivet_Mu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
         p_Mu.SetPtEtaPhiM(myPFmuInSelJet[tk2charge]->pt(), myPFmuInSelJet[tk2charge]->eta(), myPFmuInSelJet[tk2charge]->phi(), gMassMu);
         TLorentzVector p_Boptcombi = p_Mu + p_D0optcombi;
-        _h_BMomentum->Fill(p_Boptcombi.P());
-        _h_BMass->Fill(p_Boptcombi.M());
-        _h_mup->Fill(p_Mu.P());
+        _h_BMomentum->Fill(p_Boptcombi.P(), weight);
+        _h_BMass->Fill(p_Boptcombi.M(), weight);
+        _h_mup->Fill(p_Mu.P(), weight);
         if (p_D0optcombi.M() > 1.7 && p_D0optcombi.M() < 2.) 
-          _h_BMomentumClean->Fill(p_Boptcombi.P());
-        _h_BMass->Fill(p_Boptcombi.M());
+          _h_BMomentumClean->Fill(p_Boptcombi.P(), weight);
+        _h_BMass->Fill(p_Boptcombi.M(), weight);
       }
     } // jet loop
     _t_bjets->Fill();

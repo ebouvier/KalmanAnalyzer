@@ -184,7 +184,7 @@ void h_style(TH1 *h,
   h->GetYaxis()->SetTitle(ss.str().c_str());
 }
 
-void cms_style(bool isData = true){
+void cms_style_bis(bool isData = true){
   std::string status = "Simulation preliminary";
   if (isData) status = "Preliminary";
   TPaveText* pt_exp = new TPaveText(LEFT_MARGIN, 1 - 0.5 * TOP_MARGIN, 1 - RIGHT_MARGIN, 1, "brNDC");
@@ -198,7 +198,7 @@ void cms_style(bool isData = true){
   pt_exp->AddText(d);
   pt_exp->Draw();
 
-  TString lumi_s = "19.8 fb^{-1} (8 TeV)";
+  TString lumi_s = "15.2 fb^{-1} (8 TeV)";
   TPaveText* pt_lumi = new TPaveText(LEFT_MARGIN, 1 - 0.5 * TOP_MARGIN, 1 - RIGHT_MARGIN, 1, "brNDC");
   pt_lumi->SetFillStyle(0);
   pt_lumi->SetBorderSize(0);
@@ -264,7 +264,7 @@ void plotHisto(TString dateOld, TString dateNew, bool inBatch, TFile* fi_old, TF
   h_new->Draw("epsame");
   
   channel_tex->Draw("same");  
-  cms_style();
+  cms_style_bis();
   cn->SaveAs(dateNew+"/ComparisonWith"+dateOld+"/"+h_name+".C");
   cn->SaveAs(dateNew+"/ComparisonWith"+dateOld+"/"+h_name+".eps");
   cn->SaveAs(dateNew+"/ComparisonWith"+dateOld+"/"+h_name+".pdf");

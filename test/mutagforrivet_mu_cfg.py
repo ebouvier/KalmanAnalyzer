@@ -13,7 +13,7 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.GlobalTag.globaltag = 'START53_V19PR::All'
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10000) )
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(50000) )
 
 process.source = cms.Source("PoolSource",
@@ -38,6 +38,8 @@ process.TFileService = cms.Service("TFileService",
 )
 
 process.muTagBasedSelection = cms.EDAnalyzer('MuTagForRivet_Mu',
+        # selection = cms.untracked.int32(1) # Top PAG jets selection and pT(tr) > 4 GeV/c
+        selection = cms.untracked.int32(2) # 4 jets with pT > 30 GeV/c and pT(tr) > 0.5 GeV/c
 )
 
 

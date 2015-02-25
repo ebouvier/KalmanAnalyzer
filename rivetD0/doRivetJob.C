@@ -184,7 +184,7 @@ void h_style(TH1 *h,
   h->GetYaxis()->SetTitle(ss.str().c_str());
 }
 
-void cms_style(bool isData = true){
+void cms_style_bis(bool isData = true){
   std::string status = "Simulation preliminary";
   if (isData) status = "Preliminary";
   TPaveText* pt_exp = new TPaveText(LEFT_MARGIN, 1 - 0.5 * TOP_MARGIN, 1 - RIGHT_MARGIN, 1, "brNDC");
@@ -198,7 +198,7 @@ void cms_style(bool isData = true){
   pt_exp->AddText(d);
   pt_exp->Draw();
 
-  TString lumi_s = "19.8 fb^{-1} (8 TeV)";
+  TString lumi_s = "15.2 fb^{-1} (8 TeV)";
   TPaveText* pt_lumi = new TPaveText(LEFT_MARGIN, 1 - 0.5 * TOP_MARGIN, 1 - RIGHT_MARGIN, 1, "brNDC");
   pt_lumi->SetFillStyle(0);
   pt_lumi->SetBorderSize(0);
@@ -288,28 +288,28 @@ void plotHisto(bool inBatch, TString date, TString type, TFile* fi_data, TFile* 
     h_ttww->Rebin(3.);
     h_ttz->Rebin(3.);
   }
-  h_sl->Scale(25.8031*19769./12031276.);
-  h_dl->Scale(107.6722*19769./25339818.);
-  h_ts->Scale(3.79*19769./259961.);
-  h_tt->Scale(56.4*19769./3758227.);
-  h_tw->Scale(11.1*19769./497658.);
-  h_Ts->Scale(1.76*19769./139974.);
-  h_Tt->Scale(30.7*19769./1935072.);
-  h_Tw->Scale(11.1*19769./493460.);
-  h_w1->Scale(5562.36*19769./23138212.);
-  h_w2->Scale(1802.62*19769./33892560.);
-  h_w3->Scale(534.604*19769./15464503.);
-  h_w4->Scale(220.434*19769./13382803.);
-  h_ww->Scale(54.838*19769./10000431.);
-  h_wz->Scale(33.21*19769./10000283.);
-  h_zz->Scale(17.654*19769./9799908.);
-  h_z1->Scale(561.0*19769./24045248.); 
-  h_z2->Scale(181.0*19769./2352304.); 
-  h_z3->Scale(51.1*19769./11015445.);
-  h_z4->Scale(23.04*19769./6402827.);
-  h_ttw->Scale(0.2149*19769./196046.);
-  h_ttww->Scale(0.002037*19769./217820.);
-  h_ttz->Scale(0.172*19769./210160.);
+  h_sl->Scale(25.8031*15203./12031276.);
+  h_dl->Scale(107.6722*15203./25339818.);
+  h_ts->Scale(3.79*15203./259961.);
+  h_tt->Scale(56.4*15203./3758227.);
+  h_tw->Scale(11.1*15203./497658.);
+  h_Ts->Scale(1.76*15203./139974.);
+  h_Tt->Scale(30.7*15203./1935072.);
+  h_Tw->Scale(11.1*15203./493460.);
+  h_w1->Scale(5562.36*15203./23138212.);
+  h_w2->Scale(1802.62*15203./33892560.);
+  h_w3->Scale(534.604*15203./15464503.);
+  h_w4->Scale(220.434*15203./13382803.);
+  h_ww->Scale(54.838*15203./10000431.);
+  h_wz->Scale(33.21*15203./10000283.);
+  h_zz->Scale(17.654*15203./9799908.);
+  h_z1->Scale(561.0*15203./24045248.); 
+  h_z2->Scale(181.0*15203./2352304.); 
+  h_z3->Scale(51.1*15203./11015445.);
+  h_z4->Scale(23.04*15203./6402827.);
+  h_ttw->Scale(0.2149*15203./196046.);
+  h_ttww->Scale(0.002037*15203./217820.);
+  h_ttz->Scale(0.172*15203./210160.);
   TH1D* h_mc = (TH1D*)h_sl->Clone();
   h_mc->Add(h_dl);
   h_mc->Add(h_ts);
@@ -333,7 +333,6 @@ void plotHisto(bool inBatch, TString date, TString type, TFile* fi_data, TFile* 
   h_mc->Add(h_w3);
   h_mc->Add(h_w4);
   
-  // because we miss some data...
   if (h_data->Integral()/h_mc->Integral() > 1.) 
     std::cout << "Scale factor = " << h_data->Integral()/h_mc->Integral() << std::endl;  
   h_sl->Scale(h_data->Integral()/h_mc->Integral());
@@ -466,7 +465,7 @@ void plotHisto(bool inBatch, TString date, TString type, TFile* fi_data, TFile* 
   h_data->Draw("epsame");
   
   channel_tex->Draw("same");  
-  cms_style();
+  cms_style_bis();
   cn->SaveAs(rep_name+h_name+".C");
   cn->SaveAs(rep_name+h_name+".eps");
   cn->SaveAs(rep_name+h_name+".pdf");
@@ -763,9 +762,15 @@ void doRivetJob_mutag(bool inBatch, TString date)
   plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "Tagged jets", "Highestp-b-jets", "Highest track momentum (GeV/c)", 0., 200., "right");
   plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "Tagged jets", "Sum2p-b-jets", "Scalar sum of the 2 highest tracks momenta (GeV/c)", 0., 0., "right");
   plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "Tagged jets", "Sum3p-b-jets", "Scalar sum of the 3 highest tracks momenta (GeV/c)", 0., 0., "right");
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "Tagged jets", "Highestp-nomu-b-jets", "Highest track momentum (no #mu) (GeV/c)", 0., 200., "right");
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "Tagged jets", "Sum2p-nomu-b-jets", "Scalar sum of the 2 highest tracks momenta (no #mu) (GeV/c)", 0., 0., "right");
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "Tagged jets", "Sum3p-nomu-b-jets", "Scalar sum of the 3 highest tracks momenta (no #mu) (GeV/c)", 0., 0., "right");
   plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "Tagged jets", "R1-b-jets", "R_{1}", 0., 0., "right");
   plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "Tagged jets", "R2-b-jets", "R_{2}", 1.5, 1.5, "left");
   plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "Tagged jets", "R3-b-jets", "R_{3}", 1.5, 1.5, "left");
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "Tagged jets", "R1-nomu-b-jets", "R_{1} (no #mu)", 0., 0., "right");
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "Tagged jets", "R2-nomu-b-jets", "R_{2} (no #mu)", 1.5, 1.5, "right");
+  plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "Tagged jets", "R3-nomu-b-jets", "R_{3} (no #mu)", 1.5, 1.5, "short");
   plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "Tagged jets", "D0Mass-b-jets", "m(D^{0}#rightarrow#kappa^{+}#pi^{-}) (GeV/c^{2})", 0., 0., "right");
   plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "Tagged jets", "D0p-b-jets", "p(D^{0}#rightarrow#kappa^{+}#pi^{-}) (GeV/c)", 0., 0., "right");
   plotHisto(inBatch, date, "muTag", fi_data, fi_sl, fi_dl, fi_ts, fi_tt, fi_tw, fi_Ts, fi_Tt, fi_Tw, fi_w1, fi_w2, fi_w3, fi_w4, fi_ww, fi_wz, fi_zz, fi_z1, fi_z2, fi_z3, fi_z4, fi_ttw, fi_ttww, fi_ttz, "Tagged jets", "BMomentum-nobias-b-jets", "p(#kappa^{+}#pi^{-}+#mu^{-}) (GeV/c)", 0., 350., "right");

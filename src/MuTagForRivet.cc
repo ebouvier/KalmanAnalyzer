@@ -95,6 +95,8 @@ class MuTagForRivet : public edm::EDAnalyzer {
     virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
 
     // ----------member data ---------------------------
+    int _sel;
+    double _pTtrTreshold;
 
     // evts properties
     unsigned int nEvts;
@@ -236,12 +238,17 @@ class MuTagForRivet : public edm::EDAnalyzer {
 //
 // constructors and destructor
 //
-MuTagForRivet::MuTagForRivet(const edm::ParameterSet& iConfig)
+MuTagForRivet::MuTagForRivet(const edm::ParameterSet& iConfig) :
+  _sel(iConfig.getUntrackedParameter<int>("selection", 1))
 {
   // now do what ever initialization is needed
   nEvts = 0;
   nEvts2 = 0;
   nEvts3 = 0.;
+  if (_sel == 1)
+    _pTtrTreshold = 4.;
+  if (_sel == 2)
+    _pTtrTreshold = 0.5;
 
 }
 
@@ -379,8 +386,8 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     ++n20jet;
   }
 
-  if (n55jet > 0 && n45jet > 1 && n35jet > 2 && n20jet > 3) hasGoodJets = true; // FIXME
-  // if (n30jet > 3) hasGoodJets = true;
+  if (_sel == 1 && n55jet > 0 && n45jet > 1 && n35jet > 2 && n20jet > 3) hasGoodJets = true; 
+  if (_sel == 2 && n30jet > 3) hasGoodJets = true;
 
   if (hasGoodLeptons && hasGoodJets) isGoodEvt = true;
 
@@ -388,7 +395,7 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     nEvts2++;
 
     // Compute weight
-    edm::InputTag vtxTag("offlinePrimaryVertices","","RECO");
+    edm::InputTag vtxTag("goodOfflinePrimaryVertices");
     edm::Handle<std::vector<reco::Vertex> > Hvertex;
     iEvent.getByLabel(vtxTag,Hvertex);
     const std::vector<reco::Vertex>& vertex = *(Hvertex.product());
@@ -426,7 +433,7 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     //-------------------------------------------
 
     edm::Handle<reco::VertexCollection>  vtxHandle;
-    edm::InputTag tagVtx("offlinePrimaryVertices");
+    edm::InputTag tagVtx("goodOfflinePrimaryVertices");
     iEvent.getByLabel(tagVtx, vtxHandle);
     const reco::VertexCollection vtx = *(vtxHandle.product());
 
@@ -441,11 +448,12 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     }
     */
 
-    double vtxWeight[45] = {23./16.24817, 157./96.10187, 608./389.7191, 1653./1092.023, 3518./2428.246, 6185./4495.628, 9848./7287.974, 13907./10632.4, 17801./14183.71, 21165./17578., 24344./20656.52, 26132./22919.96, 26440./24470.79, 26610./25254.18, 25605./25303.6, 23974./24804.25, 21937./23480.46, 19587./21797.11, 17451./19784.64, 14764./17591.69, 12440./15221.65, 10121./12837., 8188./10599.46, 6449./8565.719, 4873./6746.303, 3690./5220.74, 2741./3919.616, 1977./2855.812, 1451./2064.941, 990./1440.364, 656./1021.42, 479./686.967, 315./451.8202, 210./290.9677, 140./184.5276, 71./118.4836, 72./73.5648, 41./44.23643, 23./26.39862, 13./16.03296, 7./9.068202, 10./6.257565, 4./3.187427, 1./1.576181, 1./1.232338};
-    if (vtx.size() < 46)
+    // double vtxWeight[45] = {23./16.24817, 157./96.10187, 608./389.7191, 1653./1092.023, 3518./2428.246, 6185./4495.628, 9848./7287.974, 13907./10632.4, 17801./14183.71, 21165./17578., 24344./20656.52, 26132./22919.96, 26440./24470.79, 26610./25254.18, 25605./25303.6, 23974./24804.25, 21937./23480.46, 19587./21797.11, 17451./19784.64, 14764./17591.69, 12440./15221.65, 10121./12837., 8188./10599.46, 6449./8565.719, 4873./6746.303, 3690./5220.74, 2741./3919.616, 1977./2855.812, 1451./2064.941, 990./1440.364, 656./1021.42, 479./686.967, 315./451.8202, 210./290.9677, 140./184.5276, 71./118.4836, 72./73.5648, 41./44.23643, 23./26.39862, 13./16.03296, 7./9.068202, 10./6.257565, 4./3.187427, 1./1.576181, 1./1.232338};
+    double vtxWeight[41] = {19.25155/19.87301, 158.5262/106.4252, 545.164/381.4703, 1324.205/982.0451, 2620.579/1968.4, 4389.64/3349.054, 6251.909/5004.719, 8295.857/6749.21, 10041.52/8351.732, 11246.49/9715.856, 12156.57/10732.26, 12040.8/11333.81, 11947.23/11495.84, 11240.02/11340.86, 10418.15/10768.74, 9103.377/10038.34, 8147.552/9118.817, 6907.619/7951.787, 5893.955/6968.651, 4724.371/5844.651, 3691.028/4802.503, 2893.805/3842.687, 2161.985/2971.495, 1631.288/2254.569, 1177.908/1697.265, 809.4686/1223.318, 584.9974/861.7063, 427.636/604.3616, 275.9681/408.4762, 183.2028/264.1217, 107.0168/172.6935, 76.4101/108.979, 45.34456/69.29522, 25.02746/42.54174, 20.28964/25.74148, 13.67228/16.25984, 6.868912/9.539864, 2./6.342913, 3./2.743164, 1./2.222037, 1.644819/1.207852};
+    if (vtx.size() < 42)
       weight *= vtxWeight[vtx.size()-1];
     else 
-      weight *= vtxWeight[44];
+      weight *= vtxWeight[40];
 
     nEvts3 = nEvts3 + weight;
     _h_nVtx->Fill((double)vtx.size(), weight);
@@ -599,6 +607,11 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           TLorentzVector p_MuCand, p_trCand;
           p_MuCand.SetPtEtaPhiM(myPFmu[iMuCand]->pt(), myPFmu[iMuCand]->eta(), myPFmu[iMuCand]->phi(), gMassMu);
           p_trCand.SetPtEtaPhiM((**iter1).pt(), (**iter1).eta(), (**iter1).phi(), gMassPi);
+          if (muon.size() > 0) {
+            TLorentzVector p_isoMu;
+            p_isoMu.SetPtEtaPhiM(muon[0].pt(), muon[0].eta(), muon[0].phi(), gMassMu);
+            if (myPFmu[iMuCand]->charge()*muon[0].charge() < 0 && (p_MuCand+p_isoMu).M() < 106. && (p_MuCand+p_isoMu).M() > 76) continue;
+          }
           if (p_trCand.DeltaR(p_MuCand) < 0.0005) {
             hasMuInside = true;
             break;
@@ -644,8 +657,7 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
         const reco::Track& Track1 = **iter1;
 
-        if ((**iter1).pt() < 4.) continue; // FIXME
-        // if ((**iter1).pt() < 0.5) continue;
+        if ((**iter1).pt() < _pTtrTreshold) continue; 
         // if (!Track1.quality(reco::Track::highPurity)) continue; // FIXME
         if (!Track1.quality(reco::Track::tight)) continue;
         double sigmax_vtx_tr = sqrt(pow(vtx[0].xError(), 2.));
@@ -861,8 +873,7 @@ MuTagForRivet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           const reco::Track& Track2 = **iter2;
 
           if (iter2 == iter1) continue;
-          if ((**iter2).pt() < 4.) continue; // FIXME
-          // if ((**iter2).pt() < 0.5) continue;
+          if ((**iter2).pt() < _pTtrTreshold) continue; 
           // if (!Track2.quality(reco::Track::highPurity)) continue; // FIXME
           if (!Track2.quality(reco::Track::tight)) continue;
           double d_v0_tr2 = pow(vtx[0].x()-(**iter2).vx(), 2.) + pow(vtx[0].y()-(**iter2).vy(), 2.) + pow(vtx[0].z()-(**iter2).vz(), 2.);

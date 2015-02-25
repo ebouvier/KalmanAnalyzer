@@ -198,7 +198,7 @@ void cms_style(bool isData = true){
   pt_exp->AddText(d);
   pt_exp->Draw();
 
-  TString lumi_s = "19.8 fb^{-1} (8 TeV)";
+  TString lumi_s = "15.2 fb^{-1} (8 TeV)";
   TPaveText* pt_lumi = new TPaveText(LEFT_MARGIN, 1 - 0.5 * TOP_MARGIN, 1 - RIGHT_MARGIN, 1, "brNDC");
   pt_lumi->SetFillStyle(0);
   pt_lumi->SetBorderSize(0);

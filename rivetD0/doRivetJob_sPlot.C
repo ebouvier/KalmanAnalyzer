@@ -194,7 +194,7 @@ void graphasymerror_mystyle(TGraphAsymmErrors *gr,
   gr->GetYaxis()->SetTitleOffset(2.5);
 }
 
-void cms_style(bool isData = true){
+void cms_style_bis(bool isData = true){
   std::string status = "Simulation preliminary";
   if (isData) status = "Preliminary";
   TPaveText* pt_exp = new TPaveText(LEFT_MARGIN, 1 - 0.5 * TOP_MARGIN, 1 - RIGHT_MARGIN, 1, "brNDC");
@@ -208,7 +208,7 @@ void cms_style(bool isData = true){
   pt_exp->AddText(d);
   pt_exp->Draw();
 
-  TString lumi_s = "19.8 fb^{-1} (8 TeV)";
+  TString lumi_s = "15.2 fb^{-1} (8 TeV)";
   TPaveText* pt_lumi = new TPaveText(LEFT_MARGIN, 1 - 0.5 * TOP_MARGIN, 1 - RIGHT_MARGIN, 1, "brNDC");
   pt_lumi->SetFillStyle(0);
   pt_lumi->SetBorderSize(0);
@@ -321,9 +321,9 @@ TGraphAsymmErrors **treatHisto(bool inBatch, TStyle* my_style, TString date, TSt
   // leg_discvar->AddEntry("bck fit","Exponential component","F");
   leg_discvar->Draw();
   if (name.Contains("Data"))
-    cms_style();
+    cms_style_bis();
   else 
-    cms_style(false);
+    cms_style_bis(false);
   cn_discvar->SaveAs(rep_name+"D0mass_Fit_"+name+".C");
   cn_discvar->SaveAs(rep_name+"D0mass_Fit_"+name+".eps");
   cn_discvar->SaveAs(rep_name+"D0mass_Fit_"+name+".pdf");
@@ -371,9 +371,9 @@ TGraphAsymmErrors **treatHisto(bool inBatch, TStyle* my_style, TString date, TSt
     else
       channel_tex_l->Draw("same");  
     if (name.Contains("Data"))
-      cms_style();
+      cms_style_bis();
     else 
-      cms_style(false);
+      cms_style_bis(false);
     cn[iVar]->SaveAs(rep_name+varName[iVar]+"_sPlot_"+name+".C");
     cn[iVar]->SaveAs(rep_name+varName[iVar]+"_sPlot_"+name+".eps");
     cn[iVar]->SaveAs(rep_name+varName[iVar]+"_sPlot_"+name+".pdf");
@@ -404,9 +404,9 @@ TGraphAsymmErrors **treatHisto(bool inBatch, TStyle* my_style, TString date, TSt
     leg_GenId->Draw();  
     channel_tex_r->Draw("same");  
     if (name.Contains("Data"))
-      cms_style();
+      cms_style_bis();
     else 
-      cms_style(false);
+      cms_style_bis(false);
     cn_GenId->SaveAs(rep_name+"GenId_sPlot_"+name+".C");
     cn_GenId->SaveAs(rep_name+"GenId_sPlot_"+name+".eps");
     cn_GenId->SaveAs(rep_name+"GenId_sPlot_"+name+".pdf");
@@ -607,7 +607,7 @@ void doRivetJob_file(bool inBatch, TString date, TString type, bool isKVF)
     leg_all->AddEntry(gr_allmc,"MG+PY6 Z2 t#bar{t}","F");
     leg_all->Draw();
     gr_alldata->Draw("P");
-    cms_style();
+    cms_style_bis();
     cn_all->SaveAs(rep_name+varName[ig]+"_Sig_Data2MC.C"); 
     cn_all->SaveAs(rep_name+varName[ig]+"_Sig_Data2MC.eps"); 
     cn_all->SaveAs(rep_name+varName[ig]+"_Sig_Data2MC.pdf"); 
